@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Анти-Шум</title>
 
     <style>
@@ -229,7 +228,36 @@
         const SUPABASE_KEY =
             "sb_publishable_wscrhaPifbezRTe4rWs-Wg_j0kGqktT";
 
+        const PROJECT_START_DATE = null;
+
         const SESSION_MINUTES = 15;
+
+
+        function getProjectDay() {
+            if (!PROJECT_START_DATE) {
+                return 1;
+            }
+
+            const now = new Date();
+
+            const start = new Date(
+                `${PROJECT_START_DATE}T20:00:00`
+            );
+
+            if (now < start) {
+                return 0;
+            }
+
+            const difference =
+                now.getTime() - start.getTime();
+
+            const daysPassed =
+                Math.floor(
+                    difference / 86400000
+                );
+
+            return daysPassed + 1;
+        }
 
 
         async function loadQuestion() {
@@ -237,8 +265,22 @@
                 document.getElementById("questionText");
 
             try {
+                const projectDay =
+                    getProjectDay();
+
+                if (projectDay === 0) {
+                    questionElement.textContent =
+                        "Анти-Шум ещё не начался.";
+
+                    questionElement.classList.remove(
+                        "loading"
+                    );
+
+                    return;
+                }
+
                 const response = await fetch(
-                    `${SUPABASE_URL}/rest/v1/questions?select=*`,
+                    `${SUPABASE_URL}/rest/v1/questions?select=*&day=eq.${projectDay}`,
                     {
                         method: "GET",
                         headers: {
@@ -263,20 +305,12 @@
 
                 if (!data.length) {
                     throw new Error(
-                        "Таблица questions пустая."
+                        `Вопрос для дня ${projectDay} не найден.`
                     );
                 }
 
                 const question =
-                    data.find(
-                        item => Number(item.day) === 1
-                    );
-
-                if (!question) {
-                    throw new Error(
-                        "Вопрос с day = 1 не найден."
-                    );
-                }
+                    data[0];
 
                 if (!question.question) {
                     throw new Error(
@@ -348,7 +382,8 @@
             const now = new Date();
             const next = getNext20();
 
-            const diff = next - now;
+            const diff =
+                next.getTime() - now.getTime();
 
             const hours =
                 Math.floor(
@@ -421,6 +456,7 @@
         loadQuestion();
         updateSessionTimer();
         updateNextTimer();
+
 
         setInterval(
             updateSessionTimer,
