@@ -172,9 +172,6 @@
 
 </div>
 
-<!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
 
     /* ==============================
@@ -186,12 +183,6 @@
 
     const SUPABASE_KEY =
         "sb_publishable_wscrhaPifbezRTe4rWs-Wg_j0kGqktT";
-
-    const supabaseClient =
-        window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_KEY
-        );
 
 
     /* ==============================
@@ -205,35 +196,45 @@
 
         try {
 
-            /*
-             * Пока дата запуска проекта ещё не установлена,
-             * используем вопрос №1 для проверки подключения.
-             *
-             * Позже здесь будет автоматическая логика:
-             * день 1 → вопрос 1
-             * день 2 → вопрос 2
-             * ...
-             */
+            const response = await fetch(
+                `${SUPABASE_URL}/rest/v1/questions?select=question,day&day=eq.1&limit=1`,
+                {
+                    method: "GET",
 
-            const { data, error } =
-                await supabaseClient
-                    .from("questions")
-                    .select("question, day")
-                    .eq("day", 1)
-                    .single();
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": `Bearer ${SUPABASE_KEY}`,
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
 
-            if (error) {
-                throw error;
+            if (!response.ok) {
+
+                const errorText =
+                    await response.text();
+
+                throw new Error(
+                    `Supabase ${response.status}: ${errorText}`
+                );
             }
 
-            if (!data) {
-                throw new Error("Вопрос не найден");
+            const data =
+                await response.json();
+
+            if (!data.length) {
+
+                throw new Error(
+                    "Вопрос №1 не найден в таблице questions"
+                );
             }
 
             questionElement.textContent =
-                data.question;
+                data[0].question;
 
-            questionElement.classList.remove("loading");
+            questionElement.classList.remove(
+                "loading"
+            );
 
         } catch (error) {
 
@@ -243,10 +244,15 @@
             );
 
             questionElement.textContent =
-                "Не удалось загрузить сегодняшний вопрос.";
+                "Ошибка загрузки вопроса. Открой F12 → Console.";
 
-            questionElement.classList.remove("loading");
-            questionElement.classList.add("error");
+            questionElement.classList.remove(
+                "loading"
+            );
+
+            questionElement.classList.add(
+                "error"
+            );
         }
     }
 
@@ -257,15 +263,19 @@
 
     const SESSION_MINUTES = 15;
 
+
     function getNext20() {
 
         const now = new Date();
+
         const next = new Date(now);
 
         next.setHours(20, 0, 0, 0);
 
         if (now >= next) {
-            next.setDate(next.getDate() + 1);
+            next.setDate(
+                next.getDate() + 1
+            );
         }
 
         return next;
@@ -275,12 +285,15 @@
     function updateNextTimer() {
 
         const now = new Date();
+
         const next = getNext20();
 
         const diff = next - now;
 
         const hours =
-            Math.floor(diff / 3600000);
+            Math.floor(
+                diff / 3600000
+            );
 
         const minutes =
             Math.floor(
@@ -325,7 +338,9 @@
         }
 
         const minutes =
-            Math.floor(sessionSeconds / 60);
+            Math.floor(
+                sessionSeconds / 60
+            );
 
         const seconds =
             sessionSeconds % 60;
@@ -346,6 +361,7 @@
     loadQuestion();
 
     updateSessionTimer();
+
     updateNextTimer();
 
     setInterval(
