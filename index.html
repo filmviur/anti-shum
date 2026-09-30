@@ -83,6 +83,50 @@
             margin-bottom: 30px;
         }
 
+        .answer-wrapper {
+            position: relative;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .answer-input {
+            width: 100%;
+            min-height: 150px;
+            resize: vertical;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 18px;
+            padding: 18px 18px 42px;
+            font-family: Arial, sans-serif;
+            font-size: 17px;
+            line-height: 1.5;
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.18);
+            outline: none;
+            transition:
+                border-color 0.2s,
+                background 0.2s,
+                box-shadow 0.2s;
+        }
+
+        .answer-input::placeholder {
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        .answer-input:focus {
+            border-color: rgba(118, 87, 255, 0.65);
+            background: rgba(0, 0, 0, 0.25);
+            box-shadow: 0 0 25px rgba(118, 87, 255, 0.12);
+        }
+
+        .answer-counter {
+            position: absolute;
+            right: 16px;
+            bottom: 13px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.45);
+            pointer-events: none;
+        }
+
         button {
             border: none;
             border-radius: 14px;
@@ -98,11 +142,18 @@
             transition:
                 transform 0.2s,
                 opacity 0.2s;
+            margin-top: 20px;
         }
 
         button:hover {
             transform: translateY(-2px);
             opacity: 0.9;
+        }
+
+        button:disabled {
+            cursor: default;
+            opacity: 0.45;
+            transform: none;
         }
 
         .countdown {
@@ -161,6 +212,10 @@
             .card {
                 padding: 28px 18px;
             }
+
+            .answer-input {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
@@ -178,7 +233,7 @@
         <div id="activeScreen" class="card">
 
             <div class="time">
-                Сегодняшний вопрос
+                Вопрос дня
             </div>
 
             <div
@@ -188,7 +243,29 @@
                 Загружаю вопрос...
             </div>
 
-            <button onclick="finishSession()">
+            <div class="answer-wrapper">
+
+                <textarea
+                    id="answerInput"
+                    class="answer-input"
+                    maxlength="500"
+                    placeholder="Напиши свой ответ..."
+                ></textarea>
+
+                <div
+                    id="answerCounter"
+                    class="answer-counter"
+                >
+                    0 / 500
+                </div>
+
+            </div>
+
+            <button
+                id="answerButton"
+                onclick="submitAnswer()"
+                disabled
+            >
                 Я ответил
             </button>
 
@@ -239,16 +316,6 @@
          * ==========================================
          * НАСТРОЙКИ ПРОЕКТА
          * ==========================================
-         *
-         * Дата запуска пока НЕ установлена.
-         *
-         * null = режим разработки.
-         *
-         * Когда сайт будет полностью готов:
-         *
-         * const PROJECT_START_DATE = "2026-XX-XX";
-         *
-         * Тогда день 1 начнётся в 20:00.
          */
 
         const PROJECT_START_DATE = null;
@@ -263,16 +330,6 @@
          * ==========================================
          * ТЕСТОВЫЙ РЕЖИМ
          * ==========================================
-         *
-         * Пока дата запуска не установлена,
-         * здесь можно выбрать номер дня.
-         *
-         * 1 = вопрос №1
-         * 2 = вопрос №2
-         * 3 = вопрос №3
-         *
-         * После окончания разработки это
-         * значение больше использоваться не будет.
          */
 
         const DEV_PROJECT_DAY = 1;
@@ -299,17 +356,7 @@
 
         function getProjectDay() {
 
-            /*
-             * Режим разработки.
-             */
-
             if (!PROJECT_START_DATE) {
-
-                /*
-                 * Если мы уже автоматически
-                 * перешли на следующий тестовый день,
-                 * используем сохранённое значение.
-                 */
 
                 const savedDay =
                     localStorage.getItem(
@@ -337,12 +384,6 @@
             }
 
 
-            /*
-             * ======================================
-             * НАСТОЯЩИЙ РЕЖИМ
-             * ======================================
-             */
-
             const now = new Date();
 
             const start =
@@ -350,10 +391,6 @@
                     `${PROJECT_START_DATE}T20:00:00`
                 );
 
-
-            /*
-             * До запуска проекта.
-             */
 
             if (now < start) {
                 return 0;
@@ -377,7 +414,7 @@
 
         /*
          * ==========================================
-         * ПОЛУЧЕНИЕ ТЕКУЩЕГО ТЕСТОВОГО ДНЯ
+         * ТЕКУЩИЙ ТЕСТОВЫЙ ДЕНЬ
          * ==========================================
          */
 
@@ -415,52 +452,37 @@
          * ==========================================
          */
 
-       function moveToNextDevDay() {
+        function moveToNextDevDay() {
 
-    if (PROJECT_START_DATE) {
-        return;
-    }
-
-
-    const currentDay =
-        getDevProjectDay();
+            if (PROJECT_START_DATE) {
+                return;
+            }
 
 
-    const nextDay =
-        currentDay + 1;
+            const currentDay =
+                getDevProjectDay();
 
 
-    /*
-     * Переходим на следующий вопрос.
-     */
-
-    localStorage.setItem(
-        DEV_DAY_KEY,
-        String(nextDay)
-    );
+            const nextDay =
+                currentDay + 1;
 
 
-    /*
-     * Очень важно:
-     * начинаем новую 15-минутную сессию
-     * прямо сейчас.
-     */
-
-    localStorage.setItem(
-        DEV_SESSION_KEY,
-        String(Date.now())
-    );
+            localStorage.setItem(
+                DEV_DAY_KEY,
+                String(nextDay)
+            );
 
 
-    /*
-     * Разрешаем следующему завершению
-     * снова переключить день.
-     */
+            localStorage.setItem(
+                DEV_SESSION_KEY,
+                String(Date.now())
+            );
 
-    sessionStorage.removeItem(
-        "antiShum_dev_day_changed"
-    );
-}
+
+            sessionStorage.removeItem(
+                "antiShum_dev_day_changed"
+            );
+        }
 
 
         /*
@@ -470,14 +492,6 @@
          */
 
         function getOpeningTime() {
-
-            /*
-             * Режим разработки.
-             *
-             * Начало сессии сохраняется,
-             * поэтому обновление страницы
-             * НЕ сбрасывает 15 минут.
-             */
 
             if (!PROJECT_START_DATE) {
 
@@ -503,12 +517,6 @@
             }
 
 
-            /*
-             * ======================================
-             * НАСТОЯЩИЙ РЕЖИМ
-             * ======================================
-             */
-
             const now = new Date();
 
             const todayOpening =
@@ -521,11 +529,6 @@
                 0
             );
 
-
-            /*
-             * Если сейчас раньше 20:00,
-             * текущий цикл начался вчера.
-             */
 
             if (now < todayOpening) {
 
@@ -541,7 +544,7 @@
 
         /*
          * ==========================================
-         * СОСТОЯНИЕ ТЕКУЩЕЙ СЕССИИ
+         * СОСТОЯНИЕ СЕССИИ
          * ==========================================
          */
 
@@ -589,10 +592,6 @@
                 );
 
 
-            /*
-             * Сбрасываем старое состояние.
-             */
-
             questionElement.classList.remove(
                 "error"
             );
@@ -610,10 +609,6 @@
                 const projectDay =
                     getProjectDay();
 
-
-                /*
-                 * Проект ещё не запущен.
-                 */
 
                 if (projectDay === 0) {
 
@@ -752,6 +747,76 @@
                     /'/g,
                     "&#039;"
                 );
+        }
+
+
+        /*
+         * ==========================================
+         * СЧЁТЧИК СИМВОЛОВ
+         * ==========================================
+         */
+
+        const answerInput =
+            document.getElementById(
+                "answerInput"
+            );
+
+        const answerCounter =
+            document.getElementById(
+                "answerCounter"
+            );
+
+        const answerButton =
+            document.getElementById(
+                "answerButton"
+            );
+
+
+        answerInput.addEventListener(
+            "input",
+            function () {
+
+                const length =
+                    answerInput.value.length;
+
+
+                answerCounter.textContent =
+                    `${length} / 500`;
+
+
+                answerButton.disabled =
+                    answerInput.value.trim().length === 0;
+            }
+        );
+
+
+        /*
+         * ==========================================
+         * ОТПРАВКА ОТВЕТА
+         * ==========================================
+         *
+         * Пока это только интерфейсный тест.
+         *
+         * Реальное сохранение в Supabase
+         * подключим следующим этапом.
+         */
+
+        function submitAnswer() {
+
+            const text =
+                answerInput.value.trim();
+
+
+            if (!text) {
+                return;
+            }
+
+
+            /*
+             * Пока просто завершаем сессию.
+             */
+
+            finishSession();
         }
 
 
@@ -897,10 +962,6 @@
                 getSessionState();
 
 
-            /*
-             * 15 минут закончились.
-             */
-
             if (!state.active) {
 
                 finishSession();
@@ -954,10 +1015,6 @@
                 getProjectDay();
 
 
-            /*
-             * Настоящий новый день проекта.
-             */
-
             if (
                 newProjectDay !==
                     currentProjectDay &&
@@ -973,13 +1030,7 @@
 
 
             /*
-             * ======================================
-             * ТЕСТОВЫЙ РЕЖИМ
-             * ======================================
-             *
-             * Когда 15 минут закончились,
-             * автоматически переключаемся
-             * на следующий вопрос.
+             * Тестовый переход.
              */
 
             if (!PROJECT_START_DATE) {
@@ -1012,12 +1063,6 @@
                 }
             }
 
-
-            /*
-             * Если сейчас начался активный
-             * период нового дня —
-             * показываем активный экран.
-             */
 
             const state =
                 getSessionState();
@@ -1060,11 +1105,6 @@
                 getSessionState();
 
 
-            /*
-             * Если 15 минут ещё идут —
-             * показываем вопрос.
-             */
-
             if (state.active) {
 
                 document
@@ -1085,11 +1125,6 @@
                     );
 
             } else {
-
-                /*
-                 * Если 15 минут уже закончились —
-                 * показываем экран окончания.
-                 */
 
                 finishSession();
             }
