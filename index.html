@@ -854,379 +854,403 @@
          * подключим следующим этапом.
          */
 
-        function submitAnswer() {
+   function submitAnswer() {
 
-            const text =
-                answerInput.value.trim();
-
-
-            if (!text) {
-                return;
-            }
+    const text =
+        answerInput.value.trim();
 
 
-            /*
-             * Пока просто завершаем сессию.
-             */
-
-            finishSession();
-        }
+    if (!text) {
+        return;
+    }
 
 
-        /*
-         * ==========================================
-         * СЛЕДУЮЩИЕ 20:00
-         * ==========================================
-         */
-
-        function getNext20() {
-
-            const now =
-                new Date();
+    if (text.length > 500) {
+        return;
+    }
 
 
-            const next =
-                new Date(now);
+    const button =
+        document.getElementById(
+            "answerButton"
+        );
 
 
-            next.setHours(
-                20,
-                0,
-                0,
-                0
+    /*
+     * Защита от повторного нажатия.
+     */
+
+    button.disabled = true;
+
+
+    /*
+     * Пока авторизация пользователя
+     * ещё не подключена.
+     *
+     * Поэтому здесь только подготавливаем
+     * ответ и передаём управление дальше.
+     */
+
+    console.log(
+        "Ответ подготовлен:",
+        text
+    );
+
+
+    finishSession();
+}
+
+
+/*
+ * ==========================================
+ * СЛЕДУЮЩИЕ 20:00
+ * ==========================================
+ */
+
+function getNext20() {
+
+    const now =
+        new Date();
+
+
+    const next =
+        new Date(now);
+
+
+    next.setHours(
+        20,
+        0,
+        0,
+        0
+    );
+
+
+    if (now >= next) {
+
+        next.setDate(
+            next.getDate() + 1
+        );
+    }
+
+
+    return next;
+}
+
+
+/*
+ * ==========================================
+ * ТАЙМЕР ДО СЛЕДУЮЩЕГО ОТКРЫТИЯ
+ * ==========================================
+ */
+
+function updateNextTimer() {
+
+    const now =
+        new Date();
+
+
+    const next =
+        getNext20();
+
+
+    const diff =
+        Math.max(
+            0,
+            next.getTime() -
+            now.getTime()
+        );
+
+
+    const hours =
+        Math.floor(
+            diff / 3600000
+        );
+
+
+    const minutes =
+        Math.floor(
+            (diff % 3600000) / 60000
+        );
+
+
+    const seconds =
+        Math.floor(
+            (diff % 60000) / 1000
+        );
+
+
+    document.getElementById(
+        "nextTimer"
+    ).textContent =
+        `До следующего открытия: ${
+            String(hours).padStart(
+                2,
+                "0"
+            )
+        }:${
+            String(minutes).padStart(
+                2,
+                "0"
+            )
+        }:${
+            String(seconds).padStart(
+                2,
+                "0"
+            )
+        }`;
+}
+
+
+/*
+ * ==========================================
+ * ЗАКРЫТИЕ САЙТА
+ * ==========================================
+ */
+
+function finishSession() {
+
+    document
+        .getElementById(
+            "activeScreen"
+        )
+        .classList.add(
+            "closed"
+        );
+
+
+    document
+        .getElementById(
+            "closedScreen"
+        )
+        .classList.remove(
+            "closed"
+        );
+
+
+    updateNextTimer();
+}
+
+
+/*
+ * ==========================================
+ * ТАЙМЕР 15 МИНУТ
+ * ==========================================
+ */
+
+function updateSessionTimer() {
+
+    const state =
+        getSessionState();
+
+
+    if (!state.active) {
+
+        finishSession();
+
+        return;
+    }
+
+
+    const remaining =
+        state.remaining;
+
+
+    const minutes =
+        Math.floor(
+            remaining / 60
+        );
+
+
+    const seconds =
+        remaining % 60;
+
+
+    document.getElementById(
+        "sessionTimer"
+    ).textContent =
+        `${String(minutes).padStart(
+            2,
+            "0"
+        )}:${
+            String(seconds).padStart(
+                2,
+                "0"
+            )
+        }`;
+}
+
+
+/*
+ * ==========================================
+ * ПРОВЕРКА НОВОГО ДНЯ
+ * ==========================================
+ */
+
+let currentProjectDay =
+    getProjectDay();
+
+
+function checkForNewDay() {
+
+    const newProjectDay =
+        getProjectDay();
+
+
+    if (
+        newProjectDay !==
+            currentProjectDay &&
+        newProjectDay > 0
+    ) {
+
+        currentProjectDay =
+            newProjectDay;
+
+
+        loadQuestion();
+    }
+
+
+    /*
+     * Тестовый переход.
+     */
+
+    if (!PROJECT_START_DATE) {
+
+        const state =
+            getSessionState();
+
+
+        if (
+            !state.active &&
+            !sessionStorage.getItem(
+                "antiShum_dev_day_changed"
+            )
+        ) {
+
+            sessionStorage.setItem(
+                "antiShum_dev_day_changed",
+                "true"
             );
 
 
-            if (now >= next) {
-
-                next.setDate(
-                    next.getDate() + 1
-                );
-            }
+            moveToNextDevDay();
 
 
-            return next;
-        }
-
-
-        /*
-         * ==========================================
-         * ТАЙМЕР ДО СЛЕДУЮЩЕГО ОТКРЫТИЯ
-         * ==========================================
-         */
-
-        function updateNextTimer() {
-
-            const now =
-                new Date();
-
-
-            const next =
-                getNext20();
-
-
-            const diff =
-                Math.max(
-                    0,
-                    next.getTime() -
-                    now.getTime()
-                );
-
-
-            const hours =
-                Math.floor(
-                    diff / 3600000
-                );
-
-
-            const minutes =
-                Math.floor(
-                    (diff % 3600000) / 60000
-                );
-
-
-            const seconds =
-                Math.floor(
-                    (diff % 60000) / 1000
-                );
-
-
-            document.getElementById(
-                "nextTimer"
-            ).textContent =
-                `До следующего открытия: ${
-                    String(hours).padStart(
-                        2,
-                        "0"
-                    )
-                }:${
-                    String(minutes).padStart(
-                        2,
-                        "0"
-                    )
-                }:${
-                    String(seconds).padStart(
-                        2,
-                        "0"
-                    )
-                }`;
-        }
-
-
-        /*
-         * ==========================================
-         * ЗАКРЫТИЕ САЙТА
-         * ==========================================
-         */
-
-        function finishSession() {
-
-            document
-                .getElementById(
-                    "activeScreen"
-                )
-                .classList.add(
-                    "closed"
-                );
-
-
-            document
-                .getElementById(
-                    "closedScreen"
-                )
-                .classList.remove(
-                    "closed"
-                );
-
-
-            updateNextTimer();
-        }
-
-
-        /*
-         * ==========================================
-         * ТАЙМЕР 15 МИНУТ
-         * ==========================================
-         */
-
-        function updateSessionTimer() {
-
-            const state =
-                getSessionState();
-
-
-            if (!state.active) {
-
-                finishSession();
-
-                return;
-            }
-
-
-            const remaining =
-                state.remaining;
-
-
-            const minutes =
-                Math.floor(
-                    remaining / 60
-                );
-
-
-            const seconds =
-                remaining % 60;
-
-
-            document.getElementById(
-                "sessionTimer"
-            ).textContent =
-                `${String(minutes).padStart(
-                    2,
-                    "0"
-                )}:${
-                    String(seconds).padStart(
-                        2,
-                        "0"
-                    )
-                }`;
-        }
-
-
-        /*
-         * ==========================================
-         * ПРОВЕРКА НОВОГО ДНЯ
-         * ==========================================
-         */
-
-        let currentProjectDay =
-            getProjectDay();
-
-
-        function checkForNewDay() {
-
-            const newProjectDay =
+            currentProjectDay =
                 getProjectDay();
 
 
-            if (
-                newProjectDay !==
-                    currentProjectDay &&
-                newProjectDay > 0
-            ) {
-
-                currentProjectDay =
-                    newProjectDay;
-
-
-                loadQuestion();
-            }
-
-
-            /*
-             * Тестовый переход.
-             */
-
-            if (!PROJECT_START_DATE) {
-
-                const state =
-                    getSessionState();
-
-
-                if (
-                    !state.active &&
-                    !sessionStorage.getItem(
-                        "antiShum_dev_day_changed"
-                    )
-                ) {
-
-                    sessionStorage.setItem(
-                        "antiShum_dev_day_changed",
-                        "true"
-                    );
-
-
-                    moveToNextDevDay();
-
-
-                    currentProjectDay =
-                        getProjectDay();
-
-
-                    loadQuestion();
-                }
-            }
-
-
-            const state =
-                getSessionState();
-
-
-            if (state.active) {
-
-                document
-                    .getElementById(
-                        "activeScreen"
-                    )
-                    .classList.remove(
-                        "closed"
-                    );
-
-
-                document
-                    .getElementById(
-                        "closedScreen"
-                    )
-                    .classList.add(
-                        "closed"
-                    );
-            }
-        }
-
-
-        /*
-         * ==========================================
-         * ПЕРВЫЙ ЗАПУСК
-         * ==========================================
-         */
-
-        function initialize() {
-
             loadQuestion();
-
-
-            const state =
-                getSessionState();
-
-
-            if (state.active) {
-
-                document
-                    .getElementById(
-                        "activeScreen"
-                    )
-                    .classList.remove(
-                        "closed"
-                    );
-
-
-                document
-                    .getElementById(
-                        "closedScreen"
-                    )
-                    .classList.add(
-                        "closed"
-                    );
-
-            } else {
-
-                finishSession();
-            }
-
-
-            updateSessionTimer();
-
-            updateNextTimer();
         }
+    }
 
 
-        /*
-         * ==========================================
-         * ЗАПУСК
-         * ==========================================
-         */
-
-        initialize();
+    const state =
+        getSessionState();
 
 
-        /*
-         * Обновление таймера каждую секунду.
-         */
+    if (state.active) {
 
-        setInterval(
-            updateSessionTimer,
-            1000
-        );
-
-
-        /*
-         * Обновление таймера до следующего дня.
-         */
-
-        setInterval(
-            updateNextTimer,
-            1000
-        );
+        document
+            .getElementById(
+                "activeScreen"
+            )
+            .classList.remove(
+                "closed"
+            );
 
 
-        /*
-         * Проверка смены дня.
-         */
+        document
+            .getElementById(
+                "closedScreen"
+            )
+            .classList.add(
+                "closed"
+            );
+    }
+}
 
-        setInterval(
-            checkForNewDay,
-            1000
-        );
-    </script>
 
-</body>
-</html>
+/*
+ * ==========================================
+ * ПЕРВЫЙ ЗАПУСК
+ * ==========================================
+ */
+
+function initialize() {
+
+    loadQuestion();
+
+
+    const state =
+        getSessionState();
+
+
+    if (state.active) {
+
+        document
+            .getElementById(
+                "activeScreen"
+            )
+            .classList.remove(
+                "closed"
+            );
+
+
+        document
+            .getElementById(
+                "closedScreen"
+            )
+            .classList.add(
+                "closed"
+            );
+
+    } else {
+
+        finishSession();
+    }
+
+
+    updateSessionTimer();
+
+    updateNextTimer();
+}
+
+
+/*
+ * ==========================================
+ * ЗАПУСК
+ * ==========================================
+ */
+
+initialize();
+
+
+/*
+ * Обновление таймера каждую секунду.
+ */
+
+setInterval(
+    updateSessionTimer,
+    1000
+);
+
+
+/*
+ * Обновление таймера до следующего дня.
+ */
+
+setInterval(
+    updateNextTimer,
+    1000
+);
+
+
+/*
+ * Проверка смены дня.
+ */
+
+setInterval(
+    checkForNewDay,
+    1000
+);
