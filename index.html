@@ -243,31 +243,29 @@
                 Загружаю вопрос...
             </div>
 
-            <div class="answer-wrapper">
+          <div class="answer-wrapper">
+    <textarea
+        id="answerInput"
+        class="answer-input"
+        maxlength="500"
+        placeholder="Отправить мысль..."
+    ></textarea>
 
-                <textarea
-                    id="answerInput"
-                    class="answer-input"
-                    maxlength="500"
-                    placeholder="Отправить мысль..."
-                ></textarea>
+    <div class="answer-counter" id="answerCounter">0 / 500</div>
 
-                <div
-                    id="answerCounter"
-                    class="answer-counter"
-                >
-                    0 / 500
-                </div>
-
-            </div>
-
-            <button
-                id="answerButton"
-                onclick="submitAnswer()"
-                disabled
-            >
-                Я ответил
-            </button>
+    <button
+        class="send-thought-button"
+        id="answerButton"
+        onclick="submitAnswer()"
+        disabled
+        aria-label="Отправить мысль"
+        title="Отправить мысль"
+    >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21.8 3.2 2.6 10.4c-.8.3-.8 1.4 0 1.7l7.1 2.5 2.5 7.1c.3.8 1.4.8 1.7 0l7.2-19.2c.3-.8-.5-1.6-1.3-1.3ZM11 13.1l-6-2.1 13.7-5.2-7.7 7.3Zm2.2 5.8-1.9-5.3 7.4-7-5.5 12.3Z"/>
+        </svg>
+    </button>
+</div>
 
             <div
                 class="countdown"
