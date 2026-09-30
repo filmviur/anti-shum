@@ -102,6 +102,16 @@
             line-height: 1.5;
         }
 
+        .loading {
+            color: rgba(255, 255, 255, 0.65);
+        }
+
+        .error {
+            color: #ffb3b3;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
         @media (max-width: 600px) {
             h1 {
                 font-size: 32px;
@@ -134,8 +144,8 @@
             Сегодняшний вопрос
         </div>
 
-        <div class="question">
-            Что действительно важно для тебя сегодня?
+        <div class="question loading" id="questionText">
+            Загружаю вопрос...
         </div>
 
         <button onclick="finishSession()">
@@ -162,11 +172,93 @@
 
 </div>
 
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
+
+    /* ==============================
+       SUPABASE
+    ============================== */
+
+    const SUPABASE_URL =
+        "https://mkyendzqoohqcwnycuys.supabase.co";
+
+    const SUPABASE_KEY =
+        "sb_publishable_wscrhaPifbezRTe4rWs-Wg_j0kGqktT";
+
+    const supabaseClient =
+        window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+
+
+    /* ==============================
+       ЗАГРУЗКА ВОПРОСА
+    ============================== */
+
+    async function loadQuestion() {
+
+        const questionElement =
+            document.getElementById("questionText");
+
+        try {
+
+            /*
+             * Пока дата запуска проекта ещё не установлена,
+             * используем вопрос №1 для проверки подключения.
+             *
+             * Позже здесь будет автоматическая логика:
+             * день 1 → вопрос 1
+             * день 2 → вопрос 2
+             * ...
+             */
+
+            const { data, error } =
+                await supabaseClient
+                    .from("questions")
+                    .select("question, day")
+                    .eq("day", 1)
+                    .single();
+
+            if (error) {
+                throw error;
+            }
+
+            if (!data) {
+                throw new Error("Вопрос не найден");
+            }
+
+            questionElement.textContent =
+                data.question;
+
+            questionElement.classList.remove("loading");
+
+        } catch (error) {
+
+            console.error(
+                "Ошибка загрузки вопроса:",
+                error
+            );
+
+            questionElement.textContent =
+                "Не удалось загрузить сегодняшний вопрос.";
+
+            questionElement.classList.remove("loading");
+            questionElement.classList.add("error");
+        }
+    }
+
+
+    /* ==============================
+       ТАЙМЕРЫ
+    ============================== */
 
     const SESSION_MINUTES = 15;
 
     function getNext20() {
+
         const now = new Date();
         const next = new Date(now);
 
@@ -179,6 +271,7 @@
         return next;
     }
 
+
     function updateNextTimer() {
 
         const now = new Date();
@@ -186,45 +279,87 @@
 
         const diff = next - now;
 
-        const hours = Math.floor(diff / 3600000);
-        const minutes = Math.floor((diff % 3600000) / 60000);
-        const seconds = Math.floor((diff % 60000) / 1000);
+        const hours =
+            Math.floor(diff / 3600000);
 
-        document.getElementById("nextTimer").textContent =
+        const minutes =
+            Math.floor(
+                (diff % 3600000) / 60000
+            );
+
+        const seconds =
+            Math.floor(
+                (diff % 60000) / 1000
+            );
+
+        document.getElementById(
+            "nextTimer"
+        ).textContent =
             `До следующего открытия: ${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
     }
 
+
     function finishSession() {
-        document.getElementById("activeScreen").classList.add("closed");
-        document.getElementById("closedScreen").classList.remove("closed");
+
+        document
+            .getElementById("activeScreen")
+            .classList.add("closed");
+
+        document
+            .getElementById("closedScreen")
+            .classList.remove("closed");
     }
 
-    let sessionSeconds = SESSION_MINUTES * 60;
+
+    let sessionSeconds =
+        SESSION_MINUTES * 60;
+
 
     function updateSessionTimer() {
 
         if (sessionSeconds <= 0) {
+
             finishSession();
+
             return;
         }
 
-        const minutes = Math.floor(sessionSeconds / 60);
-        const seconds = sessionSeconds % 60;
+        const minutes =
+            Math.floor(sessionSeconds / 60);
 
-        document.getElementById("sessionTimer").textContent =
+        const seconds =
+            sessionSeconds % 60;
+
+        document.getElementById(
+            "sessionTimer"
+        ).textContent =
             `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
         sessionSeconds--;
     }
 
+
+    /* ==============================
+       ЗАПУСК
+    ============================== */
+
+    loadQuestion();
+
     updateSessionTimer();
-
-    setInterval(updateSessionTimer, 1000);
-    setInterval(updateNextTimer, 1000);
-
     updateNextTimer();
+
+    setInterval(
+        updateSessionTimer,
+        1000
+    );
+
+    setInterval(
+        updateNextTimer,
+        1000
+    );
 
 </script>
 
 </body>
+</html>
 </html>
