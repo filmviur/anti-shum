@@ -415,26 +415,52 @@
          * ==========================================
          */
 
-        function moveToNextDevDay() {
+       function moveToNextDevDay() {
 
-            if (PROJECT_START_DATE) {
-                return;
-            }
-
-
-            const currentDay =
-                getDevProjectDay();
+    if (PROJECT_START_DATE) {
+        return;
+    }
 
 
-            const nextDay =
-                currentDay + 1;
+    const currentDay =
+        getDevProjectDay();
 
 
-            localStorage.setItem(
-                DEV_DAY_KEY,
-                String(nextDay)
-            );
-        }
+    const nextDay =
+        currentDay + 1;
+
+
+    /*
+     * Переходим на следующий вопрос.
+     */
+
+    localStorage.setItem(
+        DEV_DAY_KEY,
+        String(nextDay)
+    );
+
+
+    /*
+     * Очень важно:
+     * начинаем новую 15-минутную сессию
+     * прямо сейчас.
+     */
+
+    localStorage.setItem(
+        DEV_SESSION_KEY,
+        String(Date.now())
+    );
+
+
+    /*
+     * Разрешаем следующему завершению
+     * снова переключить день.
+     */
+
+    sessionStorage.removeItem(
+        "antiShum_dev_day_changed"
+    );
+}
 
 
         /*
