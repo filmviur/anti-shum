@@ -240,19 +240,15 @@
          * НАСТРОЙКИ ПРОЕКТА
          * ==========================================
          *
-         * Пока дата NULL — режим разработки.
+         * Дата запуска пока НЕ установлена.
          *
-         * В этом режиме:
-         * - используется вопрос №1;
-         * - 15 минут начинаются при первом открытии;
-         * - обновление страницы НЕ сбрасывает таймер.
+         * null = режим разработки.
          *
-         * Когда будем запускать проект:
+         * Когда сайт будет полностью готов:
          *
          * const PROJECT_START_DATE = "2026-XX-XX";
          *
-         * Тогда каждый день будет открываться
-         * автоматически ровно в 20:00.
+         * Тогда день 1 начнётся в 20:00.
          */
 
         const PROJECT_START_DATE = null;
@@ -265,12 +261,34 @@
 
         /*
          * ==========================================
-         * КЛЮЧ ДЛЯ РЕЖИМА РАЗРАБОТКИ
+         * ТЕСТОВЫЙ РЕЖИМ
+         * ==========================================
+         *
+         * Пока дата запуска не установлена,
+         * здесь можно выбрать номер дня.
+         *
+         * 1 = вопрос №1
+         * 2 = вопрос №2
+         * 3 = вопрос №3
+         *
+         * После окончания разработки это
+         * значение больше использоваться не будет.
+         */
+
+        const DEV_PROJECT_DAY = 1;
+
+
+        /*
+         * ==========================================
+         * КЛЮЧИ LOCALSTORAGE
          * ==========================================
          */
 
         const DEV_SESSION_KEY =
             "antiShum_dev_session_start";
+
+        const DEV_DAY_KEY =
+            "antiShum_dev_project_day";
 
 
         /*
@@ -284,10 +302,46 @@
             /*
              * Режим разработки.
              */
+
             if (!PROJECT_START_DATE) {
-                return 1;
+
+                /*
+                 * Если мы уже автоматически
+                 * перешли на следующий тестовый день,
+                 * используем сохранённое значение.
+                 */
+
+                const savedDay =
+                    localStorage.getItem(
+                        DEV_DAY_KEY
+                    );
+
+
+                if (savedDay) {
+
+                    const parsedDay =
+                        Number(savedDay);
+
+
+                    if (
+                        Number.isInteger(parsedDay) &&
+                        parsedDay > 0
+                    ) {
+
+                        return parsedDay;
+                    }
+                }
+
+
+                return DEV_PROJECT_DAY;
             }
 
+
+            /*
+             * ======================================
+             * НАСТОЯЩИЙ РЕЖИМ
+             * ======================================
+             */
 
             const now = new Date();
 
@@ -300,6 +354,7 @@
             /*
              * До запуска проекта.
              */
+
             if (now < start) {
                 return 0;
             }
@@ -322,6 +377,68 @@
 
         /*
          * ==========================================
+         * ПОЛУЧЕНИЕ ТЕКУЩЕГО ТЕСТОВОГО ДНЯ
+         * ==========================================
+         */
+
+        function getDevProjectDay() {
+
+            const savedDay =
+                localStorage.getItem(
+                    DEV_DAY_KEY
+                );
+
+
+            if (savedDay) {
+
+                const parsedDay =
+                    Number(savedDay);
+
+
+                if (
+                    Number.isInteger(parsedDay) &&
+                    parsedDay > 0
+                ) {
+
+                    return parsedDay;
+                }
+            }
+
+
+            return DEV_PROJECT_DAY;
+        }
+
+
+        /*
+         * ==========================================
+         * ПЕРЕХОД НА СЛЕДУЮЩИЙ ТЕСТОВЫЙ ДЕНЬ
+         * ==========================================
+         */
+
+        function moveToNextDevDay() {
+
+            if (PROJECT_START_DATE) {
+                return;
+            }
+
+
+            const currentDay =
+                getDevProjectDay();
+
+
+            const nextDay =
+                currentDay + 1;
+
+
+            localStorage.setItem(
+                DEV_DAY_KEY,
+                String(nextDay)
+            );
+        }
+
+
+        /*
+         * ==========================================
          * ВРЕМЯ ОТКРЫТИЯ ТЕКУЩЕГО ДНЯ
          * ==========================================
          */
@@ -329,9 +446,13 @@
         function getOpeningTime() {
 
             /*
-             * Режим разработки:
-             * начало сессии сохраняется в localStorage.
+             * Режим разработки.
+             *
+             * Начало сессии сохраняется,
+             * поэтому обновление страницы
+             * НЕ сбрасывает 15 минут.
              */
+
             if (!PROJECT_START_DATE) {
 
                 let saved =
@@ -357,9 +478,9 @@
 
 
             /*
-             * Настоящий режим.
-             *
-             * Каждый день открывается в 20:00.
+             * ======================================
+             * НАСТОЯЩИЙ РЕЖИМ
+             * ======================================
              */
 
             const now = new Date();
@@ -379,6 +500,7 @@
              * Если сейчас раньше 20:00,
              * текущий цикл начался вчера.
              */
+
             if (now < todayOpening) {
 
                 todayOpening.setDate(
@@ -441,6 +563,22 @@
                 );
 
 
+            /*
+             * Сбрасываем старое состояние.
+             */
+
+            questionElement.classList.remove(
+                "error"
+            );
+
+            questionElement.classList.add(
+                "loading"
+            );
+
+            questionElement.textContent =
+                "Загружаю вопрос...";
+
+
             try {
 
                 const projectDay =
@@ -450,6 +588,7 @@
                 /*
                  * Проект ещё не запущен.
                  */
+
                 if (projectDay === 0) {
 
                     questionElement.textContent =
@@ -735,6 +874,7 @@
             /*
              * 15 минут закончились.
              */
+
             if (!state.active) {
 
                 finishSession();
@@ -789,8 +929,9 @@
 
 
             /*
-             * Новый день проекта.
+             * Настоящий новый день проекта.
              */
+
             if (
                 newProjectDay !==
                     currentProjectDay &&
@@ -801,25 +942,57 @@
                     newProjectDay;
 
 
-                /*
-                 * Загружаем новый вопрос.
-                 */
                 loadQuestion();
-
-
-                /*
-                 * Проверяем состояние
-                 * новой 15-минутной сессии.
-                 */
-                updateSessionTimer();
             }
 
 
             /*
-             * Если сейчас 20:00 и начался
-             * новый 15-минутный период —
+             * ======================================
+             * ТЕСТОВЫЙ РЕЖИМ
+             * ======================================
+             *
+             * Когда 15 минут закончились,
+             * автоматически переключаемся
+             * на следующий вопрос.
+             */
+
+            if (!PROJECT_START_DATE) {
+
+                const state =
+                    getSessionState();
+
+
+                if (
+                    !state.active &&
+                    !sessionStorage.getItem(
+                        "antiShum_dev_day_changed"
+                    )
+                ) {
+
+                    sessionStorage.setItem(
+                        "antiShum_dev_day_changed",
+                        "true"
+                    );
+
+
+                    moveToNextDevDay();
+
+
+                    currentProjectDay =
+                        getProjectDay();
+
+
+                    loadQuestion();
+                }
+            }
+
+
+            /*
+             * Если сейчас начался активный
+             * период нового дня —
              * показываем активный экран.
              */
+
             const state =
                 getSessionState();
 
@@ -865,6 +1038,7 @@
              * Если 15 минут ещё идут —
              * показываем вопрос.
              */
+
             if (state.active) {
 
                 document
