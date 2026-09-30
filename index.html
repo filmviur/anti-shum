@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Анти-Шум</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            color: #ffffff;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(89, 55, 180, 0.35), transparent 35%),
+                radial-gradient(circle at 80% 80%, rgba(0, 150, 180, 0.25), transparent 35%),
+                linear-gradient(135deg, #090914, #111126 50%, #07151c);
+
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 42px;
+            margin: 0 0 15px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            padding: 35px 25px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        .time {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.65);
+            margin-bottom: 15px;
+        }
+
+        .question {
+            font-size: 26px;
+            line-height: 1.4;
+            margin-bottom: 30px;
+        }
+
+        button {
+            border: none;
+            border-radius: 14px;
+            padding: 14px 28px;
+            font-size: 17px;
+            cursor: pointer;
+            color: white;
+            background: linear-gradient(135deg, #7657ff, #3aa8ff);
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        .countdown {
+            margin-top: 25px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .closed {
+            display: none;
+        }
+
+        .message {
+            font-size: 22px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 32px;
+            }
+
+            .question {
+                font-size: 22px;
+            }
+
+            .card {
+                padding: 28px 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Анти-Шум</h1>
+
+    <div class="subtitle">
+        15 минут без информационного шума
+    </div>
+
+    <div id="activeScreen" class="card">
+
+        <div class="time">
+            Сегодняшний вопрос
+        </div>
+
+        <div class="question">
+            Что действительно важно для тебя сегодня?
+        </div>
+
+        <button onclick="finishSession()">
+            Я ответил
+        </button>
+
+        <div class="countdown" id="sessionTimer">
+            15:00
+        </div>
+
+    </div>
+
+    <div id="closedScreen" class="card closed">
+
+        <div class="message">
+            Время вышло! Спасибо, за твоё время!<br><br>
+            Жду тебя завтра в 20:00!<br><br>
+            Иди жить реальной жизнью!)
+        </div>
+
+        <div class="countdown" id="nextTimer"></div>
+
+    </div>
+
+</div>
+
+<script>
+
+    const SESSION_MINUTES = 15;
+
+    function getNext20() {
+        const now = new Date();
+        const next = new Date(now);
+
+        next.setHours(20, 0, 0, 0);
+
+        if (now >= next) {
+            next.setDate(next.getDate() + 1);
+        }
+
+        return next;
+    }
+
+    function updateNextTimer() {
+
+        const now = new Date();
+        const next = getNext20();
+
+        const diff = next - now;
+
+        const hours = Math.floor(diff / 3600000);
+        const minutes = Math.floor((diff % 3600000) / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+
+        document.getElementById("nextTimer").textContent =
+            `До следующего открытия: ${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+
+    function finishSession() {
+        document.getElementById("activeScreen").classList.add("closed");
+        document.getElementById("closedScreen").classList.remove("closed");
+    }
+
+    let sessionSeconds = SESSION_MINUTES * 60;
+
+    function updateSessionTimer() {
+
+        if (sessionSeconds <= 0) {
+            finishSession();
+            return;
+        }
+
+        const minutes = Math.floor(sessionSeconds / 60);
+        const seconds = sessionSeconds % 60;
+
+        document.getElementById("sessionTimer").textContent =
+            `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+
+        sessionSeconds--;
+    }
+
+    updateSessionTimer();
+
+    setInterval(updateSessionTimer, 1000);
+    setInterval(updateNextTimer, 1000);
+
+    updateNextTimer();
+
+</script>
+
+</body>
+</html>
