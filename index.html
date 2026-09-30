@@ -222,53 +222,236 @@
     </div>
 
     <script>
+        /*
+         * ==========================================
+         * SUPABASE
+         * ==========================================
+         */
+
         const SUPABASE_URL =
             "https://mkyendzqoohqcwnycuys.supabase.co";
 
         const SUPABASE_KEY =
             "sb_publishable_wscrhaPifbezRTe4rWs-Wg_j0kGqktT";
 
+
+        /*
+         * ==========================================
+         * НАСТРОЙКИ ПРОЕКТА
+         * ==========================================
+         *
+         * Пока дата NULL — режим разработки.
+         *
+         * В этом режиме:
+         * - используется вопрос №1;
+         * - 15 минут начинаются при первом открытии;
+         * - обновление страницы НЕ сбрасывает таймер.
+         *
+         * Когда будем запускать проект:
+         *
+         * const PROJECT_START_DATE = "2026-XX-XX";
+         *
+         * Тогда каждый день будет открываться
+         * автоматически ровно в 20:00.
+         */
+
         const PROJECT_START_DATE = null;
 
         const SESSION_MINUTES = 15;
 
+        const SESSION_SECONDS =
+            SESSION_MINUTES * 60;
+
+
+        /*
+         * ==========================================
+         * КЛЮЧ ДЛЯ РЕЖИМА РАЗРАБОТКИ
+         * ==========================================
+         */
+
+        const DEV_SESSION_KEY =
+            "antiShum_dev_session_start";
+
+
+        /*
+         * ==========================================
+         * ПОЛУЧЕНИЕ ТЕКУЩЕГО ДНЯ ПРОЕКТА
+         * ==========================================
+         */
 
         function getProjectDay() {
+
+            /*
+             * Режим разработки.
+             */
             if (!PROJECT_START_DATE) {
                 return 1;
             }
 
+
             const now = new Date();
 
-            const start = new Date(
-                `${PROJECT_START_DATE}T20:00:00`
-            );
+            const start =
+                new Date(
+                    `${PROJECT_START_DATE}T20:00:00`
+                );
 
+
+            /*
+             * До запуска проекта.
+             */
             if (now < start) {
                 return 0;
             }
 
+
             const difference =
-                now.getTime() - start.getTime();
+                now.getTime() -
+                start.getTime();
+
 
             const daysPassed =
                 Math.floor(
                     difference / 86400000
                 );
 
+
             return daysPassed + 1;
         }
 
 
+        /*
+         * ==========================================
+         * ВРЕМЯ ОТКРЫТИЯ ТЕКУЩЕГО ДНЯ
+         * ==========================================
+         */
+
+        function getOpeningTime() {
+
+            /*
+             * Режим разработки:
+             * начало сессии сохраняется в localStorage.
+             */
+            if (!PROJECT_START_DATE) {
+
+                let saved =
+                    localStorage.getItem(
+                        DEV_SESSION_KEY
+                    );
+
+
+                if (!saved) {
+
+                    saved =
+                        String(Date.now());
+
+                    localStorage.setItem(
+                        DEV_SESSION_KEY,
+                        saved
+                    );
+                }
+
+
+                return Number(saved);
+            }
+
+
+            /*
+             * Настоящий режим.
+             *
+             * Каждый день открывается в 20:00.
+             */
+
+            const now = new Date();
+
+            const todayOpening =
+                new Date(now);
+
+            todayOpening.setHours(
+                20,
+                0,
+                0,
+                0
+            );
+
+
+            /*
+             * Если сейчас раньше 20:00,
+             * текущий цикл начался вчера.
+             */
+            if (now < todayOpening) {
+
+                todayOpening.setDate(
+                    todayOpening.getDate() - 1
+                );
+            }
+
+
+            return todayOpening.getTime();
+        }
+
+
+        /*
+         * ==========================================
+         * СОСТОЯНИЕ ТЕКУЩЕЙ СЕССИИ
+         * ==========================================
+         */
+
+        function getSessionState() {
+
+            const now =
+                Date.now();
+
+            const opening =
+                getOpeningTime();
+
+
+            const elapsed =
+                Math.floor(
+                    (now - opening) / 1000
+                );
+
+
+            const remaining =
+                SESSION_SECONDS - elapsed;
+
+
+            return {
+                opening,
+                elapsed,
+                remaining,
+                active:
+                    elapsed >= 0 &&
+                    elapsed < SESSION_SECONDS
+            };
+        }
+
+
+        /*
+         * ==========================================
+         * ЗАГРУЗКА ВОПРОСА
+         * ==========================================
+         */
+
         async function loadQuestion() {
+
             const questionElement =
-                document.getElementById("questionText");
+                document.getElementById(
+                    "questionText"
+                );
+
 
             try {
+
                 const projectDay =
                     getProjectDay();
 
+
+                /*
+                 * Проект ещё не запущен.
+                 */
                 if (projectDay === 0) {
+
                     questionElement.textContent =
                         "Анти-Шум ещё не начался.";
 
@@ -279,65 +462,88 @@
                     return;
                 }
 
-                const response = await fetch(
-                    `${SUPABASE_URL}/rest/v1/questions?select=*&day=eq.${projectDay}`,
-                    {
-                        method: "GET",
-                        headers: {
-                            "apikey": SUPABASE_KEY,
-                            "Authorization":
-                                `Bearer ${SUPABASE_KEY}`
+
+                const response =
+                    await fetch(
+                        `${SUPABASE_URL}/rest/v1/questions?select=*&day=eq.${projectDay}`,
+                        {
+                            method: "GET",
+
+                            headers: {
+                                "apikey":
+                                    SUPABASE_KEY,
+
+                                "Authorization":
+                                    `Bearer ${SUPABASE_KEY}`
+                            }
                         }
-                    }
-                );
+                    );
+
 
                 const responseText =
                     await response.text();
 
+
                 if (!response.ok) {
+
                     throw new Error(
                         `Supabase ${response.status}: ${responseText}`
                     );
                 }
 
+
                 const data =
-                    JSON.parse(responseText);
+                    JSON.parse(
+                        responseText
+                    );
+
 
                 if (!data.length) {
+
                     throw new Error(
                         `Вопрос для дня ${projectDay} не найден.`
                     );
                 }
 
+
                 const question =
                     data[0];
 
+
                 if (!question.question) {
+
                     throw new Error(
                         "У вопроса отсутствует текст."
                     );
                 }
 
+
                 questionElement.textContent =
                     question.question;
+
 
                 questionElement.classList.remove(
                     "loading"
                 );
 
+
             } catch (error) {
+
                 console.error(
                     "Ошибка загрузки вопроса:",
                     error
                 );
 
+
                 questionElement.classList.remove(
                     "loading"
                 );
 
+
                 questionElement.classList.add(
                     "error"
                 );
+
 
                 questionElement.innerHTML = `
                     <div class="error-title">
@@ -352,119 +558,384 @@
         }
 
 
+        /*
+         * ==========================================
+         * ЗАЩИТА HTML
+         * ==========================================
+         */
+
         function escapeHtml(text) {
+
             return String(text)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
         }
 
 
-        function getNext20() {
-            const now = new Date();
-            const next = new Date(now);
+        /*
+         * ==========================================
+         * СЛЕДУЮЩИЕ 20:00
+         * ==========================================
+         */
 
-            next.setHours(20, 0, 0, 0);
+        function getNext20() {
+
+            const now =
+                new Date();
+
+
+            const next =
+                new Date(now);
+
+
+            next.setHours(
+                20,
+                0,
+                0,
+                0
+            );
+
 
             if (now >= next) {
+
                 next.setDate(
                     next.getDate() + 1
                 );
             }
 
+
             return next;
         }
 
 
+        /*
+         * ==========================================
+         * ТАЙМЕР ДО СЛЕДУЮЩЕГО ОТКРЫТИЯ
+         * ==========================================
+         */
+
         function updateNextTimer() {
-            const now = new Date();
-            const next = getNext20();
+
+            const now =
+                new Date();
+
+
+            const next =
+                getNext20();
+
 
             const diff =
-                next.getTime() - now.getTime();
+                Math.max(
+                    0,
+                    next.getTime() -
+                    now.getTime()
+                );
+
 
             const hours =
                 Math.floor(
                     diff / 3600000
                 );
 
+
             const minutes =
                 Math.floor(
                     (diff % 3600000) / 60000
                 );
+
 
             const seconds =
                 Math.floor(
                     (diff % 60000) / 1000
                 );
 
+
             document.getElementById(
                 "nextTimer"
             ).textContent =
                 `До следующего открытия: ${
-                    String(hours).padStart(2, "0")
+                    String(hours).padStart(
+                        2,
+                        "0"
+                    )
                 }:${
-                    String(minutes).padStart(2, "0")
+                    String(minutes).padStart(
+                        2,
+                        "0"
+                    )
                 }:${
-                    String(seconds).padStart(2, "0")
+                    String(seconds).padStart(
+                        2,
+                        "0"
+                    )
                 }`;
         }
 
 
+        /*
+         * ==========================================
+         * ЗАКРЫТИЕ САЙТА
+         * ==========================================
+         */
+
         function finishSession() {
-            document
-                .getElementById("activeScreen")
-                .classList.add("closed");
 
             document
-                .getElementById("closedScreen")
-                .classList.remove("closed");
+                .getElementById(
+                    "activeScreen"
+                )
+                .classList.add(
+                    "closed"
+                );
+
+
+            document
+                .getElementById(
+                    "closedScreen"
+                )
+                .classList.remove(
+                    "closed"
+                );
+
+
+            updateNextTimer();
         }
 
 
-        let sessionSeconds =
-            SESSION_MINUTES * 60;
-
+        /*
+         * ==========================================
+         * ТАЙМЕР 15 МИНУТ
+         * ==========================================
+         */
 
         function updateSessionTimer() {
-            if (sessionSeconds <= 0) {
+
+            const state =
+                getSessionState();
+
+
+            /*
+             * 15 минут закончились.
+             */
+            if (!state.active) {
+
                 finishSession();
+
                 return;
             }
 
+
+            const remaining =
+                state.remaining;
+
+
             const minutes =
                 Math.floor(
-                    sessionSeconds / 60
+                    remaining / 60
                 );
 
+
             const seconds =
-                sessionSeconds % 60;
+                remaining % 60;
+
 
             document.getElementById(
                 "sessionTimer"
             ).textContent =
-                `${String(minutes).padStart(2, "0")}:${
-                    String(seconds).padStart(2, "0")
+                `${String(minutes).padStart(
+                    2,
+                    "0"
+                )}:${
+                    String(seconds).padStart(
+                        2,
+                        "0"
+                    )
                 }`;
-
-            sessionSeconds--;
         }
 
 
-        loadQuestion();
-        updateSessionTimer();
-        updateNextTimer();
+        /*
+         * ==========================================
+         * ПРОВЕРКА НОВОГО ДНЯ
+         * ==========================================
+         */
 
+        let currentProjectDay =
+            getProjectDay();
+
+
+        function checkForNewDay() {
+
+            const newProjectDay =
+                getProjectDay();
+
+
+            /*
+             * Новый день проекта.
+             */
+            if (
+                newProjectDay !==
+                    currentProjectDay &&
+                newProjectDay > 0
+            ) {
+
+                currentProjectDay =
+                    newProjectDay;
+
+
+                /*
+                 * Загружаем новый вопрос.
+                 */
+                loadQuestion();
+
+
+                /*
+                 * Проверяем состояние
+                 * новой 15-минутной сессии.
+                 */
+                updateSessionTimer();
+            }
+
+
+            /*
+             * Если сейчас 20:00 и начался
+             * новый 15-минутный период —
+             * показываем активный экран.
+             */
+            const state =
+                getSessionState();
+
+
+            if (state.active) {
+
+                document
+                    .getElementById(
+                        "activeScreen"
+                    )
+                    .classList.remove(
+                        "closed"
+                    );
+
+
+                document
+                    .getElementById(
+                        "closedScreen"
+                    )
+                    .classList.add(
+                        "closed"
+                    );
+            }
+        }
+
+
+        /*
+         * ==========================================
+         * ПЕРВЫЙ ЗАПУСК
+         * ==========================================
+         */
+
+        function initialize() {
+
+            loadQuestion();
+
+
+            const state =
+                getSessionState();
+
+
+            /*
+             * Если 15 минут ещё идут —
+             * показываем вопрос.
+             */
+            if (state.active) {
+
+                document
+                    .getElementById(
+                        "activeScreen"
+                    )
+                    .classList.remove(
+                        "closed"
+                    );
+
+
+                document
+                    .getElementById(
+                        "closedScreen"
+                    )
+                    .classList.add(
+                        "closed"
+                    );
+
+            } else {
+
+                /*
+                 * Если 15 минут уже закончились —
+                 * показываем экран окончания.
+                 */
+
+                finishSession();
+            }
+
+
+            updateSessionTimer();
+
+            updateNextTimer();
+        }
+
+
+        /*
+         * ==========================================
+         * ЗАПУСК
+         * ==========================================
+         */
+
+        initialize();
+
+
+        /*
+         * Обновление таймера каждую секунду.
+         */
 
         setInterval(
             updateSessionTimer,
             1000
         );
 
+
+        /*
+         * Обновление таймера до следующего дня.
+         */
+
         setInterval(
             updateNextTimer,
+            1000
+        );
+
+
+        /*
+         * Проверка смены дня.
+         */
+
+        setInterval(
+            checkForNewDay,
             1000
         );
     </script>
