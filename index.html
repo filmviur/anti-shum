@@ -445,6 +445,7 @@ function getProjectDay() {
         return 0;
     }
 
+
     const difference =
         now.getTime() -
         start.getTime();
@@ -453,6 +454,7 @@ function getProjectDay() {
         Math.floor(
             difference / 86400000
         );
+
 
     return daysPassed + 1;
 }
@@ -500,21 +502,25 @@ function moveToNextDevDay() {
         return;
     }
 
+
     const currentDay =
         getDevProjectDay();
 
     const nextDay =
         currentDay + 1;
 
+
     localStorage.setItem(
         DEV_DAY_KEY,
         String(nextDay)
     );
 
+
     localStorage.setItem(
         DEV_SESSION_KEY,
         String(Date.now())
     );
+
 
     sessionStorage.removeItem(
         "antiShum_dev_day_changed"
@@ -537,16 +543,19 @@ function getOpeningTime() {
                 DEV_SESSION_KEY
             );
 
+
         if (!saved) {
 
             saved =
                 String(Date.now());
+
 
             localStorage.setItem(
                 DEV_SESSION_KEY,
                 saved
             );
         }
+
 
         return Number(saved);
     }
@@ -555,8 +564,10 @@ function getOpeningTime() {
     const now =
         new Date();
 
+
     const todayOpening =
         new Date(now);
+
 
     todayOpening.setHours(
         20,
@@ -565,12 +576,14 @@ function getOpeningTime() {
         0
     );
 
+
     if (now < todayOpening) {
 
         todayOpening.setDate(
             todayOpening.getDate() - 1
         );
     }
+
 
     return todayOpening.getTime();
 }
@@ -587,21 +600,26 @@ function getSessionState() {
     const now =
         Date.now();
 
+
     const opening =
         getOpeningTime();
+
 
     const elapsed =
         Math.floor(
             (now - opening) / 1000
         );
 
+
     const remaining =
         SESSION_SECONDS - elapsed;
+
 
     return {
         opening,
         elapsed,
         remaining,
+
         active:
             elapsed >= 0 &&
             elapsed < SESSION_SECONDS
@@ -622,13 +640,16 @@ async function loadQuestion() {
             "questionText"
         );
 
+
     questionElement.classList.remove(
         "error"
     );
 
+
     questionElement.classList.add(
         "loading"
     );
+
 
     questionElement.textContent =
         "Загружаю вопрос...";
@@ -645,9 +666,11 @@ async function loadQuestion() {
             questionElement.textContent =
                 "Анти-Шум ещё не начался.";
 
+
             questionElement.classList.remove(
                 "loading"
             );
+
 
             return;
         }
@@ -711,6 +734,7 @@ async function loadQuestion() {
         questionElement.textContent =
             question.question;
 
+
         questionElement.classList.remove(
             "loading"
         );
@@ -727,6 +751,7 @@ async function loadQuestion() {
         questionElement.classList.remove(
             "loading"
         );
+
 
         questionElement.classList.add(
             "error"
@@ -789,10 +814,12 @@ const answerInput =
         "answerInput"
     );
 
+
 const answerCounter =
     document.getElementById(
         "answerCounter"
     );
+
 
 const answerButton =
     document.getElementById(
@@ -807,8 +834,10 @@ answerInput.addEventListener(
         const length =
             answerInput.value.length;
 
+
         answerCounter.textContent =
             `${length} / 500`;
+
 
         answerButton.disabled =
             answerInput.value.trim().length === 0;
@@ -821,7 +850,8 @@ answerInput.addEventListener(
  * ОТПРАВКА ОТВЕТА
  * ==========================================
  *
- * Пока это интерфейсный тест.
+ * Пока это только интерфейсный тест.
+ *
  * Реальное сохранение в Supabase
  * подключим следующим этапом.
  */
@@ -884,8 +914,10 @@ function getNext20() {
     const now =
         new Date();
 
+
     const next =
         new Date(now);
+
 
     next.setHours(
         20,
@@ -918,8 +950,10 @@ function updateNextTimer() {
     const now =
         new Date();
 
+
     const next =
         getNext20();
+
 
     const diff =
         Math.max(
@@ -934,10 +968,12 @@ function updateNextTimer() {
             diff / 3600000
         );
 
+
     const minutes =
         Math.floor(
             (diff % 3600000) / 60000
         );
+
 
     const seconds =
         Math.floor(
@@ -1026,6 +1062,7 @@ function updateSessionTimer() {
             remaining / 60
         );
 
+
     const seconds =
         remaining % 60;
 
@@ -1069,6 +1106,7 @@ function checkForNewDay() {
 
         currentProjectDay =
             newProjectDay;
+
 
         loadQuestion();
     }
