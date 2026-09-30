@@ -109,7 +109,26 @@
         .error {
             color: #ffb3b3;
             font-size: 16px;
-            line-height: 1.5;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .error-title {
+            font-size: 20px;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .error-details {
+            padding: 15px;
+            margin-top: 15px;
+            background: rgba(255, 0, 0, 0.08);
+            border: 1px solid rgba(255, 150, 150, 0.2);
+            border-radius: 12px;
+            text-align: left;
+            font-family: monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
         }
 
         @media (max-width: 600px) {
@@ -196,41 +215,98 @@
 
         try {
 
-            const response = await fetch(
-                `${SUPABASE_URL}/rest/v1/questions?select=question,day&day=eq.1&limit=1`,
-                {
-                    method: "GET",
+            const url =
+                `${SUPABASE_URL}/rest/v1/questions?select=*`;
 
-                    headers: {
-                        "apikey": SUPABASE_KEY,
-                        "Authorization": `Bearer ${SUPABASE_KEY}`,
-                        "Content-Type": "application/json"
+            console.log("Запрос к Supabase:");
+            console.log(url);
+
+            const response =
+                await fetch(
+                    url,
+                    {
+                        method: "GET",
+
+                        headers: {
+                            "apikey": SUPABASE_KEY,
+                            "Authorization":
+                                `Bearer ${SUPABASE_KEY}`
+                        }
                     }
-                }
+                );
+
+            const responseText =
+                await response.text();
+
+            console.log(
+                "HTTP STATUS:",
+                response.status
+            );
+
+            console.log(
+                "SUPABASE RESPONSE:",
+                responseText
             );
 
             if (!response.ok) {
 
-                const errorText =
-                    await response.text();
-
                 throw new Error(
-                    `Supabase ${response.status}: ${errorText}`
+                    `HTTP ${response.status}\n\n${responseText}`
                 );
             }
 
-            const data =
-                await response.json();
+            let data;
+
+            try {
+
+                data =
+                    JSON.parse(responseText);
+
+            } catch (parseError) {
+
+                throw new Error(
+                    "Supabase вернул данные, которые не удалось прочитать:\n\n" +
+                    responseText
+                );
+            }
 
             if (!data.length) {
 
                 throw new Error(
-                    "Вопрос №1 не найден в таблице questions"
+                    "Supabase ответил успешно, но таблица questions пустая."
+                );
+            }
+
+            console.log(
+                "Полученные вопросы:",
+                data
+            );
+
+            /*
+             * Для проверки берём вопрос №1.
+             */
+
+            const firstQuestion =
+                data.find(
+                    item => Number(item.day) === 1
+                );
+
+            if (!firstQuestion) {
+
+                throw new Error(
+                    "В таблице questions есть данные, но вопрос с day = 1 не найден."
+                );
+            }
+
+            if (!firstQuestion.question) {
+
+                throw new Error(
+                    "У найденного вопроса отсутствует поле question."
                 );
             }
 
             questionElement.textContent =
-                data[0].question;
+                firstQuestion.question;
 
             questionElement.classList.remove(
                 "loading"
@@ -239,12 +315,9 @@
         } catch (error) {
 
             console.error(
-                "Ошибка загрузки вопроса:",
+                "ПОЛНАЯ ОШИБКА SUPABASE:",
                 error
             );
-
-            questionElement.textContent =
-                "Ошибка загрузки вопроса. Открой F12 → Console.";
 
             questionElement.classList.remove(
                 "loading"
@@ -253,7 +326,32 @@
             questionElement.classList.add(
                 "error"
             );
+
+            questionElement.innerHTML = `
+                <div class="error-title">
+                    Не удалось загрузить вопрос
+                </div>
+
+                <div class="error-details">
+                    ${escapeHtml(error.message)}
+                </div>
+            `;
         }
+    }
+
+
+    /* ==============================
+       ЗАЩИТА ВЫВОДА ОШИБКИ
+    ============================== */
+
+    function escapeHtml(text) {
+
+        return String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
 
@@ -270,9 +368,15 @@
 
         const next = new Date(now);
 
-        next.setHours(20, 0, 0, 0);
+        next.setHours(
+            20,
+            0,
+            0,
+            0
+        );
 
         if (now >= next) {
+
             next.setDate(
                 next.getDate() + 1
             );
@@ -288,7 +392,8 @@
 
         const next = getNext20();
 
-        const diff = next - now;
+        const diff =
+            next - now;
 
         const hours =
             Math.floor(
@@ -364,10 +469,12 @@
 
     updateNextTimer();
 
+
     setInterval(
         updateSessionTimer,
         1000
     );
+
 
     setInterval(
         updateNextTimer,
