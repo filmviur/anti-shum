@@ -4603,7 +4603,62 @@ if ("serviceWorker" in navigator) {
     );
 }
 
+/* =========================================================
+   PWA
+========================================================= */
 
+if ("serviceWorker" in navigator) {
+
+    window.addEventListener(
+        "load",
+        function() {
+
+            navigator.serviceWorker
+                .register(
+                    "./service-worker.js"
+                )
+                .then(
+                    function() {
+
+                        console.log(
+                            "Анти-Шум: PWA подключено"
+                        );
+                    }
+                )
+                .catch(
+                    function(error) {
+
+                        console.error(
+                            "Ошибка PWA:",
+                            error
+                        );
+                    }
+                );
+        }
+    );
+}
+
+
+/* =========================================================
+   PWA INSTALL
+========================================================= */
+
+let deferredInstallPrompt = null;
+
+window.addEventListener(
+    "beforeinstallprompt",
+    function(event) {
+
+        event.preventDefault();
+
+        deferredInstallPrompt = event;
+
+        console.log(
+            "Анти-Шум: установка PWA доступна"
+        );
+    }
+);
+    
 /* =========================================================
    PWA INSTALL PROMPT
 ========================================================= */
