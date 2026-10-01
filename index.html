@@ -4568,224 +4568,177 @@ document.addEventListener(
 );
 
 
-/* =========================================================
-   PWA
-========================================================= */
+ /* =========================================================
+    PWA
+ ========================================================= */
 
-if ("serviceWorker" in navigator) {
+ if ("serviceWorker" in navigator) {
 
-    window.addEventListener(
-        "load",
-        function() {
+     window.addEventListener(
+         "load",
+         function() {
 
-            navigator.serviceWorker
-                .register(
-                    "./service-worker.js"
-                )
-                .then(
-                    function() {
+             navigator.serviceWorker
+                 .register(
+                     "./service-worker.js"
+                 )
+                 .then(
+                     function() {
 
-                        console.log(
-                            "Анти-Шум: PWA подключено"
-                        );
-                    }
-                )
-                .catch(
-                    function(error) {
+                         console.log(
+                             "Анти-Шум: PWA подключено"
+                         );
+                     }
+                 )
+                 .catch(
+                     function(error) {
 
-                        console.error(
-                            "Ошибка PWA:",
-                            error
-                        );
-                    }
-                );
-        }
-    );
-}
-
-/* =========================================================
-   PWA
-========================================================= */
-
-if ("serviceWorker" in navigator) {
-
-    window.addEventListener(
-        "load",
-        function() {
-
-            navigator.serviceWorker
-                .register(
-                    "./service-worker.js"
-                )
-                .then(
-                    function() {
-
-                        console.log(
-                            "Анти-Шум: PWA подключено"
-                        );
-                    }
-                )
-                .catch(
-                    function(error) {
-
-                        console.error(
-                            "Ошибка PWA:",
-                            error
-                        );
-                    }
-                );
-        }
-    );
-}
+                         console.error(
+                             "Ошибка PWA:",
+                             error
+                         );
+                     }
+                 );
+         }
+     );
+ }
 
 
-/* =========================================================
-   PWA INSTALL
-========================================================= */
+ /* =========================================================
+    PWA INSTALL
+ ========================================================= */
 
-let deferredInstallPrompt = null;
+ let deferredInstallPrompt = null;
 
-window.addEventListener(
-    "beforeinstallprompt",
-    function(event) {
+ window.addEventListener(
+     "beforeinstallprompt",
+     function(event) {
 
-        event.preventDefault();
+         event.preventDefault();
 
-        deferredInstallPrompt = event;
+         deferredInstallPrompt =
+             event;
 
-        console.log(
-            "Анти-Шум: установка PWA доступна"
-        );
-    }
-);
-    
-/* =========================================================
-   PWA INSTALL PROMPT
-========================================================= */
+         console.log(
+             "Анти-Шум: установка PWA доступна"
+         );
 
-window.addEventListener(
-    "beforeinstallprompt",
-    function(event) {
-
-        event.preventDefault();
-
-        deferredInstallPrompt =
-            event;
-
-        showInstallOption();
-    }
-);
+         showInstallOption();
+     }
+ );
 
 
-window.addEventListener(
-    "appinstalled",
-    function() {
+ window.addEventListener(
+     "appinstalled",
+     function() {
 
-        deferredInstallPrompt =
-            null;
+         deferredInstallPrompt =
+             null;
 
-        installCard.classList.add(
-            "hidden"
-        );
-    }
-);
-
-
-function showInstallOption() {
-
-    if (
-        !currentUser
-    ) {
-        return;
-    }
-
-    /*
-        Если приложение уже открыто
-        как установленное PWA — предложение
-        не показываем.
-    */
-
-    const standalone =
-        window.matchMedia(
-            "(display-mode: standalone)"
-        ).matches ||
-        window.navigator.standalone === true;
-
-    if (standalone) {
-        return;
-    }
+         installCard.classList.add(
+             "hidden"
+         );
+     }
+ );
 
 
-    /*
-        Android / Chrome:
-        есть реальный системный prompt.
-    */
+ function showInstallOption() {
 
-    if (deferredInstallPrompt) {
-
-        installText.textContent =
-            "Добавь «Анти-Шум» на главный экран " +
-            "и открывай его как отдельное приложение.";
-
-        installBtn.textContent =
-            "Добавить на экран";
-
-        installCard.classList.remove(
-            "hidden"
-        );
-
-        return;
-    }
+     if (!currentUser) {
+         return;
+     }
 
 
-    /*
-        iPhone / Safari:
-        beforeinstallprompt отсутствует.
-    */
+     /*
+         Если приложение уже открыто
+         как установленное PWA —
+         предложение не показываем.
+     */
 
-    const isIOS =
-        /iphone|ipad|ipod/i.test(
-            navigator.userAgent
-        );
+     const standalone =
+         window.matchMedia(
+             "(display-mode: standalone)"
+         ).matches ||
+         window.navigator.standalone === true;
 
-    if (isIOS) {
-
-        installText.textContent =
-            "В Safari нажми «Поделиться» → " +
-            "«На экран Домой».";
-
-        installBtn.classList.add(
-            "hidden"
-        );
-
-        installCard.classList.remove(
-            "hidden"
-        );
-    }
-}
+     if (standalone) {
+         return;
+     }
 
 
-installBtn.addEventListener(
-    "click",
-    async function() {
+     /*
+         Android / Chrome:
+         есть реальный системный prompt.
+     */
 
-        if (!deferredInstallPrompt) {
-            return;
-        }
+     if (deferredInstallPrompt) {
 
-        deferredInstallPrompt.prompt();
+         installText.textContent =
+             "Добавь «Анти-Шум» на главный экран " +
+             "и открывай его как отдельное приложение.";
 
-        await deferredInstallPrompt.userChoice;
+         installBtn.textContent =
+             "Добавить на экран";
 
-        deferredInstallPrompt =
-            null;
+         installBtn.classList.remove(
+             "hidden"
+         );
 
-        installCard.classList.add(
-            "hidden"
-        );
-    }
-);
+         installCard.classList.remove(
+             "hidden"
+         );
 
+         return;
+     }
+
+
+     /*
+         iPhone / Safari:
+         beforeinstallprompt отсутствует.
+     */
+
+     const isIOS =
+         /iphone|ipad|ipod/i.test(
+             navigator.userAgent
+         );
+
+     if (isIOS) {
+
+         installText.textContent =
+             "В Safari нажми «Поделиться» → " +
+             "«На экран Домой».";
+
+         installBtn.classList.add(
+             "hidden"
+         );
+
+         installCard.classList.remove(
+             "hidden"
+         );
+     }
+ }
+
+
+ installBtn.addEventListener(
+     "click",
+     async function() {
+
+         if (!deferredInstallPrompt) {
+             return;
+         }
+
+         deferredInstallPrompt.prompt();
+
+         await deferredInstallPrompt.userChoice;
+
+         deferredInstallPrompt =
+             null;
+
+         installCard.classList.add(
+             "hidden"
+         );
+     }
+ );
 
 /* =========================================================
    START
