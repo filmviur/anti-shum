@@ -350,8 +350,10 @@
 
     </div>
 
-    <script>
-        
+  <script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
 /*
  * ==========================================
  * SUPABASE
@@ -432,7 +434,6 @@ function getProjectDay() {
         return DEV_PROJECT_DAY;
     }
 
-
     const now =
         new Date();
 
@@ -445,7 +446,6 @@ function getProjectDay() {
         return 0;
     }
 
-
     const difference =
         now.getTime() -
         start.getTime();
@@ -454,7 +454,6 @@ function getProjectDay() {
         Math.floor(
             difference / 86400000
         );
-
 
     return daysPassed + 1;
 }
@@ -502,25 +501,21 @@ function moveToNextDevDay() {
         return;
     }
 
-
     const currentDay =
         getDevProjectDay();
 
     const nextDay =
         currentDay + 1;
 
-
     localStorage.setItem(
         DEV_DAY_KEY,
         String(nextDay)
     );
 
-
     localStorage.setItem(
         DEV_SESSION_KEY,
         String(Date.now())
     );
-
 
     sessionStorage.removeItem(
         "antiShum_dev_day_changed"
@@ -543,12 +538,10 @@ function getOpeningTime() {
                 DEV_SESSION_KEY
             );
 
-
         if (!saved) {
 
             saved =
                 String(Date.now());
-
 
             localStorage.setItem(
                 DEV_SESSION_KEY,
@@ -556,18 +549,14 @@ function getOpeningTime() {
             );
         }
 
-
         return Number(saved);
     }
-
 
     const now =
         new Date();
 
-
     const todayOpening =
         new Date(now);
-
 
     todayOpening.setHours(
         20,
@@ -576,14 +565,12 @@ function getOpeningTime() {
         0
     );
 
-
     if (now < todayOpening) {
 
         todayOpening.setDate(
             todayOpening.getDate() - 1
         );
     }
-
 
     return todayOpening.getTime();
 }
@@ -600,20 +587,16 @@ function getSessionState() {
     const now =
         Date.now();
 
-
     const opening =
         getOpeningTime();
-
 
     const elapsed =
         Math.floor(
             (now - opening) / 1000
         );
 
-
     const remaining =
         SESSION_SECONDS - elapsed;
-
 
     return {
         opening,
@@ -624,6 +607,23 @@ function getSessionState() {
             elapsed >= 0 &&
             elapsed < SESSION_SECONDS
     };
+}
+
+
+/*
+ * ==========================================
+ * ЗАЩИТА HTML
+ * ==========================================
+ */
+
+function escapeHtml(text) {
+
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 
@@ -640,41 +640,40 @@ async function loadQuestion() {
             "questionText"
         );
 
+    if (!questionElement) {
+        console.error(
+            "Не найден элемент #questionText"
+        );
+        return;
+    }
 
     questionElement.classList.remove(
         "error"
     );
 
-
     questionElement.classList.add(
         "loading"
     );
 
-
     questionElement.textContent =
         "Загружаю вопрос...";
-
 
     try {
 
         const projectDay =
             getProjectDay();
 
-
         if (projectDay === 0) {
 
             questionElement.textContent =
                 "Анти-Шум ещё не начался.";
 
-
             questionElement.classList.remove(
                 "loading"
             );
 
-
             return;
         }
-
 
         const response =
             await fetch(
@@ -692,10 +691,8 @@ async function loadQuestion() {
                 }
             );
 
-
         const responseText =
             await response.text();
-
 
         if (!response.ok) {
 
@@ -704,12 +701,10 @@ async function loadQuestion() {
             );
         }
 
-
         const data =
             JSON.parse(
                 responseText
             );
-
 
         if (!data.length) {
 
@@ -718,10 +713,8 @@ async function loadQuestion() {
             );
         }
 
-
         const question =
             data[0];
-
 
         if (!question.question) {
 
@@ -730,15 +723,12 @@ async function loadQuestion() {
             );
         }
 
-
         questionElement.textContent =
             question.question;
-
 
         questionElement.classList.remove(
             "loading"
         );
-
 
     } catch (error) {
 
@@ -747,16 +737,13 @@ async function loadQuestion() {
             error
         );
 
-
         questionElement.classList.remove(
             "loading"
         );
 
-
         questionElement.classList.add(
             "error"
         );
-
 
         questionElement.innerHTML = `
             <div class="error-title">
@@ -773,38 +760,6 @@ async function loadQuestion() {
 
 /*
  * ==========================================
- * ЗАЩИТА HTML
- * ==========================================
- */
-
-function escapeHtml(text) {
-
-    return String(text)
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-}
-
-
-/*
- * ==========================================
  * СЧЁТЧИК СИМВОЛОВ
  * ==========================================
  */
@@ -814,12 +769,10 @@ const answerInput =
         "answerInput"
     );
 
-
 const answerCounter =
     document.getElementById(
         "answerCounter"
     );
-
 
 const answerButton =
     document.getElementById(
@@ -827,77 +780,67 @@ const answerButton =
     );
 
 
-answerInput.addEventListener(
-    "input",
-    function () {
+if (
+    answerInput &&
+    answerCounter &&
+    answerButton
+) {
 
-        const length =
-            answerInput.value.length;
+    answerInput.addEventListener(
+        "input",
+        function () {
 
+            const length =
+                answerInput.value.length;
 
-        answerCounter.textContent =
-            `${length} / 500`;
+            answerCounter.textContent =
+                `${length} / 500`;
 
-
-        answerButton.disabled =
-            answerInput.value.trim().length === 0;
-    }
-);
+            answerButton.disabled =
+                answerInput.value.trim().length === 0;
+        }
+    );
+}
 
 
 /*
  * ==========================================
  * ОТПРАВКА ОТВЕТА
  * ==========================================
- *
- * Пока это только интерфейсный тест.
- *
- * Реальное сохранение в Supabase
- * подключим следующим этапом.
  */
 
 function submitAnswer() {
 
+    if (!answerInput) {
+        return;
+    }
+
     const text =
         answerInput.value.trim();
-
 
     if (!text) {
         return;
     }
 
-
     if (text.length > 500) {
         return;
     }
-
 
     const button =
         document.getElementById(
             "answerButton"
         );
 
-
-    /*
-     * Защита от повторного нажатия.
-     */
+    if (!button) {
+        return;
+    }
 
     button.disabled = true;
-
-
-    /*
-     * Пока авторизация пользователя
-     * ещё не подключена.
-     *
-     * Поэтому здесь только подготавливаем
-     * ответ и передаём управление дальше.
-     */
 
     console.log(
         "Ответ подготовлен:",
         text
     );
-
 
     finishSession();
 }
@@ -914,10 +857,8 @@ function getNext20() {
     const now =
         new Date();
 
-
     const next =
         new Date(now);
-
 
     next.setHours(
         20,
@@ -926,14 +867,12 @@ function getNext20() {
         0
     );
 
-
     if (now >= next) {
 
         next.setDate(
             next.getDate() + 1
         );
     }
-
 
     return next;
 }
@@ -947,13 +886,20 @@ function getNext20() {
 
 function updateNextTimer() {
 
+    const timer =
+        document.getElementById(
+            "nextTimer"
+        );
+
+    if (!timer) {
+        return;
+    }
+
     const now =
         new Date();
 
-
     const next =
         getNext20();
-
 
     const diff =
         Math.max(
@@ -962,43 +908,28 @@ function updateNextTimer() {
             now.getTime()
         );
 
-
     const hours =
         Math.floor(
             diff / 3600000
         );
-
 
     const minutes =
         Math.floor(
             (diff % 3600000) / 60000
         );
 
-
     const seconds =
         Math.floor(
             (diff % 60000) / 1000
         );
 
-
-    document.getElementById(
-        "nextTimer"
-    ).textContent =
+    timer.textContent =
         `До следующего открытия: ${
-            String(hours).padStart(
-                2,
-                "0"
-            )
+            String(hours).padStart(2, "0")
         }:${
-            String(minutes).padStart(
-                2,
-                "0"
-            )
+            String(minutes).padStart(2, "0")
         }:${
-            String(seconds).padStart(
-                2,
-                "0"
-            )
+            String(seconds).padStart(2, "0")
         }`;
 }
 
@@ -1011,23 +942,29 @@ function updateNextTimer() {
 
 function finishSession() {
 
-    document
-        .getElementById(
+    const activeScreen =
+        document.getElementById(
             "activeScreen"
-        )
-        .classList.add(
-            "closed"
         );
 
-
-    document
-        .getElementById(
+    const closedScreen =
+        document.getElementById(
             "closedScreen"
-        )
-        .classList.remove(
-            "closed"
         );
 
+    if (activeScreen) {
+
+        activeScreen.classList.add(
+            "closed"
+        );
+    }
+
+    if (closedScreen) {
+
+        closedScreen.classList.remove(
+            "closed"
+        );
+    }
 
     updateNextTimer();
 }
@@ -1044,7 +981,6 @@ function updateSessionTimer() {
     const state =
         getSessionState();
 
-
     if (!state.active) {
 
         finishSession();
@@ -1052,32 +988,29 @@ function updateSessionTimer() {
         return;
     }
 
+    const timer =
+        document.getElementById(
+            "sessionTimer"
+        );
+
+    if (!timer) {
+        return;
+    }
 
     const remaining =
         state.remaining;
-
 
     const minutes =
         Math.floor(
             remaining / 60
         );
 
-
     const seconds =
         remaining % 60;
 
-
-    document.getElementById(
-        "sessionTimer"
-    ).textContent =
-        `${String(minutes).padStart(
-            2,
-            "0"
-        )}:${
-            String(seconds).padStart(
-                2,
-                "0"
-            )
+    timer.textContent =
+        `${String(minutes).padStart(2, "0")}:${
+            String(seconds).padStart(2, "0")
         }`;
 }
 
@@ -1097,30 +1030,21 @@ function checkForNewDay() {
     const newProjectDay =
         getProjectDay();
 
-
     if (
-        newProjectDay !==
-            currentProjectDay &&
+        newProjectDay !== currentProjectDay &&
         newProjectDay > 0
     ) {
 
         currentProjectDay =
             newProjectDay;
 
-
         loadQuestion();
     }
-
-
-    /*
-     * Тестовый переход.
-     */
 
     if (!PROJECT_START_DATE) {
 
         const state =
             getSessionState();
-
 
         if (
             !state.active &&
@@ -1134,41 +1058,41 @@ function checkForNewDay() {
                 "true"
             );
 
-
             moveToNextDevDay();
-
 
             currentProjectDay =
                 getProjectDay();
-
 
             loadQuestion();
         }
     }
 
-
     const state =
         getSessionState();
 
+    const activeScreen =
+        document.getElementById(
+            "activeScreen"
+        );
 
-    if (state.active) {
+    const closedScreen =
+        document.getElementById(
+            "closedScreen"
+        );
 
-        document
-            .getElementById(
-                "activeScreen"
-            )
-            .classList.remove(
-                "closed"
-            );
+    if (
+        state.active &&
+        activeScreen &&
+        closedScreen
+    ) {
 
+        activeScreen.classList.remove(
+            "closed"
+        );
 
-        document
-            .getElementById(
-                "closedScreen"
-            )
-            .classList.add(
-                "closed"
-            );
+        closedScreen.classList.add(
+            "closed"
+        );
     }
 }
 
@@ -1183,35 +1107,39 @@ function initialize() {
 
     loadQuestion();
 
-
     const state =
         getSessionState();
 
+    const activeScreen =
+        document.getElementById(
+            "activeScreen"
+        );
+
+    const closedScreen =
+        document.getElementById(
+            "closedScreen"
+        );
 
     if (state.active) {
 
-        document
-            .getElementById(
-                "activeScreen"
-            )
-            .classList.remove(
+        if (activeScreen) {
+
+            activeScreen.classList.remove(
                 "closed"
             );
+        }
 
+        if (closedScreen) {
 
-        document
-            .getElementById(
-                "closedScreen"
-            )
-            .classList.add(
+            closedScreen.classList.add(
                 "closed"
             );
+        }
 
     } else {
 
         finishSession();
     }
-
 
     updateSessionTimer();
 
@@ -1262,3 +1190,6 @@ setInterval(
     checkForNewDay,
     1000
 );
+
+});
+</script>
