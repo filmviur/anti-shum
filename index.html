@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Анти-Шум</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         * {
@@ -20,6 +23,7 @@
         body {
             font-family: Arial, sans-serif;
             color: #ffffff;
+
             background:
                 radial-gradient(
                     circle at 20% 20%,
@@ -39,9 +43,11 @@
                 );
 
             min-height: 100vh;
+
             display: flex;
             align-items: center;
             justify-content: center;
+
             padding: 20px;
         }
 
@@ -66,9 +72,13 @@
             background: rgba(255, 255, 255, 0.07);
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 24px;
+
             padding: 35px 25px;
+
             backdrop-filter: blur(15px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.35);
         }
 
         .time {
@@ -92,6 +102,7 @@
         .answer-input {
             width: 100%;
             min-height: 150px;
+
             resize: vertical;
 
             border: 1px solid rgba(255, 255, 255, 0.10);
@@ -120,16 +131,21 @@
 
         .answer-input:focus {
             border-color: rgba(140, 105, 255, 0.50);
+
             background: rgba(255, 255, 255, 0.06);
-            box-shadow: 0 0 25px rgba(118, 87, 255, 0.12);
+
+            box-shadow:
+                0 0 25px rgba(118, 87, 255, 0.12);
         }
 
         .answer-counter {
             position: absolute;
+
             left: 20px;
             bottom: 13px;
 
             font-size: 12px;
+
             color: rgba(255, 255, 255, 0.28);
 
             pointer-events: none;
@@ -137,6 +153,7 @@
 
         .send-thought-button {
             position: absolute;
+
             right: 12px;
             bottom: 10px;
 
@@ -154,6 +171,7 @@
             border-radius: 50%;
 
             background: rgba(255, 255, 255, 0.06);
+
             color: rgba(255, 255, 255, 0.25);
 
             cursor: default;
@@ -168,11 +186,13 @@
         .send-thought-button svg {
             width: 20px;
             height: 20px;
+
             fill: currentColor;
         }
 
         .send-thought-button:not(:disabled) {
             background: rgba(118, 87, 255, 0.22);
+
             color: rgba(255, 255, 255, 0.9);
 
             cursor: pointer;
@@ -183,6 +203,7 @@
 
         .send-thought-button:not(:disabled):hover {
             background: rgba(118, 87, 255, 0.35);
+
             color: #ffffff;
 
             transform: translateY(-1px);
@@ -197,12 +218,13 @@
 
         .countdown {
             margin-top: 25px;
+
             font-size: 20px;
             font-weight: bold;
         }
 
         .closed {
-            display: none;
+            display: none !important;
         }
 
         .message {
@@ -216,30 +238,244 @@
 
         .error {
             color: #ffb3b3;
+
             font-size: 16px;
             line-height: 1.6;
+
             word-break: break-word;
         }
 
         .error-title {
             font-size: 20px;
+
             color: #ffffff;
+
             margin-bottom: 12px;
         }
 
         .error-details {
             padding: 15px;
             margin-top: 15px;
+
             background: rgba(255, 0, 0, 0.08);
+
             border: 1px solid rgba(255, 150, 150, 0.2);
+
             border-radius: 12px;
+
             text-align: left;
+
             font-family: monospace;
+
             font-size: 13px;
+
             white-space: pre-wrap;
         }
 
+
+        /* ================================
+           АВТОРИЗАЦИЯ
+           ================================ */
+
+        .auth-card {
+            max-width: 460px;
+            margin: 0 auto;
+        }
+
+        .auth-input {
+            width: 100%;
+
+            padding: 15px 18px;
+
+            margin-bottom: 12px;
+
+            border-radius: 14px;
+
+            border: 1px solid rgba(255,255,255,0.10);
+
+            outline: none;
+
+            background: rgba(255,255,255,0.045);
+
+            color: #ffffff;
+
+            font-size: 16px;
+
+            font-family: Arial, sans-serif;
+
+            transition:
+                border-color 0.25s ease,
+                background 0.25s ease,
+                box-shadow 0.25s ease;
+        }
+
+        .auth-input::placeholder {
+            color: rgba(255,255,255,0.38);
+        }
+
+        .auth-input:focus {
+            border-color: rgba(140,105,255,0.50);
+
+            background: rgba(255,255,255,0.06);
+
+            box-shadow:
+                0 0 20px rgba(118,87,255,0.10);
+        }
+
+        .auth-main-button {
+            width: 100%;
+
+            height: 48px;
+
+            margin-top: 5px;
+
+            border: none;
+
+            border-radius: 14px;
+
+            background: rgba(118,87,255,0.28);
+
+            color: #ffffff;
+
+            font-size: 16px;
+
+            cursor: pointer;
+
+            transition:
+                background 0.25s ease,
+                transform 0.2s ease;
+        }
+
+        .auth-main-button:hover {
+            background: rgba(118,87,255,0.40);
+
+            transform: translateY(-1px);
+        }
+
+        .auth-main-button:disabled {
+            opacity: 0.45;
+            cursor: default;
+            transform: none;
+        }
+
+        .auth-switch {
+            margin-top: 18px;
+
+            background: none;
+
+            border: none;
+
+            color: rgba(255,255,255,0.60);
+
+            cursor: pointer;
+
+            font-size: 14px;
+        }
+
+        .auth-switch:hover {
+            color: #ffffff;
+        }
+
+        .auth-message {
+            min-height: 24px;
+
+            margin-bottom: 18px;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+        }
+
+        .profile {
+            margin-bottom: 20px;
+
+            padding-bottom: 20px;
+
+            border-bottom:
+                1px solid rgba(255,255,255,0.10);
+        }
+
+        .avatar-wrapper {
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            margin-bottom: 15px;
+        }
+
+        .avatar {
+            width: 88px;
+            height: 88px;
+
+            border-radius: 50%;
+
+            object-fit: cover;
+
+            background:
+                rgba(255,255,255,0.08);
+
+            border:
+                2px solid rgba(255,255,255,0.15);
+
+            margin-bottom: 12px;
+        }
+
+        .profile-name {
+            font-size: 20px;
+
+            font-weight: bold;
+
+            margin-bottom: 5px;
+        }
+
+        .profile-contact {
+            font-size: 13px;
+
+            color:
+                rgba(255,255,255,0.45);
+        }
+
+        .profile-actions {
+            display: flex;
+
+            gap: 10px;
+
+            justify-content: center;
+
+            margin-top: 15px;
+        }
+
+        .small-button {
+            padding: 9px 14px;
+
+            border-radius: 10px;
+
+            border:
+                1px solid rgba(255,255,255,0.10);
+
+            background:
+                rgba(255,255,255,0.05);
+
+            color: rgba(255,255,255,0.75);
+
+            cursor: pointer;
+        }
+
+        .small-button:hover {
+            background:
+                rgba(255,255,255,0.10);
+
+            color: #ffffff;
+        }
+
+        .file-input {
+            display: none;
+        }
+
         @media (max-width: 600px) {
+
             h1 {
                 font-size: 32px;
             }
@@ -264,932 +500,2379 @@
     </style>
 </head>
 
+
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <h1>Анти-Шум</h1>
+    <h1>Анти-Шум</h1>
 
-        <div class="subtitle">
-            15 минут без информационного шума
+    <div class="subtitle">
+        15 минут без информационного шума
+    </div>
+
+
+    <!-- =========================================
+         АВТОРИЗАЦИЯ
+         ========================================= -->
+
+    <div
+        id="authScreen"
+        class="card auth-card"
+    >
+
+        <div
+            class="time"
+            id="authTitle"
+        >
+            Вход
         </div>
 
-        <div id="activeScreen" class="card">
 
-            <div class="time">
-                Вопрос дня
-            </div>
+        <div
+            id="authMessage"
+            class="auth-message"
+        ></div>
 
-            <div
-                class="question loading"
-                id="questionText"
-            >
-                Загружаю вопрос...
-            </div>
 
-            <div class="answer-wrapper">
+        <input
+            id="displayNameInput"
+            class="auth-input"
+            type="text"
+            maxlength="50"
+            placeholder="Имя"
+            autocomplete="name"
+            style="display:none;"
+        >
 
-                <textarea
-                    id="answerInput"
-                    class="answer-input"
-                    maxlength="500"
-                    placeholder="Отправить мысль..."
-                ></textarea>
+
+        <input
+            id="emailInput"
+            class="auth-input"
+            type="text"
+            placeholder="Email или телефон"
+            autocomplete="username"
+        >
+
+
+        <input
+            id="passwordInput"
+            class="auth-input"
+            type="password"
+            placeholder="Пароль"
+            autocomplete="current-password"
+        >
+
+
+        <input
+            id="passwordConfirmInput"
+            class="auth-input"
+            type="password"
+            placeholder="Повтори пароль"
+            autocomplete="new-password"
+            style="display:none;"
+        >
+
+
+        <button
+            id="authButton"
+            class="auth-main-button"
+        >
+            Войти
+        </button>
+
+
+        <button
+            id="authSwitchButton"
+            class="auth-switch"
+        >
+            Нет аккаунта? Зарегистрироваться
+        </button>
+
+    </div>
+
+
+    <!-- =========================================
+         ПРОФИЛЬ
+         ========================================= -->
+
+    <div
+        id="profileScreen"
+        class="card auth-card closed"
+        style="margin-top:20px;"
+    >
+
+        <div class="profile">
+
+            <div class="avatar-wrapper">
+
+                <img
+                    id="avatarImage"
+                    class="avatar"
+                    src=""
+                    alt="Аватар"
+                >
 
                 <div
-                    class="answer-counter"
-                    id="answerCounter"
+                    id="profileName"
+                    class="profile-name"
                 >
-                    0 / 500
                 </div>
 
-                <button
-                    class="send-thought-button"
-                    id="answerButton"
-                    onclick="submitAnswer()"
-                    disabled
-                    aria-label="Отправить мысль"
-                    title="Отправить мысль"
+                <div
+                    id="profileContact"
+                    class="profile-contact"
                 >
-                    <svg
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                    >
-                        <path d="M21.8 3.2 2.6 10.4c-.8.3-.8 1.4 0 1.7l7.1 2.5 2.5 7.1c.3.8 1.4.8 1.7 0l7.2-19.2c.3-.8-.5-1.6-1.3-1.3ZM11 13.1l-6-2.1 13.7-5.2-7.7 7.3Zm2.2 5.8-1.9-5.3 7.4-7-5.5 12.3Z"/>
-                    </svg>
+                </div>
+
+            </div>
+
+
+            <div class="profile-actions">
+
+                <label
+                    for="avatarInput"
+                    class="small-button"
+                >
+                    Изменить аватар
+                </label>
+
+                <input
+                    id="avatarInput"
+                    class="file-input"
+                    type="file"
+                    accept="image/*"
+                >
+
+
+                <button
+                    id="logoutButton"
+                    class="small-button"
+                >
+                    Выйти
                 </button>
 
             </div>
-
-            <div
-                class="countdown"
-                id="sessionTimer"
-            >
-                15:00
-            </div>
-
-        </div>
-
-        <div
-            id="closedScreen"
-            class="card closed"
-        >
-
-            <div class="message">
-                Время вышло! Спасибо, за твоё время!<br><br>
-                Жду тебя завтра в 20:00!<br><br>
-                Иди жить реальной жизнью!)
-            </div>
-
-            <div
-                class="countdown"
-                id="nextTimer"
-            ></div>
 
         </div>
 
     </div>
 
-  <script>
 
-document.addEventListener("DOMContentLoaded", function () {
+    <!-- =========================================
+         ОСНОВНОЙ ЭКРАН
+         ========================================= -->
 
-/*
- * ==========================================
- * SUPABASE
- * ==========================================
- */
+    <div
+        id="activeScreen"
+        class="card closed"
+    >
 
-const SUPABASE_URL =
-    "https://mkyendzqoohqcwnycuys.supabase.co";
-
-const SUPABASE_KEY =
-    "sb_publishable_wscrhaPifbezRTe4rWs-Wg_j0kGqktT";
+        <div class="time">
+            Вопрос дня
+        </div>
 
 
-/*
- * ==========================================
- * НАСТРОЙКИ ПРОЕКТА
- * ==========================================
- */
-
-const PROJECT_START_DATE = null;
-
-const SESSION_MINUTES = 15;
-
-const SESSION_SECONDS =
-    SESSION_MINUTES * 60;
+        <div
+            class="question loading"
+            id="questionText"
+        >
+            Загружаю вопрос...
+        </div>
 
 
-/*
- * ==========================================
- * ТЕСТОВЫЙ РЕЖИМ
- * ==========================================
- */
+        <div class="answer-wrapper">
 
-const DEV_PROJECT_DAY = 1;
-
-
-/*
- * ==========================================
- * КЛЮЧИ LOCALSTORAGE
- * ==========================================
- */
-
-const DEV_SESSION_KEY =
-    "antiShum_dev_session_start";
-
-const DEV_DAY_KEY =
-    "antiShum_dev_project_day";
+            <textarea
+                id="answerInput"
+                class="answer-input"
+                maxlength="500"
+                placeholder="Отправить мысль..."
+            ></textarea>
 
 
-/*
- * ==========================================
- * ПОЛУЧЕНИЕ ТЕКУЩЕГО ДНЯ ПРОЕКТА
- * ==========================================
- */
+            <div
+                class="answer-counter"
+                id="answerCounter"
+            >
+                0 / 500
+            </div>
 
-function getProjectDay() {
 
-    if (!PROJECT_START_DATE) {
+            <button
+                class="send-thought-button"
+                id="answerButton"
+                onclick="submitAnswer()"
+                disabled
+                aria-label="Отправить мысль"
+                title="Отправить мысль"
+            >
 
-        const savedDay =
-            localStorage.getItem(
-                DEV_DAY_KEY
+                <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+
+                    <path d="
+                        M21.8 3.2
+                        2.6 10.4
+                        c-.8.3-.8 1.4 0 1.7
+                        l7.1 2.5
+                        2.5 7.1
+                        c.3.8 1.4.8 1.7 0
+                        l7.2-19.2
+                        c.3-.8-.5-1.6-1.3-1.3ZM11 13.1
+                        l-6-2.1
+                        13.7-5.2
+                        -7.7 7.3Zm2.2 5.8
+                        -1.9-5.3
+                        7.4-7
+                        -5.5 12.3Z
+                    "/>
+
+                </svg>
+
+            </button>
+
+        </div>
+
+
+        <div
+            class="countdown"
+            id="sessionTimer"
+        >
+            15:00
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         ЗАКРЫТЫЙ ЭКРАН
+         ========================================= -->
+
+    <div
+        id="closedScreen"
+        class="card closed"
+    >
+
+        <div class="message">
+
+            Время вышло! Спасибо, за твоё время!
+            <br><br>
+
+            Жду тебя завтра в 20:00!
+            <br><br>
+
+            Иди жить реальной жизнью!)
+
+        </div>
+
+
+        <div
+            class="countdown"
+            id="nextTimer"
+        ></div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+
+        /*
+         * ==========================================
+         * SUPABASE
+         * ==========================================
+         */
+
+        const SUPABASE_URL =
+            "https://mkyendzqoohqcwnycuys.supabase.co";
+
+        const SUPABASE_KEY =
+            "sb_publishable_wscrhaPifbezRTe4rWs-Wg_j0kGqktT";
+
+
+        const supabaseClient =
+            window.supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_KEY
             );
 
-        if (savedDay) {
 
-            const parsedDay =
-                Number(savedDay);
+        /*
+         * ==========================================
+         * НАСТРОЙКИ
+         * ==========================================
+         */
 
-            if (
-                Number.isInteger(parsedDay) &&
-                parsedDay > 0
-            ) {
-                return parsedDay;
+        const PROJECT_START_DATE = null;
+
+        const SESSION_MINUTES = 15;
+
+        const SESSION_SECONDS =
+            SESSION_MINUTES * 60;
+
+        const DEV_PROJECT_DAY = 1;
+
+
+        const DEV_SESSION_KEY =
+            "antiShum_dev_session_start";
+
+        const DEV_DAY_KEY =
+            "antiShum_dev_project_day";
+
+
+        /*
+         * ==========================================
+         * ТЕКУЩИЙ ПОЛЬЗОВАТЕЛЬ
+         * ==========================================
+         */
+
+        let currentSession = null;
+
+        let currentQuestionId = null;
+
+
+        /*
+         * ==========================================
+         * ЭЛЕМЕНТЫ
+         * ==========================================
+         */
+
+        const authScreen =
+            document.getElementById(
+                "authScreen"
+            );
+
+        const profileScreen =
+            document.getElementById(
+                "profileScreen"
+            );
+
+        const activeScreen =
+            document.getElementById(
+                "activeScreen"
+            );
+
+        const closedScreen =
+            document.getElementById(
+                "closedScreen"
+            );
+
+
+        const authTitle =
+            document.getElementById(
+                "authTitle"
+            );
+
+        const authMessage =
+            document.getElementById(
+                "authMessage"
+            );
+
+        const authButton =
+            document.getElementById(
+                "authButton"
+            );
+
+        const authSwitchButton =
+            document.getElementById(
+                "authSwitchButton"
+            );
+
+
+        const displayNameInput =
+            document.getElementById(
+                "displayNameInput"
+            );
+
+        const emailInput =
+            document.getElementById(
+                "emailInput"
+            );
+
+        const passwordInput =
+            document.getElementById(
+                "passwordInput"
+            );
+
+        const passwordConfirmInput =
+            document.getElementById(
+                "passwordConfirmInput"
+            );
+
+
+        const avatarImage =
+            document.getElementById(
+                "avatarImage"
+            );
+
+        const avatarInput =
+            document.getElementById(
+                "avatarInput"
+            );
+
+        const profileName =
+            document.getElementById(
+                "profileName"
+            );
+
+        const profileContact =
+            document.getElementById(
+                "profileContact"
+            );
+
+        const logoutButton =
+            document.getElementById(
+                "logoutButton"
+            );
+
+
+        const answerInput =
+            document.getElementById(
+                "answerInput"
+            );
+
+        const answerCounter =
+            document.getElementById(
+                "answerCounter"
+            );
+
+        const answerButton =
+            document.getElementById(
+                "answerButton"
+            );
+
+
+        /*
+         * ==========================================
+         * РЕЖИМ АВТОРИЗАЦИИ
+         * ==========================================
+         */
+
+        let authMode = "login";
+
+
+        /*
+         * ==========================================
+         * СООБЩЕНИЕ АВТОРИЗАЦИИ
+         * ==========================================
+         */
+
+        function showAuthMessage(
+            message,
+            isError = false
+        ) {
+
+            if (!authMessage) {
+                return;
+            }
+
+            authMessage.textContent =
+                message;
+
+            if (isError) {
+
+                authMessage.className =
+                    "auth-message error";
+
+            } else {
+
+                authMessage.className =
+                    "auth-message loading";
             }
         }
 
-        return DEV_PROJECT_DAY;
-    }
 
-    const now =
-        new Date();
+        /*
+         * ==========================================
+         * ПЕРЕКЛЮЧЕНИЕ ВХОД / РЕГИСТРАЦИЯ
+         * ==========================================
+         */
 
-    const start =
-        new Date(
-            `${PROJECT_START_DATE}T20:00:00`
-        );
+        function updateAuthMode() {
 
-    if (now < start) {
-        return 0;
-    }
+            showAuthMessage("");
 
-    const difference =
-        now.getTime() -
-        start.getTime();
+            if (authMode === "login") {
 
-    const daysPassed =
-        Math.floor(
-            difference / 86400000
-        );
+                authTitle.textContent =
+                    "Вход";
 
-    return daysPassed + 1;
-}
+                authButton.textContent =
+                    "Войти";
 
+                authSwitchButton.textContent =
+                    "Нет аккаунта? Зарегистрироваться";
 
-/*
- * ==========================================
- * ТЕКУЩИЙ ТЕСТОВЫЙ ДЕНЬ
- * ==========================================
- */
+                displayNameInput.style.display =
+                    "none";
 
-function getDevProjectDay() {
+                passwordConfirmInput.style.display =
+                    "none";
 
-    const savedDay =
-        localStorage.getItem(
-            DEV_DAY_KEY
-        );
+            } else {
 
-    if (savedDay) {
+                authTitle.textContent =
+                    "Регистрация";
 
-        const parsedDay =
-            Number(savedDay);
+                authButton.textContent =
+                    "Создать аккаунт";
 
-        if (
-            Number.isInteger(parsedDay) &&
-            parsedDay > 0
-        ) {
-            return parsedDay;
-        }
-    }
+                authSwitchButton.textContent =
+                    "Уже есть аккаунт? Войти";
 
-    return DEV_PROJECT_DAY;
-}
+                displayNameInput.style.display =
+                    "block";
 
-
-/*
- * ==========================================
- * ПЕРЕХОД НА СЛЕДУЮЩИЙ ТЕСТОВЫЙ ДЕНЬ
- * ==========================================
- */
-
-function moveToNextDevDay() {
-
-    if (PROJECT_START_DATE) {
-        return;
-    }
-
-    const currentDay =
-        getDevProjectDay();
-
-    const nextDay =
-        currentDay + 1;
-
-    localStorage.setItem(
-        DEV_DAY_KEY,
-        String(nextDay)
-    );
-
-    localStorage.setItem(
-        DEV_SESSION_KEY,
-        String(Date.now())
-    );
-
-    sessionStorage.removeItem(
-        "antiShum_dev_day_changed"
-    );
-}
-
-
-/*
- * ==========================================
- * ВРЕМЯ ОТКРЫТИЯ ТЕКУЩЕГО ДНЯ
- * ==========================================
- */
-
-function getOpeningTime() {
-
-    if (!PROJECT_START_DATE) {
-
-        let saved =
-            localStorage.getItem(
-                DEV_SESSION_KEY
-            );
-
-        if (!saved) {
-
-            saved =
-                String(Date.now());
-
-            localStorage.setItem(
-                DEV_SESSION_KEY,
-                saved
-            );
+                passwordConfirmInput.style.display =
+                    "block";
+            }
         }
 
-        return Number(saved);
-    }
 
-    const now =
-        new Date();
+        authSwitchButton.addEventListener(
+            "click",
+            function () {
 
-    const todayOpening =
-        new Date(now);
+                authMode =
+                    authMode === "login"
+                        ? "register"
+                        : "login";
 
-    todayOpening.setHours(
-        20,
-        0,
-        0,
-        0
-    );
-
-    if (now < todayOpening) {
-
-        todayOpening.setDate(
-            todayOpening.getDate() - 1
-        );
-    }
-
-    return todayOpening.getTime();
-}
-
-
-/*
- * ==========================================
- * СОСТОЯНИЕ СЕССИИ
- * ==========================================
- */
-
-function getSessionState() {
-
-    const now =
-        Date.now();
-
-    const opening =
-        getOpeningTime();
-
-    const elapsed =
-        Math.floor(
-            (now - opening) / 1000
+                updateAuthMode();
+            }
         );
 
-    const remaining =
-        SESSION_SECONDS - elapsed;
 
-    return {
-        opening,
-        elapsed,
-        remaining,
+        /*
+         * ==========================================
+         * ОПРЕДЕЛЕНИЕ EMAIL ИЛИ ТЕЛЕФОНА
+         * ==========================================
+         */
 
-        active:
-            elapsed >= 0 &&
-            elapsed < SESSION_SECONDS
-    };
-}
+        function isEmail(value) {
 
-
-/*
- * ==========================================
- * ЗАЩИТА HTML
- * ==========================================
- */
-
-function escapeHtml(text) {
-
-    return String(text)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-
-/*
- * ==========================================
- * ЗАГРУЗКА ВОПРОСА
- * ==========================================
- */
-
-async function loadQuestion() {
-
-    const questionElement =
-        document.getElementById(
-            "questionText"
-        );
-
-    if (!questionElement) {
-        console.error(
-            "Не найден элемент #questionText"
-        );
-        return;
-    }
-
-    questionElement.classList.remove(
-        "error"
-    );
-
-    questionElement.classList.add(
-        "loading"
-    );
-
-    questionElement.textContent =
-        "Загружаю вопрос...";
-
-    try {
-
-        const projectDay =
-            getProjectDay();
-
-        if (projectDay === 0) {
-
-            questionElement.textContent =
-                "Анти-Шум ещё не начался.";
-
-            questionElement.classList.remove(
-                "loading"
-            );
-
-            return;
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+                .test(value);
         }
 
-        const response =
-            await fetch(
-                `${SUPABASE_URL}/rest/v1/questions?select=*&day=eq.${projectDay}`,
-                {
-                    method: "GET",
 
-                    headers: {
-                        "apikey":
-                            SUPABASE_KEY,
+        function isPhone(value) {
 
-                        "Authorization":
-                            `Bearer ${SUPABASE_KEY}`
+            return /^\+?[0-9\s\-()]{7,20}$/
+                .test(value);
+        }
+
+
+        /*
+         * ==========================================
+         * РЕГИСТРАЦИЯ / ВХОД
+         * ==========================================
+         */
+
+        async function handleAuth() {
+
+            const login =
+                emailInput.value.trim();
+
+            const password =
+                passwordInput.value;
+
+
+            if (!login || !password) {
+
+                showAuthMessage(
+                    "Заполни логин и пароль.",
+                    true
+                );
+
+                return;
+            }
+
+
+            if (
+                !isEmail(login) &&
+                !isPhone(login)
+            ) {
+
+                showAuthMessage(
+                    "Введи корректный email или номер телефона.",
+                    true
+                );
+
+                return;
+            }
+
+
+            authButton.disabled =
+                true;
+
+
+            try {
+
+                if (authMode === "register") {
+
+                    const displayName =
+                        displayNameInput
+                            .value
+                            .trim();
+
+
+                    const passwordConfirm =
+                        passwordConfirmInput
+                            .value;
+
+
+                    if (!displayName) {
+
+                        throw new Error(
+                            "Введи имя."
+                        );
                     }
+
+
+                    if (password.length < 6) {
+
+                        throw new Error(
+                            "Пароль должен содержать минимум 6 символов."
+                        );
+                    }
+
+
+                    if (
+                        password !==
+                        passwordConfirm
+                    ) {
+
+                        throw new Error(
+                            "Пароли не совпадают."
+                        );
+                    }
+
+
+                    const credentials =
+                        isEmail(login)
+                            ? {
+                                email: login
+                            }
+                            : {
+                                phone: login
+                            };
+
+
+                    const {
+                        data,
+                        error
+                    } =
+                        await supabaseClient
+                            .auth
+                            .signUp({
+
+                                ...credentials,
+
+                                password:
+
+                                    password,
+
+                                options: {
+
+                                    data: {
+
+                                        display_name:
+                                            displayName
+                                    }
+                                }
+                            });
+
+
+                    if (error) {
+                        throw error;
+                    }
+
+
+                    currentSession =
+                        data.session;
+
+
+                    /*
+                     * Если подтверждение email
+                     * отключено или пользователь
+                     * зарегистрирован через
+                     * разрешённый phone flow —
+                     * сессия может появиться сразу.
+                     */
+
+                    if (currentSession) {
+
+                        await loadUserProfile();
+
+                        showApp();
+
+                    } else {
+
+                        showAuthMessage(
+                            "Аккаунт создан. Если Supabase требует подтверждение, подтверди регистрацию и затем войди."
+                        );
+
+                        authMode =
+                            "login";
+
+                        updateAuthMode();
+                    }
+
+
+                } else {
+
+                    const credentials =
+                        isEmail(login)
+                            ? {
+                                email: login
+                            }
+                            : {
+                                phone: login
+                            };
+
+
+                    const {
+                        data,
+                        error
+                    } =
+                        await supabaseClient
+                            .auth
+                            .signInWithPassword({
+
+                                ...credentials,
+
+                                password:
+                                    password
+                            });
+
+
+                    if (error) {
+                        throw error;
+                    }
+
+
+                    currentSession =
+                        data.session;
+
+
+                    await loadUserProfile();
+
+                    showApp();
                 }
-            );
 
-        const responseText =
-            await response.text();
 
-        if (!response.ok) {
+            } catch (error) {
 
-            throw new Error(
-                `Supabase ${response.status}: ${responseText}`
-            );
+                console.error(
+                    "Ошибка авторизации:",
+                    error
+                );
+
+
+                let message =
+                    error.message ||
+                    "Не удалось выполнить операцию.";
+
+
+                /*
+                 * Чуть более понятные сообщения
+                 */
+
+                if (
+                    message.includes(
+                        "Invalid login credentials"
+                    )
+                ) {
+
+                    message =
+                        "Неверный email/телефон или пароль.";
+                }
+
+
+                if (
+                    message.includes(
+                        "User already registered"
+                    )
+                ) {
+
+                    message =
+                        "Пользователь с таким email или телефоном уже зарегистрирован.";
+                }
+
+
+                showAuthMessage(
+                    message,
+                    true
+                );
+
+
+            } finally {
+
+                authButton.disabled =
+                    false;
+            }
         }
 
-        const data =
-            JSON.parse(
-                responseText
-            );
 
-        if (!data.length) {
+        authButton.addEventListener(
+            "click",
+            handleAuth
+        );
 
-            throw new Error(
-                `Вопрос для дня ${projectDay} не найден.`
-            );
+
+        /*
+         * ==========================================
+         * ПРОФИЛЬ
+         * ==========================================
+         */
+
+        async function loadUserProfile() {
+
+            if (!currentSession) {
+                return;
+            }
+
+
+            const userId =
+                currentSession.user.id;
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${SUPABASE_URL}/rest/v1/users?select=*&id=eq.${userId}`,
+                        {
+
+                            method: "GET",
+
+                            headers: {
+
+                                "apikey":
+                                    SUPABASE_KEY,
+
+                                "Authorization":
+                                    `Bearer ${SUPABASE_KEY}`
+                            }
+                        }
+                    );
+
+
+                const responseText =
+                    await response.text();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        `Ошибка профиля: ${response.status} ${responseText}`
+                    );
+                }
+
+
+                const users =
+                    JSON.parse(
+                        responseText
+                    );
+
+
+                if (!users.length) {
+
+                    /*
+                     * На случай если trigger
+                     * ещё не создал профиль.
+                     */
+
+                    const displayName =
+                        currentSession
+                            .user
+                            .user_metadata
+                            ?.display_name ||
+                        currentSession
+                            .user
+                            .email ||
+                        currentSession
+                            .user
+                            .phone ||
+                        "Пользователь";
+
+
+                    const createResponse =
+                        await fetch(
+                            `${SUPABASE_URL}/rest/v1/users`,
+                            {
+
+                                method: "POST",
+
+                                headers: {
+
+                                    "apikey":
+                                        SUPABASE_KEY,
+
+                                    "Authorization":
+                                        `Bearer ${SUPABASE_KEY}`,
+
+                                    "Content-Type":
+                                        "application/json",
+
+                                    "Prefer":
+                                        "return=minimal"
+                                },
+
+                                body:
+                                    JSON.stringify({
+
+                                        id:
+                                            userId,
+
+                                        display_name:
+                                            displayName
+                                    })
+                            }
+                        );
+
+
+                    if (!createResponse.ok) {
+
+                        const errorText =
+                            await createResponse.text();
+
+                        console.error(
+                            "Не удалось создать профиль:",
+                            errorText
+                        );
+                    }
+
+
+                    profileName.textContent =
+                        displayName;
+
+                    profileContact.textContent =
+                        currentSession
+                            .user
+                            .email ||
+                        currentSession
+                            .user
+                            .phone ||
+                        "";
+
+                    setDefaultAvatar();
+
+                    return;
+                }
+
+
+                const user =
+                    users[0];
+
+
+                profileName.textContent =
+                    user.display_name ||
+                    "Пользователь";
+
+
+                profileContact.textContent =
+                    currentSession
+                        .user
+                        .email ||
+                    currentSession
+                        .user
+                        .phone ||
+                    "";
+
+
+                if (user.avatar_url) {
+
+                    avatarImage.src =
+                        user.avatar_url;
+
+                } else {
+
+                    setDefaultAvatar();
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "Ошибка загрузки профиля:",
+                    error
+                );
+            }
         }
 
-        const question =
-            data[0];
 
-        if (!question.question) {
+        /*
+         * ==========================================
+         * АВАТАР ПО УМОЛЧАНИЮ
+         * ==========================================
+         */
 
-            throw new Error(
-                "У вопроса отсутствует текст."
-            );
+        function setDefaultAvatar() {
+
+            avatarImage.src =
+                "data:image/svg+xml;charset=UTF-8," +
+                encodeURIComponent(`
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="88"
+                        height="88"
+                        viewBox="0 0 88 88"
+                    >
+                        <rect
+                            width="88"
+                            height="88"
+                            rx="44"
+                            fill="#24243d"
+                        />
+
+                        <circle
+                            cx="44"
+                            cy="34"
+                            r="15"
+                            fill="#77778f"
+                        />
+
+                        <path
+                            d="
+                                M18 75
+                                C20 56 31 50 44 50
+                                C57 50 68 56 70 75
+                            "
+                            fill="#77778f"
+                        />
+                    </svg>
+                `);
         }
 
-        questionElement.textContent =
-            question.question;
 
-        questionElement.classList.remove(
-            "loading"
+        /*
+         * ==========================================
+         * ЗАГРУЗКА АВАТАРА
+         * ==========================================
+         */
+
+        avatarInput.addEventListener(
+            "change",
+            async function () {
+
+                if (
+                    !currentSession ||
+                    !avatarInput.files.length
+                ) {
+                    return;
+                }
+
+
+                const file =
+                    avatarInput.files[0];
+
+
+                if (
+                    !file.type.startsWith(
+                        "image/"
+                    )
+                ) {
+
+                    alert(
+                        "Можно загрузить только изображение."
+                    );
+
+                    return;
+                }
+
+
+                /*
+                 * Ограничиваем размер
+                 * 5 МБ.
+                 */
+
+                if (
+                    file.size >
+                    5 * 1024 * 1024
+                ) {
+
+                    alert(
+                        "Аватар должен быть не больше 5 МБ."
+                    );
+
+                    return;
+                }
+
+
+                try {
+
+                    const userId =
+                        currentSession
+                            .user
+                            .id;
+
+
+                    const extension =
+                        file.name
+                            .split(".")
+                            .pop()
+                            .toLowerCase();
+
+
+                    /*
+                     * У каждого пользователя
+                     * свой постоянный путь.
+                     */
+
+                    const filePath =
+                        `${userId}/avatar.${extension}`;
+
+
+                    const {
+                        error:
+                            uploadError
+                    } =
+                        await supabaseClient
+                            .storage
+                            .from("avatars")
+                            .upload(
+                                filePath,
+                                file,
+                                {
+                                    upsert: true,
+                                    contentType:
+                                        file.type
+                                }
+                            );
+
+
+                    if (uploadError) {
+
+                        throw uploadError;
+                    }
+
+
+                    const {
+                        data:
+                            publicData
+                    } =
+                        supabaseClient
+                            .storage
+                            .from("avatars")
+                            .getPublicUrl(
+                                filePath
+                            );
+
+
+                    const avatarUrl =
+                        publicData.publicUrl;
+
+
+                    const response =
+                        await fetch(
+                            `${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`,
+                            {
+
+                                method: "PATCH",
+
+                                headers: {
+
+                                    "apikey":
+                                        SUPABASE_KEY,
+
+                                    "Authorization":
+                                        `Bearer ${SUPABASE_KEY}`,
+
+                                    "Content-Type":
+                                        "application/json",
+
+                                    "Prefer":
+                                        "return=minimal"
+                                },
+
+                                body:
+                                    JSON.stringify({
+
+                                        avatar_url:
+                                            avatarUrl
+                                    })
+                            }
+                        );
+
+
+                    if (!response.ok) {
+
+                        const errorText =
+                            await response.text();
+
+                        throw new Error(
+                            errorText
+                        );
+                    }
+
+
+                    /*
+                     * Обновляем изображение
+                     */
+
+                    avatarImage.src =
+                        avatarUrl +
+                        "?t=" +
+                        Date.now();
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Ошибка загрузки аватара:",
+                        error
+                    );
+
+
+                    alert(
+                        "Не удалось загрузить аватар.\n\n" +
+                        error.message
+                    );
+                }
+
+
+                avatarInput.value = "";
+            }
         );
 
-    } catch (error) {
 
-        console.error(
-            "Ошибка загрузки вопроса:",
-            error
+        /*
+         * ==========================================
+         * ВЫХОД
+         * ==========================================
+         */
+
+        logoutButton.addEventListener(
+            "click",
+            async function () {
+
+                await supabaseClient
+                    .auth
+                    .signOut();
+
+
+                currentSession =
+                    null;
+
+
+                showAuth();
+
+                showAuthMessage("");
+
+                emailInput.value = "";
+
+                passwordInput.value = "";
+
+                displayNameInput.value = "";
+
+                passwordConfirmInput.value = "";
+            }
         );
 
-        questionElement.classList.remove(
-            "loading"
-        );
 
-        questionElement.classList.add(
-            "error"
-        );
+        /*
+         * ==========================================
+         * ПОКАЗ ПРИЛОЖЕНИЯ
+         * ==========================================
+         */
 
-        questionElement.innerHTML = `
-            <div class="error-title">
-                Не удалось загрузить вопрос
-            </div>
+        function showApp() {
 
-            <div class="error-details">
-                ${escapeHtml(error.message)}
-            </div>
-        `;
-    }
-}
-
-
-/*
- * ==========================================
- * СЧЁТЧИК СИМВОЛОВ
- * ==========================================
- */
-
-const answerInput =
-    document.getElementById(
-        "answerInput"
-    );
-
-const answerCounter =
-    document.getElementById(
-        "answerCounter"
-    );
-
-const answerButton =
-    document.getElementById(
-        "answerButton"
-    );
-
-
-if (
-    answerInput &&
-    answerCounter &&
-    answerButton
-) {
-
-    answerInput.addEventListener(
-        "input",
-        function () {
-
-            const length =
-                answerInput.value.length;
-
-            answerCounter.textContent =
-                `${length} / 500`;
-
-            answerButton.disabled =
-                answerInput.value.trim().length === 0;
-        }
-    );
-}
-
-
-/*
- * ==========================================
- * ОТПРАВКА ОТВЕТА
- * ==========================================
- */
-
-function submitAnswer() {
-
-    if (!answerInput) {
-        return;
-    }
-
-    const text =
-        answerInput.value.trim();
-
-    if (!text) {
-        return;
-    }
-
-    if (text.length > 500) {
-        return;
-    }
-
-    const button =
-        document.getElementById(
-            "answerButton"
-        );
-
-    if (!button) {
-        return;
-    }
-
-    button.disabled = true;
-
-    console.log(
-        "Ответ подготовлен:",
-        text
-    );
-
-    finishSession();
-}
-
-
-/*
- * ==========================================
- * СЛЕДУЮЩИЕ 20:00
- * ==========================================
- */
-
-function getNext20() {
-
-    const now =
-        new Date();
-
-    const next =
-        new Date(now);
-
-    next.setHours(
-        20,
-        0,
-        0,
-        0
-    );
-
-    if (now >= next) {
-
-        next.setDate(
-            next.getDate() + 1
-        );
-    }
-
-    return next;
-}
-
-
-/*
- * ==========================================
- * ТАЙМЕР ДО СЛЕДУЮЩЕГО ОТКРЫТИЯ
- * ==========================================
- */
-
-function updateNextTimer() {
-
-    const timer =
-        document.getElementById(
-            "nextTimer"
-        );
-
-    if (!timer) {
-        return;
-    }
-
-    const now =
-        new Date();
-
-    const next =
-        getNext20();
-
-    const diff =
-        Math.max(
-            0,
-            next.getTime() -
-            now.getTime()
-        );
-
-    const hours =
-        Math.floor(
-            diff / 3600000
-        );
-
-    const minutes =
-        Math.floor(
-            (diff % 3600000) / 60000
-        );
-
-    const seconds =
-        Math.floor(
-            (diff % 60000) / 1000
-        );
-
-    timer.textContent =
-        `До следующего открытия: ${
-            String(hours).padStart(2, "0")
-        }:${
-            String(minutes).padStart(2, "0")
-        }:${
-            String(seconds).padStart(2, "0")
-        }`;
-}
-
-
-/*
- * ==========================================
- * ЗАКРЫТИЕ САЙТА
- * ==========================================
- */
-
-function finishSession() {
-
-    const activeScreen =
-        document.getElementById(
-            "activeScreen"
-        );
-
-    const closedScreen =
-        document.getElementById(
-            "closedScreen"
-        );
-
-    if (activeScreen) {
-
-        activeScreen.classList.add(
-            "closed"
-        );
-    }
-
-    if (closedScreen) {
-
-        closedScreen.classList.remove(
-            "closed"
-        );
-    }
-
-    updateNextTimer();
-}
-
-
-/*
- * ==========================================
- * ТАЙМЕР 15 МИНУТ
- * ==========================================
- */
-
-function updateSessionTimer() {
-
-    const state =
-        getSessionState();
-
-    if (!state.active) {
-
-        finishSession();
-
-        return;
-    }
-
-    const timer =
-        document.getElementById(
-            "sessionTimer"
-        );
-
-    if (!timer) {
-        return;
-    }
-
-    const remaining =
-        state.remaining;
-
-    const minutes =
-        Math.floor(
-            remaining / 60
-        );
-
-    const seconds =
-        remaining % 60;
-
-    timer.textContent =
-        `${String(minutes).padStart(2, "0")}:${
-            String(seconds).padStart(2, "0")
-        }`;
-}
-
-
-/*
- * ==========================================
- * ПРОВЕРКА НОВОГО ДНЯ
- * ==========================================
- */
-
-let currentProjectDay =
-    getProjectDay();
-
-
-function checkForNewDay() {
-
-    const newProjectDay =
-        getProjectDay();
-
-    if (
-        newProjectDay !== currentProjectDay &&
-        newProjectDay > 0
-    ) {
-
-        currentProjectDay =
-            newProjectDay;
-
-        loadQuestion();
-    }
-
-    if (!PROJECT_START_DATE) {
-
-        const state =
-            getSessionState();
-
-        if (
-            !state.active &&
-            !sessionStorage.getItem(
-                "antiShum_dev_day_changed"
-            )
-        ) {
-
-            sessionStorage.setItem(
-                "antiShum_dev_day_changed",
-                "true"
+            authScreen.classList.add(
+                "closed"
             );
 
-            moveToNextDevDay();
 
-            currentProjectDay =
-                getProjectDay();
+            profileScreen.classList.remove(
+                "closed"
+            );
+
+
+            const state =
+                getSessionState();
+
+
+            if (state.active) {
+
+                activeScreen.classList.remove(
+                    "closed"
+                );
+
+                closedScreen.classList.add(
+                    "closed"
+                );
+
+            } else {
+
+                finishSession();
+            }
+
 
             loadQuestion();
         }
-    }
-
-    const state =
-        getSessionState();
-
-    const activeScreen =
-        document.getElementById(
-            "activeScreen"
-        );
-
-    const closedScreen =
-        document.getElementById(
-            "closedScreen"
-        );
-
-    if (
-        state.active &&
-        activeScreen &&
-        closedScreen
-    ) {
-
-        activeScreen.classList.remove(
-            "closed"
-        );
-
-        closedScreen.classList.add(
-            "closed"
-        );
-    }
-}
 
 
-/*
- * ==========================================
- * ПЕРВЫЙ ЗАПУСК
- * ==========================================
- */
+        /*
+         * ==========================================
+         * ПОКАЗ АВТОРИЗАЦИИ
+         * ==========================================
+         */
 
-function initialize() {
+        function showAuth() {
 
-    loadQuestion();
-
-    const state =
-        getSessionState();
-
-    const activeScreen =
-        document.getElementById(
-            "activeScreen"
-        );
-
-    const closedScreen =
-        document.getElementById(
-            "closedScreen"
-        );
-
-    if (state.active) {
-
-        if (activeScreen) {
-
-            activeScreen.classList.remove(
+            authScreen.classList.remove(
                 "closed"
             );
-        }
 
-        if (closedScreen) {
+
+            profileScreen.classList.add(
+                "closed"
+            );
+
+
+            activeScreen.classList.add(
+                "closed"
+            );
+
 
             closedScreen.classList.add(
                 "closed"
             );
         }
 
-    } else {
 
-        finishSession();
+        /*
+         * ==========================================
+         * ТЕКУЩИЙ ДЕНЬ ПРОЕКТА
+         * ==========================================
+         */
+
+        function getProjectDay() {
+
+            if (!PROJECT_START_DATE) {
+
+                const savedDay =
+                    localStorage.getItem(
+                        DEV_DAY_KEY
+                    );
+
+
+                if (savedDay) {
+
+                    const parsedDay =
+                        Number(savedDay);
+
+
+                    if (
+                        Number.isInteger(parsedDay) &&
+                        parsedDay > 0
+                    ) {
+
+                        return parsedDay;
+                    }
+                }
+
+
+                return DEV_PROJECT_DAY;
+            }
+
+
+            const now =
+                new Date();
+
+
+            const start =
+                new Date(
+                    `${PROJECT_START_DATE}T20:00:00`
+                );
+
+
+            if (now < start) {
+                return 0;
+            }
+
+
+            const difference =
+                now.getTime() -
+                start.getTime();
+
+
+            const daysPassed =
+                Math.floor(
+                    difference / 86400000
+                );
+
+
+            return daysPassed + 1;
+        }
+
+
+        /*
+         * ==========================================
+         * ТЕСТОВЫЙ ДЕНЬ
+         * ==========================================
+         */
+
+        function getDevProjectDay() {
+
+            const savedDay =
+                localStorage.getItem(
+                    DEV_DAY_KEY
+                );
+
+
+            if (savedDay) {
+
+                const parsedDay =
+                    Number(savedDay);
+
+
+                if (
+                    Number.isInteger(parsedDay) &&
+                    parsedDay > 0
+                ) {
+
+                    return parsedDay;
+                }
+            }
+
+
+            return DEV_PROJECT_DAY;
+        }
+
+
+        /*
+         * ==========================================
+         * СЛЕДУЮЩИЙ ТЕСТОВЫЙ ДЕНЬ
+         * ==========================================
+         */
+
+        function moveToNextDevDay() {
+
+            if (PROJECT_START_DATE) {
+                return;
+            }
+
+
+            const currentDay =
+                getDevProjectDay();
+
+
+            const nextDay =
+                currentDay + 1;
+
+
+            localStorage.setItem(
+                DEV_DAY_KEY,
+                String(nextDay)
+            );
+
+
+            localStorage.setItem(
+                DEV_SESSION_KEY,
+                String(Date.now())
+            );
+
+
+            sessionStorage.removeItem(
+                "antiShum_dev_day_changed"
+            );
+        }
+
+
+        /*
+         * ==========================================
+         * ВРЕМЯ ОТКРЫТИЯ
+         * ==========================================
+         */
+
+        function getOpeningTime() {
+
+            if (!PROJECT_START_DATE) {
+
+                let saved =
+                    localStorage.getItem(
+                        DEV_SESSION_KEY
+                    );
+
+
+                if (!saved) {
+
+                    saved =
+                        String(Date.now());
+
+
+                    localStorage.setItem(
+                        DEV_SESSION_KEY,
+                        saved
+                    );
+                }
+
+
+                return Number(saved);
+            }
+
+
+            const now =
+                new Date();
+
+
+            const todayOpening =
+                new Date(now);
+
+
+            todayOpening.setHours(
+                20,
+                0,
+                0,
+                0
+            );
+
+
+            if (now < todayOpening) {
+
+                todayOpening.setDate(
+                    todayOpening.getDate() - 1
+                );
+            }
+
+
+            return todayOpening.getTime();
+        }
+
+
+        /*
+         * ==========================================
+         * СОСТОЯНИЕ СЕССИИ
+         * ==========================================
+         */
+
+        function getSessionState() {
+
+            const now =
+                Date.now();
+
+
+            const opening =
+                getOpeningTime();
+
+
+            const elapsed =
+                Math.floor(
+                    (now - opening) / 1000
+                );
+
+
+            const remaining =
+                SESSION_SECONDS -
+                elapsed;
+
+
+            return {
+
+                opening,
+
+                elapsed,
+
+                remaining,
+
+                active:
+                    elapsed >= 0 &&
+                    elapsed < SESSION_SECONDS
+            };
+        }
+
+
+        /*
+         * ==========================================
+         * ЗАЩИТА HTML
+         * ==========================================
+         */
+
+        function escapeHtml(text) {
+
+            return String(text)
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
+        }
+
+
+        /*
+         * ==========================================
+         * ЗАГРУЗКА ВОПРОСА
+         * ==========================================
+         */
+
+        async function loadQuestion() {
+
+            const questionElement =
+                document.getElementById(
+                    "questionText"
+                );
+
+
+            if (!questionElement) {
+                return;
+            }
+
+
+            questionElement.classList.remove(
+                "error"
+            );
+
+
+            questionElement.classList.add(
+                "loading"
+            );
+
+
+            questionElement.textContent =
+                "Загружаю вопрос...";
+
+
+            try {
+
+                const projectDay =
+                    getProjectDay();
+
+
+                if (projectDay === 0) {
+
+                    questionElement.textContent =
+                        "Анти-Шум ещё не начался.";
+
+
+                    questionElement.classList.remove(
+                        "loading"
+                    );
+
+
+                    return;
+                }
+
+
+                const response =
+                    await fetch(
+                        `${SUPABASE_URL}/rest/v1/questions?select=*&day=eq.${projectDay}`,
+                        {
+
+                            method: "GET",
+
+                            headers: {
+
+                                "apikey":
+                                    SUPABASE_KEY,
+
+                                "Authorization":
+                                    `Bearer ${SUPABASE_KEY}`
+                            }
+                        }
+                    );
+
+
+                const responseText =
+                    await response.text();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        `Supabase ${response.status}: ${responseText}`
+                    );
+                }
+
+
+                const data =
+                    JSON.parse(
+                        responseText
+                    );
+
+
+                if (!data.length) {
+
+                    throw new Error(
+                        `Вопрос для дня ${projectDay} не найден.`
+                    );
+                }
+
+
+                const question =
+                    data[0];
+
+
+                if (!question.question) {
+
+                    throw new Error(
+                        "У вопроса отсутствует текст."
+                    );
+                }
+
+
+                /*
+                 * Запоминаем UUID вопроса.
+                 * Он понадобится при сохранении
+                 * ответа.
+                 */
+
+                currentQuestionId =
+                    question.id;
+
+
+                questionElement.textContent =
+                    question.question;
+
+
+                questionElement.classList.remove(
+                    "loading"
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Ошибка загрузки вопроса:",
+                    error
+                );
+
+
+                questionElement.classList.remove(
+                    "loading"
+                );
+
+
+                questionElement.classList.add(
+                    "error"
+                );
+
+
+                questionElement.innerHTML = `
+
+                    <div class="error-title">
+                        Не удалось загрузить вопрос
+                    </div>
+
+                    <div class="error-details">
+                        ${escapeHtml(
+                            error.message
+                        )}
+                    </div>
+
+                `;
+            }
+        }
+
+
+        /*
+         * ==========================================
+         * СЧЁТЧИК СИМВОЛОВ
+         * ==========================================
+         */
+
+        if (
+            answerInput &&
+            answerCounter &&
+            answerButton
+        ) {
+
+            answerInput.addEventListener(
+                "input",
+                function () {
+
+                    const length =
+                        answerInput.value.length;
+
+
+                    answerCounter.textContent =
+                        `${length} / 500`;
+
+
+                    answerButton.disabled =
+                        answerInput.value
+                            .trim()
+                            .length === 0;
+                }
+            );
+        }
+
+
+        /*
+         * ==========================================
+         * ОТПРАВКА ОТВЕТА
+         * ==========================================
+         */
+
+        window.submitAnswer =
+            async function () {
+
+                if (!currentSession) {
+
+                    showAuth();
+
+                    return;
+                }
+
+
+                if (!answerInput) {
+                    return;
+                }
+
+
+                const text =
+                    answerInput.value.trim();
+
+
+                if (!text) {
+                    return;
+                }
+
+
+                if (text.length > 500) {
+                    return;
+                }
+
+
+                if (!currentQuestionId) {
+
+                    alert(
+                        "Вопрос ещё не загрузился."
+                    );
+
+                    return;
+                }
+
+
+                const button =
+                    document.getElementById(
+                        "answerButton"
+                    );
+
+
+                if (!button) {
+                    return;
+                }
+
+
+                button.disabled =
+                    true;
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            `${SUPABASE_URL}/rest/v1/answers`,
+                            {
+
+                                method: "POST",
+
+                                headers: {
+
+                                    "apikey":
+                                        SUPABASE_KEY,
+
+                                    "Authorization":
+                                        `Bearer ${currentSession.access_token}`,
+
+                                    "Content-Type":
+                                        "application/json",
+
+                                    "Prefer":
+                                        "return=minimal"
+                                },
+
+                                body:
+                                    JSON.stringify({
+
+                                        question_id:
+                                            currentQuestionId,
+
+                                        user_id:
+                                            currentSession
+                                                .user
+                                                .id,
+
+                                        answer_text:
+                                            text,
+
+                                        is_anonymous:
+                                            false,
+
+                                        reports_count:
+                                            0,
+
+                                        is_hidden:
+                                            false
+                                    })
+                            }
+                        );
+
+
+                    const responseText =
+                        await response.text();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            `Supabase ${response.status}: ${responseText}`
+                        );
+                    }
+
+
+                    answerInput.value = "";
+
+                    answerCounter.textContent =
+                        "0 / 500";
+
+
+                    finishSession();
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Ошибка сохранения ответа:",
+                        error
+                    );
+
+
+                    alert(
+                        "Не удалось отправить ответ.\n\n" +
+                        error.message
+                    );
+
+
+                    button.disabled =
+                        false;
+                }
+            };
+
+
+        /*
+         * ==========================================
+         * СЛЕДУЮЩИЕ 20:00
+         * ==========================================
+         */
+
+        function getNext20() {
+
+            const now =
+                new Date();
+
+
+            const next =
+                new Date(now);
+
+
+            next.setHours(
+                20,
+                0,
+                0,
+                0
+            );
+
+
+            if (now >= next) {
+
+                next.setDate(
+                    next.getDate() + 1
+                );
+            }
+
+
+            return next;
+        }
+
+
+        /*
+         * ==========================================
+         * ТАЙМЕР ДО 20:00
+         * ==========================================
+         */
+
+        function updateNextTimer() {
+
+            const timer =
+                document.getElementById(
+                    "nextTimer"
+                );
+
+
+            if (!timer) {
+                return;
+            }
+
+
+            const now =
+                new Date();
+
+
+            const next =
+                getNext20();
+
+
+            const diff =
+                Math.max(
+                    0,
+                    next.getTime() -
+                    now.getTime()
+                );
+
+
+            const hours =
+                Math.floor(
+                    diff / 3600000
+                );
+
+
+            const minutes =
+                Math.floor(
+                    (diff % 3600000) /
+                    60000
+                );
+
+
+            const seconds =
+                Math.floor(
+                    (diff % 60000) /
+                    1000
+                );
+
+
+            timer.textContent =
+                `До следующего открытия: ${
+                    String(hours)
+                        .padStart(2, "0")
+                }:${
+                    String(minutes)
+                        .padStart(2, "0")
+                }:${
+                    String(seconds)
+                        .padStart(2, "0")
+                }`;
+        }
+
+
+        /*
+         * ==========================================
+         * ЗАКРЫТИЕ САЙТА
+         * ==========================================
+         */
+
+        function finishSession() {
+
+            activeScreen.classList.add(
+                "closed"
+            );
+
+
+            closedScreen.classList.remove(
+                "closed"
+            );
+
+
+            updateNextTimer();
+        }
+
+
+        /*
+         * ==========================================
+         * ТАЙМЕР 15 МИНУТ
+         * ==========================================
+         */
+
+        function updateSessionTimer() {
+
+            if (!currentSession) {
+                return;
+            }
+
+
+            const state =
+                getSessionState();
+
+
+            if (!state.active) {
+
+                finishSession();
+
+                return;
+            }
+
+
+            const timer =
+                document.getElementById(
+                    "sessionTimer"
+                );
+
+
+            if (!timer) {
+                return;
+            }
+
+
+            const remaining =
+                state.remaining;
+
+
+            const minutes =
+                Math.floor(
+                    remaining / 60
+                );
+
+
+            const seconds =
+                remaining % 60;
+
+
+            timer.textContent =
+                `${String(minutes)
+                    .padStart(2, "0")
+                }:${
+                    String(seconds)
+                        .padStart(2, "0")
+                }`;
+        }
+
+
+        /*
+         * ==========================================
+         * ПРОВЕРКА НОВОГО ДНЯ
+         * ==========================================
+         */
+
+        let currentProjectDay =
+            getProjectDay();
+
+
+        function checkForNewDay() {
+
+            if (!currentSession) {
+                return;
+            }
+
+
+            const newProjectDay =
+                getProjectDay();
+
+
+            if (
+                newProjectDay !==
+                currentProjectDay &&
+                newProjectDay > 0
+            ) {
+
+                currentProjectDay =
+                    newProjectDay;
+
+
+                loadQuestion();
+            }
+
+
+            if (!PROJECT_START_DATE) {
+
+                const state =
+                    getSessionState();
+
+
+                if (
+                    !state.active &&
+                    !sessionStorage.getItem(
+                        "antiShum_dev_day_changed"
+                    )
+                ) {
+
+                    sessionStorage.setItem(
+                        "antiShum_dev_day_changed",
+                        "true"
+                    );
+
+
+                    moveToNextDevDay();
+
+
+                    currentProjectDay =
+                        getProjectDay();
+
+
+                    loadQuestion();
+                }
+            }
+
+
+            const state =
+                getSessionState();
+
+
+            if (
+                state.active &&
+                activeScreen &&
+                closedScreen
+            ) {
+
+                activeScreen.classList.remove(
+                    "closed"
+                );
+
+
+                closedScreen.classList.add(
+                    "closed"
+                );
+            }
+        }
+
+
+        /*
+         * ==========================================
+         * ПРОВЕРКА СЕССИИ SUPABASE
+         * ==========================================
+         */
+
+        async function initializeAuth() {
+
+            setDefaultAvatar();
+
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient
+                    .auth
+                    .getSession();
+
+
+            if (error) {
+
+                console.error(
+                    "Ошибка получения сессии:",
+                    error
+                );
+
+
+                showAuth();
+
+                return;
+            }
+
+
+            currentSession =
+                data.session;
+
+
+            if (currentSession) {
+
+                await loadUserProfile();
+
+                showApp();
+
+            } else {
+
+                showAuth();
+            }
+
+
+            /*
+             * Если пользователь вошёл
+             * или вышел в другой вкладке.
+             */
+
+            supabaseClient
+                .auth
+                .onAuthStateChange(
+                    async function (
+                        event,
+                        session
+                    ) {
+
+                        currentSession =
+                            session;
+
+
+                        if (session) {
+
+                            await loadUserProfile();
+
+                            showApp();
+
+                        } else {
+
+                            showAuth();
+                        }
+                    }
+                );
+        }
+
+
+        /*
+         * ==========================================
+         * ЗАПУСК
+         * ==========================================
+         */
+
+        updateAuthMode();
+
+        initializeAuth();
+
+
+        /*
+         * ==========================================
+         * ТАЙМЕРЫ
+         * ==========================================
+         */
+
+        setInterval(
+            updateSessionTimer,
+            1000
+        );
+
+
+        setInterval(
+            updateNextTimer,
+            1000
+        );
+
+
+        setInterval(
+            checkForNewDay,
+            1000
+        );
+
     }
-
-    updateSessionTimer();
-
-    updateNextTimer();
-}
-
-
-/*
- * ==========================================
- * ЗАПУСК
- * ==========================================
- */
-
-initialize();
-
-
-/*
- * ==========================================
- * ОБНОВЛЕНИЕ ТАЙМЕРА КАЖДУЮ СЕКУНДУ
- * ==========================================
- */
-
-setInterval(
-    updateSessionTimer,
-    1000
 );
 
-
-/*
- * ==========================================
- * ОБНОВЛЕНИЕ ТАЙМЕРА ДО СЛЕДУЮЩЕГО ДНЯ
- * ==========================================
- */
-
-setInterval(
-    updateNextTimer,
-    1000
-);
-
-
-/*
- * ==========================================
- * ПРОВЕРКА СМЕНЫ ДНЯ
- * ==========================================
- */
-
-setInterval(
-    checkForNewDay,
-    1000
-);
-
-});
 </script>
+
+</body>
+</html>
