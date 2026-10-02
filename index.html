@@ -2221,6 +2221,62 @@ async function initializeUser() {
     await loadTodayQuestionAndState();
 
     showInstallOption();
+
+
+    /* =====================================================
+       CHECK PUSH NOTIFICATIONS
+    ===================================================== */
+
+    if (enableNotificationsBtn) {
+
+        let pushEnabled = false;
+
+        try {
+
+            if (
+                "Notification" in window &&
+                Notification.permission === "granted" &&
+                "serviceWorker" in navigator &&
+                "PushManager" in window
+            ) {
+
+                const registration =
+                    await navigator.serviceWorker.ready;
+
+                const subscription =
+                    await registration.pushManager
+                        .getSubscription();
+
+                if (subscription) {
+
+                    pushEnabled = true;
+
+                }
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Анти-Шум: ошибка проверки Push:",
+                error
+            );
+
+        }
+
+        if (pushEnabled) {
+
+            enableNotificationsBtn.classList.add(
+                "hidden"
+            );
+
+        } else {
+
+            enableNotificationsBtn.classList.remove(
+                "hidden"
+            );
+
+        }
+    }
 }
 
 /* =========================================================
