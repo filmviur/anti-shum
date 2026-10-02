@@ -3848,8 +3848,14 @@ function createReactionButton(
         }
     );
 
-    return button;
-}
+  function createReactionButton(
+    text,
+    answerId,
+    reactionType,
+    count,
+    selected
+) {
+
     const button =
         document.createElement("button");
 
@@ -3859,9 +3865,14 @@ function createReactionButton(
     button.className =
         "reaction-btn";
 
-    button.textContent =
-        text;
+    if (selected) {
+        button.classList.add("selected");
+    }
 
+    button.textContent =
+        count > 0
+            ? `${text} ${count}`
+            : text;
 
     button.addEventListener(
         "click",
