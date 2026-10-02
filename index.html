@@ -3854,6 +3854,100 @@ function createReactionButton(
     return button;
 }
 
+async function toggleReaction(
+    answerId,
+    reactionType
+) {
+
+    const {
+        data: existing,
+        error: existingError
+    } =
+        await supabaseClient
+            .from("reactions")
+            .select(
+                "id, reaction_type"
+            )
+            .eq(
+                "answer_id",
+                answerId
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            )
+            .maybeSingle();
+
+    if (existingError) {
+        throw existingError;
+    }
+
+    if (
+        existing &&
+        existing.reaction_type ===
+            reactionType
+    ) {
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from("reactions")
+                .delete()
+                .eq(
+                    "id",
+                    existing.id
+                );
+
+        if (error) {
+            throw error;
+        }
+
+        return;
+    }
+
+    if (existing) {
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from("reactions")
+                .update({
+                    reaction_type:
+                        reactionType
+                })
+                .eq(
+                    "id",
+                    existing.id
+                );
+
+        if (error) {
+            throw error;
+        }
+
+        return;
+    }
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("reactions")
+            .insert({
+                answer_id:
+                    answerId,
+                user_id:
+                    currentUser.id,
+                reaction_type:
+                    reactionType
+            });
+
+    if (error) {
+        throw error;
+    }
+}
+    
 /* =========================================================
    SIGNED PHOTO
 ========================================================= */
