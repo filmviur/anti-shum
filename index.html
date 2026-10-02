@@ -3572,20 +3572,26 @@ async function loadFeed() {
                 "answer-actions";
 
 
-            const reaction1 =
-                createReactionButton(
-                    "🤍 Отозвалось"
-                );
+           const reaction1 =
+    createReactionButton(
+        "🤍 Отозвалось",
+        answer.id,
+        "felt"
+    );
 
-            const reaction2 =
-                createReactionButton(
-                    "🫂 Обнимаю"
-                );
+const reaction2 =
+    createReactionButton(
+        "🫂 Обнимаю",
+        answer.id,
+        "hug"
+    );
 
-            const reaction3 =
-                createReactionButton(
-                    "💡 Заставило задуматься"
-                );
+const reaction3 =
+    createReactionButton(
+        "💡 Заставило задуматься",
+        answer.id,
+        "think"
+    );
 
 
             actions.appendChild(
