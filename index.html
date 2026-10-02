@@ -3625,25 +3625,73 @@ if (answerIds.length) {
                 "answer-actions";
 
 
-        const reaction1 =
+       const answerReactions =
+    reactionsMap.get(answer.id) || [];
+
+const heartCount =
+    answerReactions.filter(
+        reaction =>
+            reaction.reaction_type === "heart"
+    ).length;
+
+const hugCount =
+    answerReactions.filter(
+        reaction =>
+            reaction.reaction_type === "hug"
+    ).length;
+
+const ideaCount =
+    answerReactions.filter(
+        reaction =>
+            reaction.reaction_type === "idea"
+    ).length;
+
+const heartSelected =
+    answerReactions.some(
+        reaction =>
+            reaction.user_id === currentUser.id &&
+            reaction.reaction_type === "heart"
+    );
+
+const hugSelected =
+    answerReactions.some(
+        reaction =>
+            reaction.user_id === currentUser.id &&
+            reaction.reaction_type === "hug"
+    );
+
+const ideaSelected =
+    answerReactions.some(
+        reaction =>
+            reaction.user_id === currentUser.id &&
+            reaction.reaction_type === "idea"
+    );
+
+const reaction1 =
     createReactionButton(
         "🤍 Отозвалось",
         answer.id,
-        "heart"
+        "heart",
+        heartCount,
+        heartSelected
     );
 
 const reaction2 =
     createReactionButton(
         "🫂 Обнимаю",
         answer.id,
-        "hug"
+        "hug",
+        hugCount,
+        hugSelected
     );
 
 const reaction3 =
     createReactionButton(
         "💡 Заставило задуматься",
         answer.id,
-        "idea"
+        "idea",
+        ideaCount,
+        ideaSelected
     );
 
 
