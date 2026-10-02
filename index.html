@@ -4967,6 +4967,7 @@ document
     );
 
 
+```js
 /* =========================================================
    SUPPORT
 ========================================================= */
@@ -4978,64 +4979,17 @@ document
     .forEach(
         button => {
 
-           button.addEventListener(
-    "click",
-    async function() {
+            button.addEventListener(
+                "click",
+                function() {
 
-        const reason =
-            button.dataset.reason;
-
-        if (
-            !currentReportAnswerId ||
-            !currentUser
-        ) {
-            return;
-        }
-
-        try {
-
-            const {
-                error
-            } =
-                await supabaseClient
-                    .from("reports")
-                    .insert({
-                        answer_id:
-                            currentReportAnswerId,
-                        user_id:
-                            currentUser.id,
-                        report_type:
-                            reason
-                    });
-
-            if (error) {
-                throw error;
-            }
-
-            reportModal.classList.add(
-                "hidden"
-            );
-
-            alert(
-                "Жалоба отправлена."
-            );
-
-            currentReportAnswerId =
-                null;
-
-        } catch (error) {
-
-            console.error(
-                "Report error:",
-                error
-            );
-
-            alert(
-                "Не удалось отправить жалобу."
+                    supportModal.classList.remove(
+                        "hidden"
+                    );
+                }
             );
         }
-    }
-);
+    );
 
 
 closeSupportBtn.addEventListener(
@@ -5047,6 +5001,8 @@ closeSupportBtn.addEventListener(
         );
     }
 );
+```
+
 
 
 /* =========================================================
