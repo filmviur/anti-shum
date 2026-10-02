@@ -3367,6 +3367,59 @@ async function loadFeed() {
         const answers =
             data || [];
 
+        const answerIds =
+    answers.map(
+        answer => answer.id
+    );
+
+let reactionsMap =
+    new Map();
+
+if (answerIds.length) {
+
+    const {
+        data: reactions,
+        error: reactionsError
+    } =
+        await supabaseClient
+            .from("reactions")
+            .select(
+                "answer_id, user_id, reaction_type"
+            )
+            .in(
+                "answer_id",
+                answerIds
+            );
+
+    if (reactionsError) {
+        throw reactionsError;
+    }
+
+    (reactions || []).forEach(
+        reaction => {
+
+            if (
+                !reactionsMap.has(
+                    reaction.answer_id
+                )
+            ) {
+
+                reactionsMap.set(
+                    reaction.answer_id,
+                    []
+                );
+            }
+
+            reactionsMap
+                .get(
+                    reaction.answer_id
+                )
+                .push(
+                    reaction
+                );
+        }
+    );
+}
 
         /*
             Получаем только пользователей,
