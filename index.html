@@ -5018,31 +5018,15 @@ function createAvatarPlaceholder(name) {
             .toUpperCase();
 
     const svg =
-        
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="100"
-            height="100"
-            viewBox="0 0 100 100"
-        >
-            <rect
-                width="100"
-                height="100"
-                rx="50"
-                fill="#25253b"
-            />
-            <text
-                x="50"
-                y="58"
-                text-anchor="middle"
-                font-size="42"
-                fill="#aaaaff"
-                font-family="Arial"
-            >
-                ${escapeHtml(first)}
-            </text>
-        </svg>
-    
+        '<svg xmlns="http://www.w3.org/2000/svg" ' +
+        'width="100" height="100" viewBox="0 0 100 100">' +
+        '<rect width="100" height="100" rx="50" ' +
+        'fill="#25253b"/>' +
+        '<text x="50" y="58" text-anchor="middle" ' +
+        'font-size="42" fill="#aaaaff" font-family="Arial">' +
+        escapeHtml(first) +
+        '</text>' +
+        '</svg>';
 
     return (
         "data:image/svg+xml;charset=UTF-8," +
@@ -5167,13 +5151,6 @@ function showInstallOption() {
         return;
     }
 
-
-    /*
-        Если приложение уже открыто
-        как установленное PWA —
-        предложение не показываем.
-    */
-
     const standalone =
         window.matchMedia(
             "(display-mode: standalone)"
@@ -5183,12 +5160,6 @@ function showInstallOption() {
     if (standalone) {
         return;
     }
-
-
-    /*
-        Android / Chrome:
-        есть реальный системный prompt.
-    */
 
     if (deferredInstallPrompt) {
 
@@ -5209,12 +5180,6 @@ function showInstallOption() {
 
         return;
     }
-
-
-    /*
-        iPhone / Safari:
-        beforeinstallprompt отсутствует.
-    */
 
     const isIOS =
         /iphone|ipad|ipod/i.test(
@@ -5272,4 +5237,3 @@ restoreSession();
 
 </body>
 </html>
-
