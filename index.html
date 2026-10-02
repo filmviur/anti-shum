@@ -3672,7 +3672,11 @@ async function loadFeed() {
 }
 
 
-function createReactionButton(text) {
+function createReactionButton(
+    text,
+    answerId,
+    reactionType
+) {
 
     const button =
         document.createElement("button");
@@ -3686,24 +3690,52 @@ function createReactionButton(text) {
     button.textContent =
         text;
 
-    /*
-        Пока только UI.
-        Когда будут известны реальные
-        поля reactions — подключим запись.
-    */
 
     button.addEventListener(
         "click",
-        function() {
+        async function() {
 
-            button.style.opacity =
-                "0.55";
+            if (
+                !currentUser ||
+                !answerId ||
+                !reactionType
+            ) {
+                return;
+            }
+
+            button.disabled =
+                true;
+
+            try {
+
+                await toggleReaction(
+                    answerId,
+                    reactionType
+                );
+
+                await loadFeed();
+
+            } catch (error) {
+
+                console.error(
+                    "Reaction error:",
+                    error
+                );
+
+                alert(
+                    "Не удалось сохранить реакцию."
+                );
+
+            } finally {
+
+                button.disabled =
+                    false;
+            }
         }
     );
 
     return button;
 }
-
 
 /* =========================================================
    SIGNED PHOTO
