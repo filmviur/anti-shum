@@ -3782,9 +3782,74 @@ const reaction3 =
 function createReactionButton(
     text,
     answerId,
-    reactionType
+    reactionType,
+    count,
+    selected
 ) {
 
+    const button =
+        document.createElement("button");
+
+    button.type =
+        "button";
+
+    button.className =
+        "reaction-btn";
+
+    if (selected) {
+        button.classList.add("selected");
+    }
+
+    button.textContent =
+        count > 0
+            ? `${text} ${count}`
+            : text;
+
+    button.addEventListener(
+        "click",
+        async function() {
+
+            if (
+                !currentUser ||
+                !answerId ||
+                !reactionType
+            ) {
+                return;
+            }
+
+            button.disabled =
+                true;
+
+            try {
+
+                await toggleReaction(
+                    answerId,
+                    reactionType
+                );
+
+                await loadFeed();
+
+            } catch (error) {
+
+                console.error(
+                    "Reaction error:",
+                    error
+                );
+
+                alert(
+                    "Не удалось сохранить реакцию."
+                );
+
+            } finally {
+
+                button.disabled =
+                    false;
+            }
+        }
+    );
+
+    return button;
+}
     const button =
         document.createElement("button");
 
