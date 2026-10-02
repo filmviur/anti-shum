@@ -2332,6 +2332,14 @@ async function enablePushNotifications() {
             "Анти-Шум: Push-подписка сохранена."
         );
 
+        if (enableNotificationsBtn) {
+
+            enableNotificationsBtn.classList.add(
+                "hidden"
+            );
+
+        }
+
     } catch (error) {
 
         console.error(
@@ -2386,6 +2394,20 @@ function urlBase64ToUint8Array(
     }
 
     return outputArray;
+}
+
+
+if (enableNotificationsBtn) {
+
+    enableNotificationsBtn.addEventListener(
+        "click",
+        async function() {
+
+            await enablePushNotifications();
+
+        }
+    );
+
 }
     
 /* =========================================================
