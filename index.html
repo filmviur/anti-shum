@@ -4932,31 +4932,55 @@ document
                     const reason =
                         button.dataset.reason;
 
-                    /*
-                        Точная запись в reports
-                        будет подключена после проверки
-                        реальных колонок таблицы reports.
-                    */
+                    if (
+                        !currentReportAnswerId ||
+                        !currentUser
+                    ) {
+                        return;
+                    }
 
-                    console.log(
-                        "Report:",
-                        {
-                            answerId:
-                                currentReportAnswerId,
-                            reason
+                    try {
+
+                        const {
+                            error
+                        } =
+                            await supabaseClient
+                                .from("reports")
+                                .insert({
+                                    answer_id:
+                                        currentReportAnswerId,
+                                    user_id:
+                                        currentUser.id,
+                                    report_type:
+                                        reason
+                                });
+
+                        if (error) {
+                            throw error;
                         }
-                    );
 
-                    reportModal.classList.add(
-                        "hidden"
-                    );
+                        reportModal.classList.add(
+                            "hidden"
+                        );
 
-                    alert(
-                        "Жалоба отправлена."
-                    );
+                        alert(
+                            "Жалоба отправлена."
+                        );
 
-                    currentReportAnswerId =
-                        null;
+                        currentReportAnswerId =
+                            null;
+
+                    } catch (error) {
+
+                        console.error(
+                            "Report error:",
+                            error
+                        );
+
+                        alert(
+                            "Не удалось отправить жалобу."
+                        );
+                    }
                 }
             );
         }
