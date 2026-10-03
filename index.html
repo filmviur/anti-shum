@@ -5206,29 +5206,21 @@ async function loadSupportMessages() {
     }
 }
 
+    
+supportBtn.addEventListener(
+    "click",
+    async function() {
 
-document
-    .querySelectorAll(
-        "#supportBtnQuestion, #supportBtnFeed"
-    )
-    .forEach(
-        button => {
+        supportModal.classList.remove(
+            "hidden"
+        );
 
-            button.addEventListener(
-                "click",
-                async function() {
+        await loadSupportMessages();
 
-                    supportModal.classList.remove(
-                        "hidden"
-                    );
+        supportInput.focus();
+    }
+);
 
-                    await loadSupportMessages();
-
-                    supportInput.focus();
-                }
-            );
-        }
-    );
 
 
 closeSupportBtn.addEventListener(
