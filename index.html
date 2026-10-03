@@ -446,11 +446,26 @@
 ========================= */
 
 .session-card {
+    position: relative;
+
     padding: 20px;
-    border-radius: 20px;
-    background: rgba(255,255,255,0.045);
-    border: 1px solid rgba(255,255,255,0.07);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(69, 50, 32, 0.82),
+            rgba(31, 24, 18, 0.96)
+        );
+
+    border: 1px solid rgba(183, 146, 88, 0.26);
+    border-radius: 6px;
+
     margin-bottom: 18px;
+
+    box-shadow:
+        0 14px 32px rgba(0, 0, 0, 0.38),
+        inset 0 1px 0 rgba(255, 220, 160, 0.05),
+        inset 0 0 35px rgba(0, 0, 0, 0.16);
 }
 
 .session-timer {
