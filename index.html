@@ -749,10 +749,69 @@
             display: none;
         }
 
+        ```css
         .support-text {
             color: #a8a8b8;
             line-height: 1.6;
         }
+
+        .support-messages {
+            max-height: 260px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            padding: 4px 2px;
+        }
+
+        .support-message {
+            max-width: 85%;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            line-height: 1.45;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: 14px;
+        }
+
+        .support-message-user {
+            margin-left: auto;
+            background: rgba(170,170,255,0.12);
+            border: 1px solid rgba(170,170,255,0.15);
+            color: #eeeeff;
+        }
+
+        .support-message-admin {
+            margin-right: auto;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #d8d8e8;
+        }
+
+        #supportInput {
+            width: 100%;
+            min-height: 90px;
+            box-sizing: border-box;
+            resize: vertical;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.04);
+            color: #ffffff;
+            border-radius: 12px;
+            padding: 11px 12px;
+            outline: none;
+            font: inherit;
+            line-height: 1.45;
+            margin-bottom: 12px;
+        }
+
+        #supportInput::placeholder {
+            color: #77778b;
+        }
+
+        #supportInput:focus {
+            border-color: rgba(170,170,255,0.35);
+            background: rgba(255,255,255,0.055);
+        }
+
 
         /* =========================
            INSTALL
