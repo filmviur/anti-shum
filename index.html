@@ -1346,7 +1346,7 @@
 
 </div>
 
-
+    
 <!-- SUPPORT MODAL -->
 <div
     id="supportModal"
@@ -1359,11 +1359,17 @@
             ❓ Поддержка
         </div>
 
-        <div class="support-text">
-            Если у тебя возникла проблема с «Анти-Шумом»,
-            напиши нам. Здесь будет подключена форма поддержки
-            и отправка сообщения владельцу проекта.
-        </div>
+        <div
+            id="supportMessages"
+            class="support-messages"
+        ></div>
+
+        <textarea
+            id="supportInput"
+            class="text-input"
+            maxlength="1000"
+            placeholder="Напиши, что случилось..."
+        ></textarea>
 
         <div class="modal-actions">
 
@@ -1373,6 +1379,14 @@
                 type="button"
             >
                 Закрыть
+            </button>
+
+            <button
+                id="sendSupportBtn"
+                class="primary-btn"
+                type="button"
+            >
+                Отправить
             </button>
 
         </div>
