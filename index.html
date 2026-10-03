@@ -1108,24 +1108,22 @@
 }
 
 #closedView .timer-digit {
-    display: inline-block;
+    position: relative;
 
-    min-width: 2ch;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 1ch;
+    height: 1em;
 
     text-align: center;
 
     overflow: hidden;
-}
 
-#closedView .timer-separator {
-    color: rgba(201, 168, 106, 0.62);
+    transform: translateY(0);
 
-    font-family:
-        Georgia,
-        "Times New Roman",
-        serif;
-
-    font-size: 0.85em;
+    flex: 0 0 auto;
 }
 
 
