@@ -5876,16 +5876,18 @@ function createAvatarPlaceholder(name) {
             .charAt(0)
             .toUpperCase();
 
-    const svg =
-        '<svg xmlns="http://www.w3.org/2000/svg" ' +
-        'width="100" height="100" viewBox="0 0 100 100">' +
-        '<rect width="100" height="100" rx="50" ' +
-        'fill="#25253b"/>' +
-        '<text x="50" y="58" text-anchor="middle" ' +
-        'font-size="42" fill="#aaaaff" font-family="Arial">' +
-        escapeHtml(first) +
-        '</text>' +
-        '</svg>';
+   const svg =
+    '<svg xmlns="http://www.w3.org/2000/svg" ' +
+    'width="100" height="100" viewBox="0 0 100 100">' +
+    '<rect width="100" height="100" rx="50" ' +
+    'fill="#3a2a1c"/>' +
+    '<circle cx="50" cy="50" r="47" ' +
+    'fill="none" stroke="#c9a86a" stroke-width="1.5" opacity="0.55"/>' +
+    '<text x="50" y="58" text-anchor="middle" ' +
+    'font-size="42" fill="#c9a86a" font-family="Georgia, serif">' +
+    escapeHtml(first) +
+    '</text>' +
+    '</svg>';
 
     return (
         "data:image/svg+xml;charset=UTF-8," +
