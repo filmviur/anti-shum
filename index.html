@@ -5052,6 +5052,89 @@ document
    SUPPORT
 ========================================================= */
 
+async function loadSupportMessages() {
+
+    if (!currentUser) {
+        return;
+    }
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("support_messages")
+                .select(
+                    "id, message_text, is_from_admin, created_at"
+                )
+                .eq(
+                    "user_id",
+                    currentUser.id
+                )
+                .order(
+                    "created_at",
+                    {
+                        ascending: true
+                    }
+                );
+
+        if (error) {
+            throw error;
+        }
+
+
+        supportMessages.innerHTML = "";
+
+
+        if (
+            !data ||
+            data.length === 0
+        ) {
+
+            return;
+        }
+
+
+        data.forEach(
+            message => {
+
+                const messageElement =
+                    document.createElement(
+                        "div"
+                    );
+
+                messageElement.className =
+                    message.is_from_admin
+                        ? "support-message support-message-admin"
+                        : "support-message support-message-user";
+
+
+                messageElement.textContent =
+                    message.message_text;
+
+
+                supportMessages.appendChild(
+                    messageElement
+                );
+            }
+        );
+
+
+        supportMessages.scrollTop =
+            supportMessages.scrollHeight;
+
+    } catch (error) {
+
+        console.error(
+            "Support load error:",
+            error
+        );
+    }
+}
+
+
 document
     .querySelectorAll(
         "#supportBtnQuestion, #supportBtnFeed"
@@ -5061,11 +5144,15 @@ document
 
             button.addEventListener(
                 "click",
-                function() {
+                async function() {
 
                     supportModal.classList.remove(
                         "hidden"
                     );
+
+                    await loadSupportMessages();
+
+                    supportInput.focus();
                 }
             );
         }
@@ -5083,9 +5170,88 @@ closeSupportBtn.addEventListener(
 );
 
 
+sendSupportBtn.addEventListener(
+    "click",
+    async function() {
+
+        if (!currentUser) {
+            return;
+        }
+
+
+        const message =
+            supportInput.value.trim();
+
+
+        if (!message) {
+
+            alert(
+                "Напиши сообщение."
+            );
+
+            return;
+        }
+
+
+        sendSupportBtn.disabled =
+            true;
+
+
+        try {
+
+            const {
+                error
+            } =
+                await supabaseClient
+                    .from("support_messages")
+                    .insert({
+                        user_id:
+                            currentUser.id,
+                        message_text:
+                            message,
+                        is_from_admin:
+                            false,
+                        is_read:
+                            false
+                    });
+
+
+            if (error) {
+                throw error;
+            }
+
+
+            supportInput.value =
+                "";
+
+
+            await loadSupportMessages();
+
+        } catch (error) {
+
+            console.error(
+                "Support send error:",
+                error
+            );
+
+            alert(
+                error?.message ||
+                "Не удалось отправить сообщение."
+            );
+
+        } finally {
+
+            sendSupportBtn.disabled =
+                false;
+        }
+    }
+);
+
+
 /* =========================================================
    AVATAR PLACEHOLDER
 ========================================================= */
+
 
 function createAvatarPlaceholder(name) {
 
