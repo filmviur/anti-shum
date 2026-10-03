@@ -4605,23 +4605,31 @@ function updateNextDayTimer() {
         totalSeconds % 60;
 
 
-   const hoursText =
-    String(hours).padStart(2, "0");
+    const hoursText =
+        String(hours).padStart(2, "0");
 
-const minutesText =
-    String(minutes).padStart(2, "0");
+    const minutesText =
+        String(minutes).padStart(2, "0");
 
-const secondsText =
-    String(seconds).padStart(2, "0");
+    const secondsText =
+        String(seconds).padStart(2, "0");
 
-document.getElementById("timerHours").textContent =
-    hoursText;
 
-document.getElementById("timerMinutes").textContent =
-    minutesText;
+    updateRetroDigit(
+        "timerHours",
+        hoursText
+    );
 
-document.getElementById("timerSeconds").textContent =
-    secondsText;
+    updateRetroDigit(
+        "timerMinutes",
+        minutesText
+    );
+
+    updateRetroDigit(
+        "timerSeconds",
+        secondsText
+    );
+
 
     /*
         Если наступило 20:00,
