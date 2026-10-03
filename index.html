@@ -4539,14 +4539,23 @@ function updateNextDayTimer() {
         totalSeconds % 60;
 
 
-    nextSessionTimer.textContent =
-        "До завтра: " +
-        String(hours).padStart(2, "0") +
-        ":" +
-        String(minutes).padStart(2, "0") +
-        ":" +
-        String(seconds).padStart(2, "0");
+   const hoursText =
+    String(hours).padStart(2, "0");
 
+const minutesText =
+    String(minutes).padStart(2, "0");
+
+const secondsText =
+    String(seconds).padStart(2, "0");
+
+document.getElementById("timerHours").textContent =
+    hoursText;
+
+document.getElementById("timerMinutes").textContent =
+    minutesText;
+
+document.getElementById("timerSeconds").textContent =
+    secondsText;
 
     /*
         Если наступило 20:00,
