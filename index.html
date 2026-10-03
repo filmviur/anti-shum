@@ -762,11 +762,40 @@
 }
 
 .own-answer-card {
-    padding: 15px;
-    border-radius: 15px;
-    border: 1px solid rgba(255,255,255,0.07);
-    background: rgba(255,255,255,0.035);
+    position: relative;
+
+    padding: 18px 20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(69, 50, 32, 0.82),
+            rgba(31, 24, 18, 0.96)
+        );
+
+    border: 1px solid rgba(183, 146, 88, 0.26);
+    border-radius: 6px;
+
     margin-bottom: 10px;
+
+    box-shadow:
+        0 10px 24px rgba(0, 0, 0, 0.32),
+        inset 0 1px 0 rgba(255, 220, 160, 0.05),
+        inset 0 0 30px rgba(0, 0, 0, 0.14);
+
+    overflow: hidden;
+}
+
+.own-answer-card::before {
+    content: "";
+
+    position: absolute;
+    inset: 8px;
+
+    border: 1px solid rgba(201, 168, 106, 0.08);
+    border-radius: 4px;
+
+    pointer-events: none;
 }
 
 .own-answer-date {
