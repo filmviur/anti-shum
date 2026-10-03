@@ -1166,13 +1166,61 @@
     }
 
     #closedView .next-session {
-        min-width: 190px;
-        padding: 14px 20px;
-        font-size: 25px;
-        letter-spacing: 0.08em;
+    min-width: 190px;
+    padding: 14px 20px;
+    font-size: 25px;
+    letter-spacing: 0.08em;
+}
+}
+
+/* =========================================================
+   РЕТРО-ПЕРЕЛИСТЫВАНИЕ ЦИФР
+========================================================= */
+
+#closedView .timer-digit {
+    position: relative;
+
+    display: inline-block;
+
+    min-width: 2ch;
+
+    text-align: center;
+
+    overflow: hidden;
+
+    transform: translateY(0);
+}
+
+#closedView .timer-digit.retro-digit-drop {
+    animation:
+        retroDigitDrop
+        0.42s
+        cubic-bezier(0.22, 0.75, 0.25, 1);
+}
+
+@keyframes retroDigitDrop {
+
+    0% {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+
+    45% {
+        opacity: 1;
+        transform: translateY(12%);
+    }
+
+    72% {
+        transform: translateY(-3%);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
-    </style>
+
+</style>
 </head>
 
 <body>
