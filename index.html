@@ -4699,18 +4699,35 @@ function updateNextDayTimer() {
 
 
     updateRetroDigit(
-        "timerHours",
-        hoursText
+        "timerHoursTens",
+        hoursText[0]
     );
 
     updateRetroDigit(
-        "timerMinutes",
-        minutesText
+        "timerHoursOnes",
+        hoursText[1]
+    );
+
+
+    updateRetroDigit(
+        "timerMinutesTens",
+        minutesText[0]
     );
 
     updateRetroDigit(
-        "timerSeconds",
-        secondsText
+        "timerMinutesOnes",
+        minutesText[1]
+    );
+
+
+    updateRetroDigit(
+        "timerSecondsTens",
+        secondsText[0]
+    );
+
+    updateRetroDigit(
+        "timerSecondsOnes",
+        secondsText[1]
     );
 
 
