@@ -1080,25 +1080,58 @@
 /* Сам таймер */
 
 #closedView .timer-display {
-#closedView .timer-digit {
-    position: relative;
+    display: flex !important;
 
-    display: inline-flex;
+    flex-direction: row !important;
+
     align-items: center;
     justify-content: center;
 
-    width: 1ch;
-    height: 1em;
+    flex-wrap: nowrap !important;
 
-    text-align: center;
+    gap: 8px;
 
-    overflow: hidden;
+    width: 100%;
 
-    transform: translateY(0);
+    color: #d9b56f;
+
+    font-family:
+        "Courier New",
+        "Lucida Console",
+        monospace;
+
+    font-size: clamp(29px, 5vw, 38px);
+    font-weight: 700;
+
+    line-height: 1;
+
+    letter-spacing: 0.08em;
+
+    font-variant-numeric: tabular-nums;
+
+    white-space: nowrap;
+
+    text-shadow:
+        0 1px 0 #000,
+        0 0 10px rgba(201, 168, 106, 0.12);
+}
+
+        #closedView .timer-group {
+    display: inline-flex !important;
+
+    flex-direction: row !important;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-wrap: nowrap !important;
+
+    gap: 0;
+
+    white-space: nowrap;
 
     flex: 0 0 auto;
 }
-
 
 /* Появление карточки */
 
