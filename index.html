@@ -862,7 +862,36 @@
    ========================================================= */
 
 #closedView {
+    position: fixed;
+    inset: 0;
+
+    width: 100vw;
+    height: 100vh;
     min-height: 100vh;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 30px 18px;
+
+    background:
+        radial-gradient(
+            circle at 50% 35%,
+            rgba(112, 82, 45, 0.14),
+            transparent 42%
+        ),
+        linear-gradient(
+            145deg,
+            #0d0b09 0%,
+            #15110d 48%,
+            #0b0a08 100%
+        );
+
+    overflow: auto;
+}
     box-sizing: border-box;
 
     display: flex;
