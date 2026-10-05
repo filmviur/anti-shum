@@ -9000,28 +9000,7 @@ confirmPasswordInput.addEventListener(
 );
 
 
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-logoutBtn.addEventListener(
-    "click",
-    async function() {
-
-        const confirmed =
-            confirm(
-                "Выйти из аккаунта?"
-            );
-
-        if (!confirmed) {
-            return;
-        }
-
-        clearTimers();
-
-        await supabaseClient.auth.signOut();
-    }
-);
+ LOGOUT
 
 
 /* =========================================================
