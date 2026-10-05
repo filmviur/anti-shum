@@ -8061,11 +8061,11 @@ function createReactionButton(
                     error
                 );
 
-                alert(
-                    "Не удалось сохранить реакцию."
-                );
+               showNotice(
+    "Не удалось сохранить реакцию."
+);
 
-            } finally {
+} finally {
 
                 button.disabled =
                     false;
