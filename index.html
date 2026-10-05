@@ -9168,40 +9168,40 @@ saveEmailBtn.addEventListener(
 
         if (!newEmail) {
 
-            alert(
-                "Введи новый email."
-            );
+            showNotice(
+    "Введи новый email."
+);
 
-            return;
-        }
-
-
-        if (
-            !newEmailInput.checkValidity()
-        ) {
-
-            alert(
-                "Введи корректный email."
-            );
-
-            newEmailInput.focus();
-
-            return;
-        }
+return;
+}
 
 
-        if (
-            currentUser?.email &&
-            newEmail ===
-                currentUser.email.toLowerCase()
-        ) {
+if (
+    !newEmailInput.checkValidity()
+) {
 
-            alert(
-                "Это уже твой текущий email."
-            );
+    showNotice(
+        "Введи корректный email."
+    );
 
-            return;
-        }
+    newEmailInput.focus();
+
+    return;
+}
+
+
+if (
+    currentUser?.email &&
+    newEmail ===
+        currentUser.email.toLowerCase()
+) {
+
+    showNotice(
+        "Это уже твой текущий email."
+    );
+
+    return;
+}
 
 
         try {
