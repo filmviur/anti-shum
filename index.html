@@ -1118,37 +1118,132 @@
 }
 
 
-/* Действия */
+/* Действия под записью */
 
 .answer-actions {
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
 
-    gap: 7px;
+    gap: 6px 14px;
 
-    margin-top: 14px;
-}
+    margin-top: 19px;
+    padding-top: 13px;
 
-.reaction-btn,
-.report-btn {
-    padding: 8px 10px;
-
-    border:
+    border-top:
         1px solid
-        rgba(255, 255, 255, 0.08);
-
-    border-radius: 12px;
-
-    color: #b7b7c6;
-
-    background:
-        rgba(255, 255, 255, 0.035);
-
-    font-size: 13px;
+        rgba(201, 168, 106, 0.10);
 }
+
+
+/* Реакции */
+
+.reaction-btn {
+    position: relative;
+
+    padding: 4px 2px;
+
+    border: none;
+    border-radius: 0;
+
+    background: transparent;
+
+    color: #9f9281;
+
+    font-family:
+        "Cormorant Garamond",
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    letter-spacing: 0.015em;
+
+    cursor: pointer;
+
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+/* Маленькая дневниковая отметка */
+
+.reaction-btn::before {
+    content: "·";
+
+    margin-right: 5px;
+
+    color:
+        rgba(201, 168, 106, 0.48);
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+}
+
+
+/* Наведение */
+
+.reaction-btn:hover {
+    color: #d2b476;
+
+    transform: translateY(-1px);
+}
+
+
+/* Выбранная реакция */
+
+.reaction-btn.active {
+    color: #d9b56f;
+}
+
+.reaction-btn.active::before {
+    content: "✦";
+
+    color: #d9b56f;
+
+    font-size: 9px;
+}
+
+
+/* Жалоба */
 
 .report-btn {
     margin-left: auto;
+
+    padding: 4px 2px;
+
+    border: none;
+    border-radius: 0;
+
+    background: transparent;
+
+    color: #776f66;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 12px;
+    font-weight: 400;
+
+    cursor: pointer;
+
+    opacity: 0.78;
+
+    transition:
+        color 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.report-btn:hover {
+    color: #aa8d68;
+    opacity: 1;
 }
 
 
@@ -1206,6 +1301,26 @@
 
     .session-timer::after {
         margin-left: 10px;
+    }
+
+
+    /* Реакции на телефоне */
+
+    .answer-actions {
+        gap: 7px 12px;
+    }
+
+    .reaction-btn {
+        font-size: 14px;
+    }
+
+    .report-btn {
+        width: 100%;
+
+        margin-left: 0;
+        margin-top: 3px;
+
+        text-align: right;
     }
 }
 
