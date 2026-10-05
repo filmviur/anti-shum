@@ -4877,6 +4877,34 @@ function startSessionTimer() {
 }
 
 
+function updateSessionDigit(id, value) {
+
+    const element =
+        document.getElementById(id);
+
+    if (!element) {
+        return;
+    }
+
+    if (element.textContent === value) {
+        return;
+    }
+
+    element.classList.remove(
+        "retro-digit-drop"
+    );
+
+    void element.offsetWidth;
+
+    element.textContent =
+        value;
+
+    element.classList.add(
+        "retro-digit-drop"
+    );
+}
+
+
 function updateSessionTimer() {
 
     if (!sessionEndsAt) {
