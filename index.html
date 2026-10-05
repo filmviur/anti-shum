@@ -4890,14 +4890,44 @@ function updateSessionTimer() {
             Date.now()
         );
 
-    const seconds =
+    const totalSeconds =
         Math.ceil(
             remaining / 1000
         );
 
-    sessionTimer.textContent =
-        formatTime(seconds);
+    const minutes =
+        Math.floor(
+            totalSeconds / 60
+        );
 
+    const seconds =
+        totalSeconds % 60;
+
+    const minutesText =
+        String(minutes).padStart(2, "0");
+
+    const secondsText =
+        String(seconds).padStart(2, "0");
+
+    updateSessionDigit(
+        "sessionMinutesTens",
+        minutesText[0]
+    );
+
+    updateSessionDigit(
+        "sessionMinutesOnes",
+        minutesText[1]
+    );
+
+    updateSessionDigit(
+        "sessionSecondsTens",
+        secondsText[0]
+    );
+
+    updateSessionDigit(
+        "sessionSecondsOnes",
+        secondsText[1]
+    );
 
     if (remaining <= 0) {
 
