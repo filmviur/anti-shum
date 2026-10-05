@@ -6998,20 +6998,22 @@ cameraBtn.addEventListener(
 
 async function openCamera() {
 
-    if (
-        !navigator.mediaDevices ||
-        !navigator.mediaDevices.getUserMedia
-    ) {
+   if (
+    !navigator.mediaDevices ||
+    !navigator.mediaDevices.getUserMedia
+) {
 
-       showNotice(
-    "Камера недоступна в этом браузере."
-);
+    showNotice(
+        "Камера недоступна в этом браузере."
+    );
 
-return;
-    try {
+    return;
+}
 
-        cameraStream =
-            await navigator.mediaDevices.getUserMedia({
+try {
+
+    cameraStream =
+        await navigator.mediaDevices.getUserMedia({
                 video: {
                     facingMode: {
                         ideal: "environment"
