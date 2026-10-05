@@ -8821,16 +8821,61 @@ newEmailInput.addEventListener(
 
 changePasswordBtn.addEventListener(
     "click",
+    function() {
+
+        newPasswordInput.value = "";
+        confirmPasswordInput.value = "";
+
+        passwordModal.classList.remove(
+            "hidden"
+        );
+
+        setTimeout(
+            function() {
+                newPasswordInput.focus();
+            },
+            50
+        );
+    }
+);
+
+
+cancelPasswordBtn.addEventListener(
+    "click",
+    function() {
+
+        passwordModal.classList.add(
+            "hidden"
+        );
+
+        newPasswordInput.value = "";
+        confirmPasswordInput.value = "";
+    }
+);
+
+
+savePasswordBtn.addEventListener(
+    "click",
     async function() {
 
         const password =
-            prompt(
-                "Введи новый пароль:"
-            );
+            newPasswordInput.value;
+
+        const confirmPassword =
+            confirmPasswordInput.value;
+
 
         if (!password) {
+
+            alert(
+                "Введи новый пароль."
+            );
+
+            newPasswordInput.focus();
+
             return;
         }
+
 
         if (password.length < 6) {
 
@@ -8838,24 +8883,70 @@ changePasswordBtn.addEventListener(
                 "Пароль должен содержать минимум 6 символов."
             );
 
+            newPasswordInput.focus();
+
             return;
         }
 
+
+        if (!confirmPassword) {
+
+            alert(
+                "Повтори новый пароль."
+            );
+
+            confirmPasswordInput.focus();
+
+            return;
+        }
+
+
+        if (
+            password !==
+            confirmPassword
+        ) {
+
+            alert(
+                "Пароли не совпадают."
+            );
+
+            confirmPasswordInput.focus();
+
+            return;
+        }
+
+
         try {
+
+            savePasswordBtn.disabled = true;
+
+            savePasswordBtn.textContent =
+                "Сохраняю...";
+
 
             const {
                 error
             } =
                 await supabaseClient.auth.updateUser({
-                    password
+                    password: password
                 });
+
 
             if (error) {
                 throw error;
             }
 
+
+            passwordModal.classList.add(
+                "hidden"
+            );
+
+            newPasswordInput.value = "";
+            confirmPasswordInput.value = "";
+
+
             alert(
-                "Пароль изменён."
+                "Пароль успешно изменён."
             );
 
         } catch (error) {
@@ -8869,6 +8960,41 @@ changePasswordBtn.addEventListener(
                 error?.message ||
                 "Не удалось изменить пароль."
             );
+
+        } finally {
+
+            savePasswordBtn.disabled = false;
+
+            savePasswordBtn.textContent =
+                "Сохранить";
+        }
+    }
+);
+
+
+newPasswordInput.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            confirmPasswordInput.focus();
+        }
+    }
+);
+
+
+confirmPasswordInput.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            savePasswordBtn.click();
         }
     }
 );
