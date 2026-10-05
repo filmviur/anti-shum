@@ -5691,6 +5691,70 @@ const enableNotificationsBtn =
     );
 
 /* =========================================================
+   NOTICE
+========================================================= */
+
+function showNotice(
+    message,
+    title = "АНТИ-ШУМ"
+) {
+
+    noticeTitle.textContent =
+        title;
+
+    noticeText.textContent =
+        String(message || "");
+
+    noticeModal.classList.remove(
+        "hidden"
+    );
+}
+
+
+function closeNotice() {
+
+    noticeModal.classList.add(
+        "hidden"
+    );
+}
+
+
+closeNoticeBtn.addEventListener(
+    "click",
+    closeNotice
+);
+
+
+noticeModal.addEventListener(
+    "click",
+    function(event) {
+
+        if (
+            event.target ===
+            noticeModal
+        ) {
+            closeNotice();
+        }
+    }
+);
+
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Escape" &&
+            !noticeModal.classList.contains(
+                "hidden"
+            )
+        ) {
+            closeNotice();
+        }
+    }
+);
+    
+/* =========================================================
    HELPERS
 ========================================================= */
 
