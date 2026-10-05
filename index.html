@@ -9003,21 +9003,21 @@ avatarInput.addEventListener(
 
             await loadProfile();
 
-            alert(
-                "Аватар изменён."
-            );
+           showNotice(
+    "Аватар изменён."
+);
 
-        } catch (error) {
+} catch (error) {
 
-            console.error(
-                "Avatar error:",
-                error
-            );
+    console.error(
+        "Avatar error:",
+        error
+    );
 
-            alert(
-                error?.message ||
-                "Не удалось изменить аватар."
-            );
+    showNotice(
+        error?.message ||
+        "Не удалось изменить аватар."
+    );
         }
     }
 );
