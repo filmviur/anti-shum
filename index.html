@@ -9422,11 +9422,10 @@ try {
                 error
             );
 
-            alert(
-                error?.message ||
-                "Не удалось изменить пароль."
-            );
-
+           showNotice(
+    error?.message ||
+    "Не удалось изменить пароль."
+);
         } finally {
 
             savePasswordBtn.disabled = false;
