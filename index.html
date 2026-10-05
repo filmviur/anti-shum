@@ -7255,17 +7255,19 @@ async function submitAnswer() {
         return;
     }
 
-    if (text.length > MAX_ANSWER_LENGTH) {
+   if (text.length > MAX_ANSWER_LENGTH) {
 
-       showNotice(
-    `Максимум ${MAX_ANSWER_LENGTH} символов.`
-);
+    showNotice(
+        `Максимум ${MAX_ANSWER_LENGTH} символов.`
+    );
 
-return;
-    sendAnswerBtn.disabled =
-        true;
+    return;
+}
 
-    try {
+sendAnswerBtn.disabled =
+    true;
+
+try {
 
         /*
             Повторно проверяем, нет ли уже ответа.
