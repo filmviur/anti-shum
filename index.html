@@ -925,60 +925,97 @@
 .answer-card {
     position: relative;
 
-    padding: 24px 22px;
+    padding: 27px 25px 24px 28px;
 
     background:
         linear-gradient(
-            145deg,
-            rgba(69, 50, 32, 0.82),
-            rgba(31, 24, 18, 0.96)
+            105deg,
+            rgba(55, 42, 30, 0.78),
+            rgba(36, 28, 21, 0.91)
         );
 
-    border:
-        1px solid
-        rgba(183, 146, 88, 0.26);
+    border: none;
 
-    border-radius: 6px;
+    border-left:
+        2px solid
+        rgba(201, 168, 106, 0.32);
+
+    border-radius: 2px;
 
     box-shadow:
-        0 14px 32px rgba(0, 0, 0, 0.38),
-        inset 0 1px 0 rgba(255, 220, 160, 0.05),
-        inset 0 0 35px rgba(0, 0, 0, 0.16);
+        0 8px 22px rgba(0, 0, 0, 0.24),
+        inset 0 1px 0 rgba(255, 222, 170, 0.035);
 
     overflow: hidden;
 }
+
+
+/* Тонкая декоративная линия слева */
 
 .answer-card::before {
     content: "";
 
     position: absolute;
 
-    inset: 9px;
+    left: 8px;
+    top: 15px;
+    bottom: 15px;
 
-    border:
-        1px solid
-        rgba(201, 168, 106, 0.09);
+    width: 1px;
 
-    border-radius: 4px;
+    background:
+        linear-gradient(
+            to bottom,
+            transparent,
+            rgba(201, 168, 106, 0.22) 20%,
+            rgba(201, 168, 106, 0.22) 80%,
+            transparent
+        );
 
     pointer-events: none;
 }
 
-.answer-card.mine {
-    border-color:
-        rgba(201, 168, 106, 0.34);
 
+/* Маленькая отметка записи */
+
+.answer-card::after {
+    content: "✦";
+
+    position: absolute;
+
+    top: 11px;
+    right: 14px;
+
+    color:
+        rgba(201, 168, 106, 0.23);
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 9px;
+
+    pointer-events: none;
+}
+
+
+/* Твой собственный ответ */
+
+.answer-card.mine {
     background:
         linear-gradient(
-            145deg,
-            rgba(69, 50, 32, 0.88),
-            rgba(31, 24, 18, 0.98)
+            105deg,
+            rgba(64, 48, 33, 0.82),
+            rgba(39, 30, 22, 0.93)
         );
 
+    border-left-color:
+        rgba(201, 168, 106, 0.55);
+
     box-shadow:
-        0 14px 32px rgba(0, 0, 0, 0.38),
-        inset 0 1px 0 rgba(255, 220, 160, 0.05),
-        inset 0 0 35px rgba(0, 0, 0, 0.16);
+        0 8px 22px rgba(0, 0, 0, 0.24),
+        inset 0 1px 0 rgba(255, 222, 170, 0.045);
 }
 
 
