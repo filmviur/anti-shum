@@ -8658,35 +8658,126 @@ saveNameBtn.addEventListener(
 
 changeEmailBtn.addEventListener(
     "click",
+    function() {
+
+        newEmailInput.value =
+            currentUser?.email || "";
+
+        emailModal.classList.remove(
+            "hidden"
+        );
+
+        setTimeout(
+            function() {
+                newEmailInput.focus();
+                newEmailInput.select();
+            },
+            50
+        );
+    }
+);
+
+
+cancelEmailBtn.addEventListener(
+    "click",
+    function() {
+
+        emailModal.classList.add(
+            "hidden"
+        );
+
+        newEmailInput.value = "";
+    }
+);
+
+
+saveEmailBtn.addEventListener(
+    "click",
     async function() {
 
         const newEmail =
-            prompt(
-                "Введи новый email:"
-            );
+            newEmailInput.value
+                .trim()
+                .toLowerCase();
 
         if (!newEmail) {
+
+            alert(
+                "Введи новый email."
+            );
+
             return;
         }
 
+
+        if (
+            !newEmailInput.checkValidity()
+        ) {
+
+            alert(
+                "Введи корректный email."
+            );
+
+            newEmailInput.focus();
+
+            return;
+        }
+
+
+        if (
+            currentUser?.email &&
+            newEmail ===
+                currentUser.email.toLowerCase()
+        ) {
+
+            alert(
+                "Это уже твой текущий email."
+            );
+
+            return;
+        }
+
+
         try {
 
+            saveEmailBtn.disabled = true;
+            saveEmailBtn.textContent =
+                "Сохраняю...";
+
+
             const {
+                data,
                 error
             } =
                 await supabaseClient.auth.updateUser({
-                    email:
-                        newEmail.trim()
+                    email: newEmail
                 });
+
 
             if (error) {
                 throw error;
             }
 
+
+            emailModal.classList.add(
+                "hidden"
+            );
+
+            newEmailInput.value = "";
+
+
+            if (data?.user) {
+                currentUser = data.user;
+            }
+
+
             alert(
                 "Запрос на изменение email отправлен. " +
-                "Проверь почту."
+                "Проверь почту и подтверди новый адрес."
             );
+
+
+            await loadProfile();
 
         } catch (error) {
 
@@ -8699,6 +8790,26 @@ changeEmailBtn.addEventListener(
                 error?.message ||
                 "Не удалось изменить email."
             );
+
+        } finally {
+
+            saveEmailBtn.disabled = false;
+            saveEmailBtn.textContent =
+                "Сохранить";
+        }
+    }
+);
+
+
+newEmailInput.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            saveEmailBtn.click();
         }
     }
 );
