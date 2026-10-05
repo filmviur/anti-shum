@@ -4967,13 +4967,176 @@
 
 </div>
 
-    <script>
+
+<!-- EMAIL MODAL -->
+<div
+    id="emailModal"
+    class="modal-backdrop hidden"
+>
+
+    <div class="modal">
+
+        <div class="modal-title">
+            Изменить email
+        </div>
+
+        <div class="field">
+
+            <label for="newEmailInput">
+                Новый email
+            </label>
+
+            <input
+                id="newEmailInput"
+                type="email"
+                autocomplete="email"
+                placeholder="example@email.com"
+            >
+
+        </div>
+
+        <div class="modal-actions">
+
+            <button
+                id="cancelEmailBtn"
+                class="secondary-btn"
+                type="button"
+            >
+                Отмена
+            </button>
+
+            <button
+                id="saveEmailBtn"
+                class="primary-btn"
+                type="button"
+            >
+                Сохранить
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- PASSWORD MODAL -->
+<div
+    id="passwordModal"
+    class="modal-backdrop hidden"
+>
+
+    <div class="modal">
+
+        <div class="modal-title">
+            Изменить пароль
+        </div>
+
+        <div class="field">
+
+            <label for="newPasswordInput">
+                Новый пароль
+            </label>
+
+            <input
+                id="newPasswordInput"
+                type="password"
+                minlength="6"
+                autocomplete="new-password"
+                placeholder="Минимум 6 символов"
+            >
+
+        </div>
+
+        <div class="field">
+
+            <label for="confirmPasswordInput">
+                Повтори пароль
+            </label>
+
+            <input
+                id="confirmPasswordInput"
+                type="password"
+                minlength="6"
+                autocomplete="new-password"
+                placeholder="Повтори новый пароль"
+            >
+
+        </div>
+
+        <div class="modal-actions">
+
+            <button
+                id="cancelPasswordBtn"
+                class="secondary-btn"
+                type="button"
+            >
+                Отмена
+            </button>
+
+            <button
+                id="savePasswordBtn"
+                class="primary-btn"
+                type="button"
+            >
+                Сохранить
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- LOGOUT MODAL -->
+<div
+    id="logoutModal"
+    class="modal-backdrop hidden"
+>
+
+    <div class="modal">
+
+        <div class="modal-title">
+            Выйти из аккаунта?
+        </div>
+
+        <div class="logout-modal-text">
+            Ты сможешь войти снова в любое время.
+        </div>
+
+        <div class="modal-actions">
+
+            <button
+                id="cancelLogoutBtn"
+                class="secondary-btn"
+                type="button"
+            >
+                Остаться
+            </button>
+
+            <button
+                id="confirmLogoutBtn"
+                class="primary-btn"
+                type="button"
+            >
+                Выйти
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
 "use strict";
-        
+
+
 /* =========================================================
    SUPABASE
 ========================================================= */
-
 const SUPABASE_URL =
     "https://mkyendzqoohqcwnycuys.supabase.co";
 
