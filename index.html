@@ -1080,6 +1080,8 @@
 /* Текст ответа */
 
 .answer-text {
+    position: relative;
+
     color: #ded2c2;
 
     font-family:
@@ -1088,30 +1090,48 @@
         serif;
 
     font-size: 16px;
-    line-height: 1.65;
+    font-weight: 400;
 
-    letter-spacing: 0.01em;
+    line-height: 1.72;
+    letter-spacing: 0.012em;
 
     white-space: pre-wrap;
     word-break: break-word;
 }
 
 
-/* Фото */
+/* Фото в дневниковой записи */
 
 .answer-photo {
     display: block;
 
-    width: 100%;
+    width: calc(100% - 8px);
     max-height: 520px;
 
-    margin-top: 14px;
+    margin:
+        20px auto
+        5px;
+
+    box-sizing: border-box;
 
     object-fit: contain;
 
-    border-radius: 14px;
+    padding: 6px;
 
-    background: #050509;
+    background:
+        rgba(218, 202, 174, 0.90);
+
+    border:
+        1px solid
+        rgba(201, 168, 106, 0.22);
+
+    border-radius: 2px;
+
+    box-shadow:
+        0 5px 14px rgba(0, 0, 0, 0.32),
+        0 1px 0 rgba(255, 255, 255, 0.12);
+
+    transform: rotate(-0.35deg);
 
     user-select: none;
     -webkit-user-drag: none;
