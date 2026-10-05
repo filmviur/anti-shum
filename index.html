@@ -9237,25 +9237,25 @@ if (
             }
 
 
-            alert(
-                "Запрос на изменение email отправлен. " +
-                "Проверь почту и подтверди новый адрес."
-            );
+           showNotice(
+    "Запрос на изменение email отправлен. " +
+    "Проверь почту и подтверди новый адрес."
+);
 
 
-            await loadProfile();
+await loadProfile();
 
-        } catch (error) {
+} catch (error) {
 
-            console.error(
-                "Email change error:",
-                error
-            );
+    console.error(
+        "Email change error:",
+        error
+    );
 
-            alert(
-                error?.message ||
-                "Не удалось изменить email."
-            );
+    showNotice(
+        error?.message ||
+        "Не удалось изменить email."
+    );
 
         } finally {
 
