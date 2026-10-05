@@ -631,6 +631,12 @@
 }
 
 .session-timer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+
     text-align: center;
 
     margin-bottom: 16px;
@@ -650,10 +656,45 @@
     letter-spacing: 0.08em;
     font-variant-numeric: tabular-nums;
 
+    white-space: nowrap;
+
     text-shadow:
         0 1px 0 #000,
         0 0 10px rgba(201, 168, 106, 0.12);
 }
+
+.session-timer-group {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    gap: 0;
+
+    white-space: nowrap;
+}
+
+.session-timer-digit {
+    position: relative;
+
+    display: inline-block;
+
+    min-width: 1ch;
+
+    text-align: center;
+    overflow: hidden;
+
+    transform: translateY(0);
+}
+
+.session-timer-separator {
+    display: inline-block;
+
+    margin: 0 3px;
+
+    color: #d9b56f;
+}
+
 .session-question {
     color: #c2c2d0;
     font-size: 16px;
