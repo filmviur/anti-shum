@@ -721,59 +721,68 @@
 /* Левый орнамент */
 
 .session-question::before {
-    content: "❦";
+    content: "──  ❦";
 
     position: absolute;
 
-    left: 8px;
+    left: -62px;
     top: 50%;
 
     transform:
-        translateY(-50%)
-        rotate(-18deg);
+        translateY(-50%);
 
-    color: rgba(201, 168, 106, 0.48);
+    color: rgba(201, 168, 106, 0.46);
 
     font-family:
         Georgia,
         "Times New Roman",
         serif;
 
-    font-size: 25px;
+    font-size: 19px;
     font-weight: 400;
 
+    letter-spacing: 0.08em;
+
+    white-space: nowrap;
+
     text-shadow:
-        0 0 8px rgba(201, 168, 106, 0.10);
+        0 0 8px rgba(201, 168, 106, 0.08);
+
+    pointer-events: none;
 }
 
 
 /* Правый орнамент */
 
 .session-question::after {
-    content: "❦";
+    content: "❦  ──";
 
     position: absolute;
 
-    right: 8px;
+    right: -62px;
     top: 50%;
 
     transform:
-        translateY(-50%)
-        scaleX(-1)
-        rotate(-18deg);
+        translateY(-50%);
 
-    color: rgba(201, 168, 106, 0.48);
+    color: rgba(201, 168, 106, 0.46);
 
     font-family:
         Georgia,
         "Times New Roman",
         serif;
 
-    font-size: 25px;
+    font-size: 19px;
     font-weight: 400;
 
+    letter-spacing: 0.08em;
+
+    white-space: nowrap;
+
     text-shadow:
-        0 0 8px rgba(201, 168, 106, 0.10);
+        0 0 8px rgba(201, 168, 106, 0.08);
+
+    pointer-events: none;
 }
 
 
