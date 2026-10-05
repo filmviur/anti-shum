@@ -997,7 +997,7 @@
     position: relative;
 
     margin-top: 20px;
-    padding: 18px;
+    padding: 20px 18px 18px;
 
     border:
         1px solid
@@ -1037,10 +1037,28 @@
     pointer-events: none;
 }
 
+
+/* Заголовок */
+
 .photo-title {
-    margin-bottom: 12px;
-    font-weight: 700;
+    margin-bottom: 13px;
+
+    color: #bda270;
+
+    font-family:
+        "Cormorant Garamond",
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    letter-spacing: 0.035em;
 }
+
+
+/* Кнопки выбора фотографии */
 
 .photo-buttons {
     display: flex;
@@ -1048,26 +1066,65 @@
     gap: 9px;
 }
 
+
+/* Область предпросмотра */
+
 .photo-preview {
-    margin-top: 14px;
     position: relative;
+
+    margin-top: 17px;
+    padding-top: 15px;
+
+    border-top:
+        1px solid
+        rgba(201, 168, 106, 0.11);
 }
+
+
+/* Фотография как вклеенный снимок */
 
 .photo-preview img {
     display: block;
-    width: 100%;
+
+    width: calc(100% - 8px);
     max-height: 400px;
+
+    box-sizing: border-box;
+
+    margin: 0 auto;
+
+    padding: 6px;
+
     object-fit: contain;
-    border-radius: 14px;
-    background: #050509;
+
+    background:
+        rgba(218, 202, 174, 0.90);
+
+    border:
+        1px solid
+        rgba(201, 168, 106, 0.22);
+
+    border-radius: 2px;
+
+    box-shadow:
+        0 5px 14px rgba(0, 0, 0, 0.32),
+        0 1px 0 rgba(255, 255, 255, 0.12);
+
+    transform: rotate(-0.25deg);
 }
+
+
+/* Действия с выбранной фотографией */
 
 .photo-preview-actions {
     display: flex;
-    gap: 8px;
-    margin-top: 10px;
-}
+    align-items: center;
+    justify-content: flex-end;
 
+    gap: 8px;
+
+    margin-top: 12px;
+}
 
 /* =========================
    FEED
