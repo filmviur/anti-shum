@@ -3570,128 +3570,128 @@
     </div>
 
     <div class="top-bar">
-
         <div></div>
 
         <div class="top-actions">
+        </div>
+    </div>
+
+    <div class="question-screen">
+
+        <div class="question-label">
+            ВОПРОС ДНЯ
+        </div>
+
+        <div
+            id="questionText"
+            class="question-text"
+        >
+            Загрузка...
+        </div>
+
+        <!-- ФОТО -->
+        <div
+            id="photoSection"
+            class="photo-section hidden"
+        >
+
+            <div class="photo-title">
+                📷 Добавь фотографию
+            </div>
+
+            <div class="photo-buttons">
+
+                <button
+                    id="cameraBtn"
+                    class="secondary-btn"
+                    type="button"
+                >
+                    Сделать фото сейчас
+                </button>
+
+                <button
+                    id="galleryBtn"
+                    class="secondary-btn"
+                    type="button"
+                >
+                    Загрузить из галереи
+                </button>
+
+                <input
+                    id="galleryInput"
+                    type="file"
+                    accept="image/*"
+                    class="hidden"
+                >
+
+            </div>
+
+            <div
+                id="selectedPhotoPreview"
+                class="photo-preview hidden"
+            >
+
+                <img
+                    id="selectedPhotoImg"
+                    alt="Предпросмотр фотографии"
+                >
+
+                <div class="photo-preview-actions">
+
+                    <button
+                        id="retakePhotoBtn"
+                        class="secondary-btn"
+                        type="button"
+                    >
+                        🔄 Переснять
+                    </button>
+
+                    <button
+                        id="confirmPhotoBtn"
+                        class="secondary-btn"
+                        type="button"
+                    >
+                        ✅ Подтвердить и прикрепить
+                    </button>
 
                 </div>
 
-                <div class="question-screen">
+            </div>
 
-                    <div class="question-label">
-                        ВОПРОС ДНЯ
-                    </div>
+        </div>
 
-                    <div
-                        id="questionText"
-                        class="question-text"
-                    >
-                        Загрузка...
-                    </div>
+        <!-- ОТВЕТ -->
+        <div class="answer-box">
 
-                    <div
-                        id="photoSection"
-                        class="photo-section hidden"
-                    >
+            <textarea
+                id="answerInput"
+                class="answer-textarea"
+                maxlength="500"
+                placeholder="Изложи свою мысль..."
+            ></textarea>
 
-                        <div class="photo-title">
-                            📷 Добавь фотографию
-                        </div>
+            <button
+                id="sendAnswerBtn"
+                class="send-answer-btn"
+                type="button"
+                title="Сохранить мысль"
+                disabled
+            >
+                ✎ Сохранить мысль
+            </button>
 
-                        <div class="photo-buttons">
+        </div>
 
-                            <button
-                                id="cameraBtn"
-                                class="secondary-btn"
-                                type="button"
-                            >
-                                Сделать фото сейчас
-                            </button>
+        <div
+            id="answerCounter"
+            class="answer-counter"
+        >
+            0 / 500
+        </div>
 
-                            <button
-                                id="galleryBtn"
-                                class="secondary-btn"
-                                type="button"
-                            >
-                                Загрузить из галереи
-                            </button>
+    </div>
 
-                            <input
-                                id="galleryInput"
-                                type="file"
-                                accept="image/*"
-                                class="hidden"
-                            >
-
-                        </div>
-
-                        <div
-                            id="selectedPhotoPreview"
-                            class="photo-preview hidden"
-                        >
-
-                            <img
-                                id="selectedPhotoImg"
-                                alt="Предпросмотр фотографии"
-                            >
-
-                            <div class="photo-preview-actions">
-
-                                <button
-                                    id="retakePhotoBtn"
-                                    class="secondary-btn"
-                                    type="button"
-                                >
-                                    🔄 Переснять
-                                </button>
-
-                                <button
-                                    id="confirmPhotoBtn"
-                                    class="secondary-btn"
-                                    type="button"
-                                >
-                                    ✅ Подтвердить и прикрепить
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="answer-box">
-
-                        <textarea
-                            id="answerInput"
-                            class="answer-textarea"
-                            maxlength="500"
-                            placeholder="Изложи свою мысль..."
-                        ></textarea>
-
-                       <button
-    id="sendAnswerBtn"
-    class="send-answer-btn"
-    type="button"
-    title="Сохранить мысль"
-    disabled
->
-    ✎ Сохранить мысль
-</button>
-
-                    </div>
-
-                    <div
-                        id="answerCounter"
-                        class="answer-counter"
-                    >
-                        0 / 500
-                    </div>
-
-                </div>
-
-            </section>
-
+</section>
 
 <!-- FEED VIEW -->
 <section
