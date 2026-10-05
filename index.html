@@ -1982,43 +1982,131 @@
     display: none;
 }
 
+/* =========================
+   SUPPORT
+========================= */
+
 .support-text {
-    color: #a8a8b8;
-    line-height: 1.6;
+    color: #9d9182;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 14px;
+    line-height: 1.65;
 }
+
+
+/* История переписки */
 
 .support-messages {
-    max-height: 260px;
+    max-height: 280px;
+
     overflow-y: auto;
-    margin-bottom: 12px;
-    padding: 4px 2px;
+
+    margin-bottom: 14px;
+    padding: 8px 4px;
 }
 
+
+/* Общее оформление сообщения */
+
 .support-message {
-    max-width: 85%;
-    padding: 10px 12px;
-    margin-bottom: 8px;
-    border-radius: 12px;
-    line-height: 1.45;
+    position: relative;
+
+    max-width: 84%;
+
+    box-sizing: border-box;
+
+    padding: 12px 15px;
+
+    margin-bottom: 11px;
+
+    border-radius: 2px;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 14px;
+    line-height: 1.55;
+
     white-space: pre-wrap;
     word-break: break-word;
-    font-size: 14px;
+
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.18);
 }
+
+
+/* Сообщение пользователя */
 
 .support-message-user {
     margin-left: auto;
-    background: rgba(170,170,255,0.12);
-    border: 1px solid rgba(170,170,255,0.15);
-    color: #eeeeff;
+
+    background:
+        linear-gradient(
+            105deg,
+            rgba(65, 48, 32, 0.82),
+            rgba(42, 32, 23, 0.94)
+        );
+
+    border:
+        1px solid
+        rgba(201, 168, 106, 0.22);
+
+    border-right:
+        2px solid
+        rgba(201, 168, 106, 0.48);
+
+    color: #ded2c2;
 }
+
+
+/* Сообщение от Анти-Шума */
 
 .support-message-admin {
     margin-right: auto;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #d8d8e8;
+
+    background:
+        linear-gradient(
+            105deg,
+            rgba(42, 35, 27, 0.88),
+            rgba(27, 23, 18, 0.96)
+        );
+
+    border:
+        1px solid
+        rgba(201, 168, 106, 0.14);
+
+    border-left:
+        2px solid
+        rgba(201, 168, 106, 0.42);
+
+    color: #d3c6b5;
 }
 
+
+/* Маленькая отметка у ответа Анти-Шума */
+
+.support-message-admin::before {
+    content: "✦";
+
+    position: absolute;
+
+    top: 5px;
+    right: 7px;
+
+    color:
+        rgba(201, 168, 106, 0.24);
+
+    font-size: 8px;
+
+    pointer-events: none;
+}
 #supportInput {
     width: 100%;
     min-height: 90px;
