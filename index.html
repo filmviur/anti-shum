@@ -7003,13 +7003,11 @@ async function openCamera() {
         !navigator.mediaDevices.getUserMedia
     ) {
 
-        alert(
-            "Камера недоступна в этом браузере."
-        );
+       showNotice(
+    "Камера недоступна в этом браузере."
+);
 
-        return;
-    }
-
+return;
     try {
 
         cameraStream =
@@ -7036,10 +7034,10 @@ async function openCamera() {
             error
         );
 
-        alert(
-            "Не удалось открыть камеру. " +
-            "Проверь разрешение камеры в браузере."
-        );
+showNotice(
+    "Не удалось открыть камеру. " +
+    "Проверь разрешение камеры в браузере."
+);
     }
 }
 
