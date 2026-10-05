@@ -9528,7 +9528,7 @@ confirmLogoutBtn.addEventListener(
                 error
             );
 
-            alert(
+            showNotice(
                 error?.message ||
                 "Не удалось выйти из аккаунта."
             );
@@ -9632,7 +9632,7 @@ document
                             error
                         );
 
-                        alert(
+                        showNotice(
                             "Не удалось отправить жалобу."
                         );
                     }
@@ -9771,7 +9771,7 @@ sendSupportBtn.addEventListener(
 
         if (!message) {
 
-            alert(
+            showNotice(
                 "Напиши сообщение."
             );
 
@@ -9820,7 +9820,7 @@ sendSupportBtn.addEventListener(
                 error
             );
 
-            alert(
+            showNotice(
                 error?.message ||
                 "Не удалось отправить сообщение."
             );
