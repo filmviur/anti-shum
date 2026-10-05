@@ -9000,7 +9000,83 @@ confirmPasswordInput.addEventListener(
 );
 
 
- LOGOUT
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+logoutBtn.addEventListener(
+    "click",
+    function() {
+
+        logoutModal.classList.remove(
+            "hidden"
+        );
+    }
+);
+
+
+cancelLogoutBtn.addEventListener(
+    "click",
+    function() {
+
+        logoutModal.classList.add(
+            "hidden"
+        );
+    }
+);
+
+
+confirmLogoutBtn.addEventListener(
+    "click",
+    async function() {
+
+        try {
+
+            confirmLogoutBtn.disabled = true;
+
+            confirmLogoutBtn.textContent =
+                "Выхожу...";
+
+
+            clearTimers();
+
+
+            const {
+                error
+            } =
+                await supabaseClient.auth.signOut();
+
+
+            if (error) {
+                throw error;
+            }
+
+
+            logoutModal.classList.add(
+                "hidden"
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Logout error:",
+                error
+            );
+
+            alert(
+                error?.message ||
+                "Не удалось выйти из аккаунта."
+            );
+
+        } finally {
+
+            confirmLogoutBtn.disabled = false;
+
+            confirmLogoutBtn.textContent =
+                "Выйти";
+        }
+    }
+);
 
 
 /* =========================================================
