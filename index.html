@@ -7397,13 +7397,13 @@ return;
             error
         );
 
-        alert(
-            "Не удалось сохранить ответ.\n\n" +
-            (
-                error?.message ||
-                "Попробуй ещё раз."
-            )
-        );
+       showNotice(
+    "Не удалось сохранить ответ.\n\n" +
+    (
+        error?.message ||
+        "Попробуй ещё раз."
+    )
+);
 
         updateSendButton();
     }
