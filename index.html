@@ -8443,23 +8443,29 @@ async function initializeUser() {
     await loadProfile();
 
 
-    /*
-        Проверяем новые ответы поддержки.
-        Если есть непрочитанный ответ
-        администратора, возле кнопки
-        поддержки появится индикатор.
-    */
+/*
+    Проверяем уже существующие
+    непрочитанные ответы поддержки.
+*/
 
-    await checkSupportNotifications();
+await checkSupportNotifications();
 
 
-    /*
-        Загружаем вопрос дня
-        и текущее состояние приложения.
-    */
+/*
+    Запускаем Realtime-подписку.
+    Новые ответы поддержки будут
+    появляться без обновления страницы.
+*/
 
-    await loadTodayQuestionAndState();
+await startSupportRealtime();
 
+
+/*
+    Загружаем вопрос дня
+    и текущее состояние приложения.
+*/
+
+await loadTodayQuestionAndState();
 
     showInstallOption();
 
