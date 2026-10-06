@@ -8871,9 +8871,7 @@ async function getQuestionText(questionId) {
     } =
         await supabaseClient
             .from("questions")
-            .select(
-                "question, text, question_text"
-            )
+            .select("question")
             .eq(
                 "id",
                 questionId
@@ -8894,12 +8892,9 @@ async function getQuestionText(questionId) {
 
     return (
         data?.question ||
-        data?.text ||
-        data?.question_text ||
         "Вопрос"
     );
 }
-
 
 /* =========================================================
    AVATAR
