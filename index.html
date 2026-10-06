@@ -9996,6 +9996,50 @@ adminBackBtn.addEventListener(
     }
 );
 
+/* =========================
+   ADMIN NAVIGATION
+========================= */
+
+adminNavButtons.forEach(
+    function(button) {
+
+        button.addEventListener(
+            "click",
+            function() {
+
+                const sectionName =
+                    button.dataset.adminSection;
+
+
+                adminNavButtons.forEach(
+                    function(item) {
+
+                        item.classList.toggle(
+                            "active",
+                            item === button
+                        );
+                    }
+                );
+
+
+                adminSections.forEach(
+                    function(section) {
+
+                        const isCurrentSection =
+                            section.dataset.adminContent ===
+                            sectionName;
+
+                        section.classList.toggle(
+                            "hidden",
+                            !isCurrentSection
+                        );
+                    }
+                );
+            }
+        );
+    }
+);
+    
 /* =========================================================
    OWN ANSWERS
 ========================================================= */
