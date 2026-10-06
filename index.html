@@ -9168,18 +9168,29 @@ async function loadProfile() {
             "";
 
 
-        if (data?.avatar_url) {
+        currentAvatarUrl =
+    data?.avatar_url ||
+    null;
 
-            profileAvatar.src =
-                data.avatar_url;
 
-        } else {
+if (currentAvatarUrl) {
 
-            profileAvatar.src =
-                createAvatarPlaceholder(
-                    displayName
-                );
-        }
+    profileAvatar.src =
+        currentAvatarUrl;
+
+} else {
+
+    profileAvatar.src =
+        createAvatarPlaceholder(
+            displayName
+        );
+}
+
+
+deleteAvatarMenuBtn.classList.toggle(
+    "hidden",
+    !currentAvatarUrl
+);
 
 
         if (
