@@ -10611,7 +10611,7 @@ deleteAvatarMenuBtn.classList.toggle(
     }
 }
 
-    /* =========================================================
+   /* =========================================================
    ADMIN PANEL
 ========================================================= */
 
@@ -10638,6 +10638,7 @@ adminBackBtn.addEventListener(
     }
 );
 
+
 /* =========================
    ADMIN NAVIGATION
 ========================= */
@@ -10647,7 +10648,7 @@ adminNavButtons.forEach(
 
         button.addEventListener(
             "click",
-            function() {
+            async function() {
 
                 const sectionName =
                     button.dataset.adminSection;
@@ -10677,10 +10678,372 @@ adminNavButtons.forEach(
                         );
                     }
                 );
+
+
+                if (
+                    sectionName === "support"
+                ) {
+
+                    await loadAdminSupportConversations();
+                }
             }
         );
     }
 );
+
+
+/* =========================
+   ADMIN SUPPORT
+========================= */
+
+async function loadAdminSupportConversations() {
+
+    if (!currentUser) {
+        return;
+    }
+
+
+    adminSupportConversations.innerHTML =
+        `
+            <div class="admin-support-placeholder">
+                Загрузка обращений...
+            </div>
+        `;
+
+
+    try {
+
+        /*
+            Загружаем все сообщения поддержки.
+            Свежие сообщения идут первыми.
+        */
+
+        const {
+            data: messages,
+            error: messagesError
+        } =
+            await supabaseClient
+                .from("support_messages")
+                .select(
+                    "id, user_id, message_text, is_from_admin, is_read, created_at"
+                )
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                );
+
+
+        if (messagesError) {
+            throw messagesError;
+        }
+
+
+        if (
+            !messages ||
+            messages.length === 0
+        ) {
+
+            adminSupportConversations.innerHTML =
+                `
+                    <div class="admin-support-placeholder">
+                        Пока нет обращений.
+                    </div>
+                `;
+
+            return;
+        }
+
+
+        /*
+            Собираем уникальные ID пользователей,
+            которые писали в поддержку.
+        */
+
+        const userIds =
+            [
+                ...new Set(
+                    messages.map(
+                        message =>
+                            message.user_id
+                    )
+                )
+            ];
+
+
+        /*
+            Загружаем данные пользователей.
+        */
+
+        const {
+            data: users,
+            error: usersError
+        } =
+            await supabaseClient
+                .from("users")
+                .select(
+                    "id, display_name, email"
+                )
+                .in(
+                    "id",
+                    userIds
+                );
+
+
+        if (usersError) {
+            throw usersError;
+        }
+
+
+        const usersById =
+            new Map();
+
+
+        (
+            users ||
+            []
+        ).forEach(
+            user => {
+
+                usersById.set(
+                    user.id,
+                    user
+                );
+            }
+        );
+
+
+        /*
+            Группируем сообщения
+            в отдельные диалоги.
+        */
+
+        const conversations =
+            new Map();
+
+
+        messages.forEach(
+            message => {
+
+                if (
+                    !conversations.has(
+                        message.user_id
+                    )
+                ) {
+
+                    conversations.set(
+                        message.user_id,
+                        {
+                            userId:
+                                message.user_id,
+
+                            lastMessage:
+                                message,
+
+                            unreadCount:
+                                0
+                        }
+                    );
+                }
+
+
+                const conversation =
+                    conversations.get(
+                        message.user_id
+                    );
+
+
+                /*
+                    Считаем только непрочитанные
+                    сообщения от пользователя.
+                */
+
+                if (
+                    message.is_from_admin === false &&
+                    message.is_read === false
+                ) {
+
+                    conversation.unreadCount +=
+                        1;
+                }
+            }
+        );
+
+
+        adminSupportConversations.innerHTML =
+            "";
+
+
+        /*
+            Map сохраняет порядок сообщений.
+            Поскольку запрос был от новых к старым,
+            свежие диалоги также будут сверху.
+        */
+
+        conversations.forEach(
+            conversation => {
+
+                const user =
+                    usersById.get(
+                        conversation.userId
+                    );
+
+
+                const displayName =
+                    user?.display_name ||
+                    "Пользователь";
+
+
+                const lastText =
+                    conversation.lastMessage
+                        ?.message_text ||
+                    "";
+
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                item.className =
+                    "admin-support-conversation";
+
+
+                item.dataset.userId =
+                    conversation.userId;
+
+
+                /*
+                    Имя
+                */
+
+                const name =
+                    document.createElement(
+                        "div"
+                    );
+
+                name.className =
+                    "admin-support-conversation-name";
+
+                name.textContent =
+                    displayName;
+
+
+                /*
+                    Последнее сообщение
+                */
+
+                const preview =
+                    document.createElement(
+                        "div"
+                    );
+
+                preview.className =
+                    "admin-support-conversation-preview";
+
+                preview.textContent =
+                    lastText;
+
+
+                item.appendChild(
+                    name
+                );
+
+                item.appendChild(
+                    preview
+                );
+
+
+                /*
+                    Счётчик непрочитанных.
+                */
+
+                if (
+                    conversation.unreadCount > 0
+                ) {
+
+                    const unread =
+                        document.createElement(
+                            "div"
+                        );
+
+                    unread.className =
+                        "admin-support-unread";
+
+                    unread.textContent =
+                        conversation.unreadCount;
+
+                    item.appendChild(
+                        unread
+                    );
+                }
+
+
+                /*
+                    Пока только запоминаем,
+                    какой диалог выбран.
+
+                    Саму переписку подключим
+                    следующим шагом.
+                */
+
+                item.addEventListener(
+                    "click",
+                    function() {
+
+                        selectedSupportUserId =
+                            conversation.userId;
+
+
+                        document
+                            .querySelectorAll(
+                                ".admin-support-conversation"
+                            )
+                            .forEach(
+                                conversationElement => {
+
+                                    conversationElement
+                                        .classList
+                                        .remove(
+                                            "active"
+                                        );
+                                }
+                            );
+
+
+                        item.classList.add(
+                            "active"
+                        );
+                    }
+                );
+
+
+                adminSupportConversations
+                    .appendChild(
+                        item
+                    );
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Admin support conversations error:",
+            error
+        );
+
+
+        adminSupportConversations.innerHTML =
+            `
+                <div class="admin-support-placeholder">
+                    Не удалось загрузить обращения.
+                </div>
+            `;
+    }
+}
     
 /* =========================================================
    OWN ANSWERS
