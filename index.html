@@ -10198,7 +10198,48 @@ editAvatarMenuBtn.addEventListener(
     }
 );
 
+deleteAvatarMenuBtn.addEventListener(
+    "click",
+    function() {
 
+        editProfileModal.classList.add(
+            "hidden"
+        );
+
+        deleteAvatarModal.classList.remove(
+            "hidden"
+        );
+    }
+);
+
+
+cancelDeleteAvatarBtn.addEventListener(
+    "click",
+    function() {
+
+        deleteAvatarModal.classList.add(
+            "hidden"
+        );
+    }
+);
+
+
+deleteAvatarModal.addEventListener(
+    "click",
+    function(event) {
+
+        if (
+            event.target ===
+            deleteAvatarModal
+        ) {
+
+            deleteAvatarModal.classList.add(
+                "hidden"
+            );
+        }
+    }
+);
+    
 editNameMenuBtn.addEventListener(
     "click",
     function() {
