@@ -9278,6 +9278,98 @@ avatarInput.addEventListener(
     }
 );
 
+    /* =========================================================
+   EDIT PROFILE MENU
+========================================================= */
+
+editProfileBtn.addEventListener(
+    "click",
+    function() {
+
+        editProfileModal.classList.remove(
+            "hidden"
+        );
+    }
+);
+
+
+closeEditProfileBtn.addEventListener(
+    "click",
+    function() {
+
+        editProfileModal.classList.add(
+            "hidden"
+        );
+    }
+);
+
+
+editProfileModal.addEventListener(
+    "click",
+    function(event) {
+
+        if (
+            event.target ===
+            editProfileModal
+        ) {
+            editProfileModal.classList.add(
+                "hidden"
+            );
+        }
+    }
+);
+
+
+editAvatarMenuBtn.addEventListener(
+    "click",
+    function() {
+
+        editProfileModal.classList.add(
+            "hidden"
+        );
+
+        changeAvatarBtn.click();
+    }
+);
+
+
+editNameMenuBtn.addEventListener(
+    "click",
+    function() {
+
+        editProfileModal.classList.add(
+            "hidden"
+        );
+
+        changeNameBtn.click();
+    }
+);
+
+
+editEmailMenuBtn.addEventListener(
+    "click",
+    function() {
+
+        editProfileModal.classList.add(
+            "hidden"
+        );
+
+        changeEmailBtn.click();
+    }
+);
+
+
+editPasswordMenuBtn.addEventListener(
+    "click",
+    function() {
+
+        editProfileModal.classList.add(
+            "hidden"
+        );
+
+        changePasswordBtn.click();
+    }
+);
 
 /* =========================================================
    CHANGE NAME
