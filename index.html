@@ -5562,7 +5562,176 @@
 
 </section>
 
-        
+<!-- ADMIN PANEL -->
+<section
+    id="adminView"
+    class="admin-screen hidden"
+>
+
+    <div class="admin-header">
+
+        <button
+            id="adminBackBtn"
+            class="back-btn"
+            type="button"
+        >
+            ← Назад
+        </button>
+
+        <div class="admin-title">
+            АДМИН-ПАНЕЛЬ
+        </div>
+
+    </div>
+
+
+    <div class="admin-nav">
+
+        <button
+            class="admin-nav-btn active"
+            type="button"
+            data-admin-section="moderation"
+        >
+            Модерация
+        </button>
+
+        <button
+            class="admin-nav-btn"
+            type="button"
+            data-admin-section="users"
+        >
+            Пользователи
+        </button>
+
+        <button
+            class="admin-nav-btn"
+            type="button"
+            data-admin-section="support"
+        >
+            Поддержка
+        </button>
+
+        <button
+            class="admin-nav-btn"
+            type="button"
+            data-admin-section="questions"
+        >
+            Вопросы
+        </button>
+
+        <button
+            class="admin-nav-btn"
+            type="button"
+            data-admin-section="stats"
+        >
+            Статистика
+        </button>
+
+    </div>
+
+
+    <div class="admin-content">
+
+
+        <!-- MODERATION -->
+        <div
+            id="adminModerationSection"
+            class="admin-section"
+            data-admin-content="moderation"
+        >
+
+            <div class="admin-section-title">
+                МОДЕРАЦИЯ
+            </div>
+
+            <div class="admin-empty">
+                Здесь будут ответы, жалобы
+                и инструменты модерации.
+            </div>
+
+        </div>
+
+
+        <!-- USERS -->
+        <div
+            id="adminUsersSection"
+            class="admin-section hidden"
+            data-admin-content="users"
+        >
+
+            <div class="admin-section-title">
+                ПОЛЬЗОВАТЕЛИ
+            </div>
+
+            <div class="admin-empty">
+                Здесь будет список пользователей
+                и управление их статусом.
+            </div>
+
+        </div>
+
+
+        <!-- SUPPORT -->
+        <div
+            id="adminSupportSection"
+            class="admin-section hidden"
+            data-admin-content="support"
+        >
+
+            <div class="admin-section-title">
+                ПОДДЕРЖКА
+            </div>
+
+            <div class="admin-empty">
+                Здесь будут обращения пользователей
+                и ответы от поддержки.
+            </div>
+
+        </div>
+
+
+        <!-- QUESTIONS -->
+        <div
+            id="adminQuestionsSection"
+            class="admin-section hidden"
+            data-admin-content="questions"
+        >
+
+            <div class="admin-section-title">
+                ВОПРОСЫ
+            </div>
+
+            <div class="admin-empty">
+                Здесь будет управление
+                вопросами проекта.
+            </div>
+
+        </div>
+
+
+        <!-- STATISTICS -->
+        <div
+            id="adminStatsSection"
+            class="admin-section hidden"
+            data-admin-content="stats"
+        >
+
+            <div class="admin-section-title">
+                СТАТИСТИКА
+            </div>
+
+            <div class="admin-empty">
+                Здесь появится статистика
+                проекта.
+            </div>
+
+        </div>
+
+
+    </div>
+
+</section>
+    
 <!-- CLOSED -->
 <section
     id="closedView"
