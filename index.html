@@ -6102,15 +6102,20 @@ function getNext20Timestamp() {
 
 function questionNeedsPhoto(question) {
 
-    return Boolean(
-        question?.requires_photo ||
-        question?.photo_required ||
-        question?.needs_photo ||
-        question?.requiresPhoto ||
-        question?.photo_question
+    if (!question) {
+        return false;
+    }
+
+    const photoDays = [
+        5,
+        15,
+        23
+    ];
+
+    return photoDays.includes(
+        Number(question.day)
     );
 }
-
 
 /* =========================================================
    AUTH
