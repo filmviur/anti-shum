@@ -3381,7 +3381,6 @@
     cursor: grab;
 
     touch-action: none;
-
     user-select: none;
 }
 
@@ -3401,7 +3400,6 @@
     max-height: none;
 
     pointer-events: none;
-
     user-select: none;
 
     transform-origin: center center;
@@ -3469,6 +3467,231 @@
     margin-top: 24px;
 }
 
+
+/* =========================
+   AVATAR CROP BUTTONS
+========================= */
+
+#avatarCropModal .modal-actions button {
+    min-width: 145px;
+    min-height: 44px;
+
+    padding: 10px 18px;
+
+    border-radius: 10px;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 15px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+/* Отмена */
+
+#cancelAvatarCropBtn {
+    border:
+        1px solid
+        rgba(201, 168, 106, 0.24);
+
+    background:
+        rgba(201, 168, 106, 0.04);
+
+    color: #b8aa97;
+}
+
+
+#cancelAvatarCropBtn:hover {
+    border-color:
+        rgba(201, 168, 106, 0.42);
+
+    background:
+        rgba(201, 168, 106, 0.08);
+
+    color: #ddd0bb;
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* Сохранить фото */
+
+#saveAvatarCropBtn {
+    border:
+        1px solid
+        rgba(201, 168, 106, 0.58);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(201, 168, 106, 0.18),
+            rgba(201, 168, 106, 0.09)
+        );
+
+    color: #d9bb82;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+
+#saveAvatarCropBtn:hover {
+    border-color:
+        rgba(201, 168, 106, 0.82);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(201, 168, 106, 0.25),
+            rgba(201, 168, 106, 0.12)
+        );
+
+    color: #ead19f;
+
+    transform:
+        translateY(-1px);
+}
+
+
+#saveAvatarCropBtn:disabled {
+    opacity: 0.55;
+    cursor: default;
+    transform: none;
+}
+
+
+/* =========================
+   DELETE AVATAR MODAL
+========================= */
+
+#deleteAvatarModal .modal {
+    width: min(420px, 100%);
+}
+
+
+#deleteAvatarModal .modal-title {
+    color: #d5bd8e;
+}
+
+
+#deleteAvatarModal .modal-text {
+    margin-top: 12px;
+
+    color: #a99d8d;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 15px;
+    line-height: 1.6;
+    text-align: center;
+}
+
+
+#deleteAvatarModal .modal-actions {
+    margin-top: 24px;
+}
+
+
+#deleteAvatarModal .modal-actions button {
+    min-width: 130px;
+    min-height: 44px;
+
+    padding: 10px 18px;
+
+    border-radius: 10px;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 15px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+/* Отмена удаления */
+
+#cancelDeleteAvatarBtn {
+    border:
+        1px solid
+        rgba(201, 168, 106, 0.24);
+
+    background:
+        rgba(201, 168, 106, 0.04);
+
+    color: #b8aa97;
+}
+
+
+#cancelDeleteAvatarBtn:hover {
+    border-color:
+        rgba(201, 168, 106, 0.42);
+
+    background:
+        rgba(201, 168, 106, 0.08);
+
+    color: #ddd0bb;
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* Удалить */
+
+#confirmDeleteAvatarBtn {
+    border:
+        1px solid
+        rgba(142, 74, 67, 0.58);
+
+    background:
+        rgba(110, 48, 43, 0.16);
+
+    color: #c98d83;
+}
+
+
+#confirmDeleteAvatarBtn:hover {
+    border-color:
+        rgba(164, 88, 79, 0.82);
+
+    background:
+        rgba(125, 55, 49, 0.26);
+
+    color: #dda097;
+
+    transform:
+        translateY(-1px);
+}
+
+
+#confirmDeleteAvatarBtn:disabled {
+    opacity: 0.55;
+    cursor: default;
+    transform: none;
+}
 /* =========================
    EDIT PROFILE MODAL — MOBILE
 ========================= */
