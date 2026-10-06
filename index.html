@@ -13220,7 +13220,132 @@ document
         }
     );
 
+/* =========================================================
+   SUPPORT REALTIME
+========================================================= */
 
+async function startSupportRealtime() {
+
+    if (!currentUser) {
+        return;
+    }
+
+
+    /*
+        Если старая подписка уже существует,
+        сначала удаляем её.
+    */
+
+    if (supportRealtimeChannel) {
+
+        try {
+
+            await supabaseClient.removeChannel(
+                supportRealtimeChannel
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Support Realtime remove error:",
+                error
+            );
+        }
+
+
+        supportRealtimeChannel = null;
+    }
+
+
+    /*
+        Слушаем новые сообщения поддержки
+        только для текущего пользователя.
+    */
+
+    supportRealtimeChannel =
+        supabaseClient
+            .channel(
+                `support-${currentUser.id}`
+            )
+            .on(
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "support_messages",
+                    filter:
+                        `user_id=eq.${currentUser.id}`
+                },
+                async function(payload) {
+
+                    const message =
+                        payload.new;
+
+
+                    if (!message) {
+                        return;
+                    }
+
+
+                    /*
+                        Если пришёл новый ответ
+                        от администратора.
+                    */
+
+                    if (
+                        message.is_from_admin === true
+                    ) {
+
+                        /*
+                            Если окно поддержки
+                            сейчас закрыто —
+                            показываем золотую точку.
+                        */
+
+                        if (
+                            supportModal.classList.contains(
+                                "hidden"
+                            )
+                        ) {
+
+                            supportNotificationBadge
+                                ?.classList
+                                .remove(
+                                    "hidden"
+                                );
+
+                        } else {
+
+                            /*
+                                Если пользователь уже
+                                смотрит переписку —
+                                сразу обновляем сообщения
+                                и считаем ответ прочитанным.
+                            */
+
+                            await loadSupportMessages();
+
+                            await markSupportMessagesAsRead();
+                        }
+                    }
+                }
+            )
+            .subscribe(
+                function(status) {
+
+                    if (
+                        status ===
+                        "SUBSCRIBED"
+                    ) {
+
+                        console.log(
+                            "Анти-Шум: Support Realtime подключён."
+                        );
+                    }
+                }
+            );
+}
+    
 /* =========================================================
    SUPPORT
 ========================================================= */
