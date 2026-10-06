@@ -10140,6 +10140,105 @@ window.addEventListener(
         updateAvatarCrop();
     }
 );
+
+/* =========================
+   DELETE AVATAR
+========================= */
+
+confirmDeleteAvatarBtn.addEventListener(
+    "click",
+    async function() {
+
+        if (!currentUser) {
+            return;
+        }
+
+        try {
+
+            confirmDeleteAvatarBtn.disabled =
+                true;
+
+            confirmDeleteAvatarBtn.textContent =
+                "Удаляю...";
+
+
+            const path =
+                `${currentUser.id}/avatar.jpg`;
+
+
+            const {
+                error: deleteError
+            } =
+                await supabaseClient.storage
+                    .from("avatars")
+                    .remove([
+                        path
+                    ]);
+
+
+            if (deleteError) {
+                throw deleteError;
+            }
+
+
+            const {
+                error: updateError
+            } =
+                await supabaseClient
+                    .from("users")
+                    .update({
+                        avatar_url: null
+                    })
+                    .eq(
+                        "id",
+                        currentUser.id
+                    );
+
+
+            if (updateError) {
+                throw updateError;
+            }
+
+
+            currentAvatarUrl =
+                null;
+
+
+            deleteAvatarModal.classList.add(
+                "hidden"
+            );
+
+
+            await loadProfile();
+
+
+            showNotice(
+                "Фото профиля удалено."
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Delete avatar error:",
+                error
+            );
+
+            showNotice(
+                error?.message ||
+                "Не удалось удалить фото."
+            );
+
+        } finally {
+
+            confirmDeleteAvatarBtn.disabled =
+                false;
+
+            confirmDeleteAvatarBtn.textContent =
+                "Удалить";
+        }
+    }
+);
+    
     /* =========================================================
    EDIT PROFILE MENU
 ========================================================= */
