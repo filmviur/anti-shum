@@ -10098,12 +10098,16 @@ editProfileBtn.addEventListener(
     "click",
     function() {
 
+        deleteAvatarMenuBtn.classList.toggle(
+            "hidden",
+            !currentAvatarUrl
+        );
+
         editProfileModal.classList.remove(
             "hidden"
         );
     }
 );
-
 
 closeEditProfileBtn.addEventListener(
     "click",
