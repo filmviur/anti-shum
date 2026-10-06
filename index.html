@@ -10876,9 +10876,9 @@ async function loadAdminSupportConversations() {
 
 
         /*
-            Map сохраняет порядок сообщений.
-            Поскольку запрос был от новых к старым,
-            свежие диалоги также будут сверху.
+            Поскольку сообщения загружены
+            от новых к старым,
+            свежие диалоги будут сверху.
         */
 
         conversations.forEach(
@@ -10916,7 +10916,7 @@ async function loadAdminSupportConversations() {
 
 
                 /*
-                    Имя
+                    Имя пользователя.
                 */
 
                 const name =
@@ -10924,15 +10924,17 @@ async function loadAdminSupportConversations() {
                         "div"
                     );
 
+
                 name.className =
                     "admin-support-conversation-name";
+
 
                 name.textContent =
                     displayName;
 
 
                 /*
-                    Последнее сообщение
+                    Последнее сообщение.
                 */
 
                 const preview =
@@ -10940,8 +10942,10 @@ async function loadAdminSupportConversations() {
                         "div"
                     );
 
+
                 preview.className =
                     "admin-support-conversation-preview";
+
 
                 preview.textContent =
                     lastText;
@@ -10950,6 +10954,7 @@ async function loadAdminSupportConversations() {
                 item.appendChild(
                     name
                 );
+
 
                 item.appendChild(
                     preview
@@ -10969,11 +10974,14 @@ async function loadAdminSupportConversations() {
                             "div"
                         );
 
+
                     unread.className =
                         "admin-support-unread";
 
+
                     unread.textContent =
                         conversation.unreadCount;
+
 
                     item.appendChild(
                         unread
@@ -10982,16 +10990,12 @@ async function loadAdminSupportConversations() {
 
 
                 /*
-                    Пока только запоминаем,
-                    какой диалог выбран.
-
-                    Саму переписку подключим
-                    следующим шагом.
+                    Открываем выбранный диалог.
                 */
 
                 item.addEventListener(
                     "click",
-                    function() {
+                    async function() {
 
                         selectedSupportUserId =
                             conversation.userId;
@@ -11015,6 +11019,11 @@ async function loadAdminSupportConversations() {
 
                         item.classList.add(
                             "active"
+                        );
+
+
+                        await openAdminSupportConversation(
+                            conversation.userId
                         );
                     }
                 );
@@ -11042,6 +11051,237 @@ async function loadAdminSupportConversations() {
                     Не удалось загрузить обращения.
                 </div>
             `;
+    }
+}
+
+
+/* =========================
+   OPEN SUPPORT CONVERSATION
+========================= */
+
+async function openAdminSupportConversation(
+    userId
+) {
+
+    if (!currentUser || !userId) {
+        return;
+    }
+
+
+    selectedSupportUserId =
+        userId;
+
+
+    try {
+
+        /*
+            Загружаем данные пользователя.
+        */
+
+        const {
+            data: user,
+            error: userError
+        } =
+            await supabaseClient
+                .from("users")
+                .select(
+                    "id, display_name, email"
+                )
+                .eq(
+                    "id",
+                    userId
+                )
+                .maybeSingle();
+
+
+        if (userError) {
+            throw userError;
+        }
+
+
+        /*
+            Загружаем всю переписку.
+            Старые сообщения сверху,
+            новые снизу.
+        */
+
+        const {
+            data: messages,
+            error: messagesError
+        } =
+            await supabaseClient
+                .from("support_messages")
+                .select(
+                    "id, user_id, message_text, is_from_admin, is_read, created_at"
+                )
+                .eq(
+                    "user_id",
+                    userId
+                )
+                .order(
+                    "created_at",
+                    {
+                        ascending: true
+                    }
+                );
+
+
+        if (messagesError) {
+            throw messagesError;
+        }
+
+
+        /*
+            Заполняем данные пользователя.
+        */
+
+        adminSupportUserName.textContent =
+            user?.display_name ||
+            "Пользователь";
+
+
+        adminSupportUserEmail.textContent =
+            user?.email ||
+            "";
+
+
+        /*
+            Открываем область переписки.
+        */
+
+        adminSupportChatEmpty.classList.add(
+            "hidden"
+        );
+
+
+        adminSupportChatContent.classList.remove(
+            "hidden"
+        );
+
+
+        /*
+            Выводим сообщения.
+        */
+
+        adminSupportMessages.innerHTML =
+            "";
+
+
+        (
+            messages ||
+            []
+        ).forEach(
+            message => {
+
+                const messageElement =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                messageElement.className =
+                    message.is_from_admin
+                        ? "admin-support-message admin-support-message-admin"
+                        : "admin-support-message admin-support-message-user";
+
+
+                messageElement.textContent =
+                    message.message_text;
+
+
+                adminSupportMessages.appendChild(
+                    messageElement
+                );
+            }
+        );
+
+
+        /*
+            Прокручиваем чат
+            к последнему сообщению.
+        */
+
+        adminSupportMessages.scrollTop =
+            adminSupportMessages.scrollHeight;
+
+
+        /*
+            Отмечаем непрочитанные сообщения
+            пользователя как прочитанные.
+        */
+
+        const {
+            error: readError
+        } =
+            await supabaseClient
+                .from("support_messages")
+                .update({
+                    is_read: true
+                })
+                .eq(
+                    "user_id",
+                    userId
+                )
+                .eq(
+                    "is_from_admin",
+                    false
+                )
+                .eq(
+                    "is_read",
+                    false
+                );
+
+
+        if (readError) {
+            throw readError;
+        }
+
+
+        /*
+            Убираем счётчик непрочитанных
+            возле открытого диалога.
+        */
+
+        const activeConversation =
+            document.querySelector(
+                `.admin-support-conversation[data-user-id="${userId}"]`
+            );
+
+
+        if (activeConversation) {
+
+            const unread =
+                activeConversation.querySelector(
+                    ".admin-support-unread"
+                );
+
+
+            if (unread) {
+
+                unread.remove();
+            }
+        }
+
+
+        /*
+            Ставим курсор в поле ответа.
+        */
+
+        adminSupportInput.focus();
+
+
+    } catch (error) {
+
+        console.error(
+            "Admin support conversation error:",
+            error
+        );
+
+
+        showNotice(
+            error?.message ||
+            "Не удалось открыть переписку."
+        );
     }
 }
     
