@@ -14065,6 +14065,278 @@ document
     );
 
 /* =========================================================
+   ADMIN MODERATION
+========================================================= */
+
+async function loadAdminModeration() {
+
+    if (
+        !currentUser ||
+        !adminModerationList
+    ) {
+        return;
+    }
+
+    adminModerationList.innerHTML = `
+        <div class="admin-moderation-placeholder">
+            Загрузка жалоб...
+        </div>
+    `;
+
+    adminModerationDetails
+        ?.classList
+        .add("hidden");
+
+    selectedModerationReportId = null;
+    selectedModerationAnswerId = null;
+    selectedModerationUserId = null;
+
+    try {
+
+        const { data, error } =
+            await supabaseClient
+                .from("reports")
+                .select(`
+                    id,
+                    answer_id,
+                    user_id,
+                    report_type,
+                    created_at,
+                    is_resolved,
+                    resolution
+                `)
+                .order(
+                    "created_at",
+                    { ascending: false }
+                );
+
+        if (error) {
+            throw error;
+        }
+
+        const reports =
+            Array.isArray(data)
+                ? data
+                : [];
+
+        const newReports =
+            reports.filter(
+                report =>
+                    report.is_resolved !== true
+            );
+
+        if (adminModerationNewCount) {
+
+            adminModerationNewCount.textContent =
+                String(newReports.length);
+
+            adminModerationNewCount
+                .classList
+                .toggle(
+                    "hidden",
+                    newReports.length === 0
+                );
+        }
+
+
+        let visibleReports = reports;
+
+        if (
+            currentModerationFilter === "new"
+        ) {
+
+            visibleReports =
+                reports.filter(
+                    report =>
+                        report.is_resolved !== true
+                );
+
+        } else if (
+            currentModerationFilter === "hidden"
+        ) {
+
+            visibleReports =
+                reports.filter(
+                    report =>
+                        report.is_resolved === true &&
+                        report.resolution === "hidden"
+                );
+
+        } else if (
+            currentModerationFilter === "resolved"
+        ) {
+
+            visibleReports =
+                reports.filter(
+                    report =>
+                        report.is_resolved === true
+                );
+        }
+
+
+        adminModerationList.innerHTML = "";
+
+
+        if (visibleReports.length === 0) {
+
+            let emptyText =
+                "Новых жалоб нет.";
+
+            if (
+                currentModerationFilter === "hidden"
+            ) {
+                emptyText =
+                    "Скрытых ответов пока нет.";
+            }
+
+            if (
+                currentModerationFilter === "resolved"
+            ) {
+                emptyText =
+                    "Обработанных жалоб пока нет.";
+            }
+
+            adminModerationList.innerHTML = `
+                <div class="admin-moderation-placeholder">
+                    ${emptyText}
+                </div>
+            `;
+
+            return;
+        }
+
+
+        visibleReports.forEach(
+            report => {
+
+                const item =
+                    document.createElement("div");
+
+                item.className =
+                    "admin-moderation-item";
+
+                const reason =
+                    document.createElement("div");
+
+                reason.className =
+                    "admin-moderation-reason";
+
+                reason.textContent =
+                    report.report_type ||
+                    "Жалоба";
+
+
+                const date =
+                    document.createElement("div");
+
+                date.className =
+                    "admin-moderation-label";
+
+                date.style.marginTop =
+                    "7px";
+
+                date.style.marginBottom =
+                    "0";
+
+                date.textContent =
+                    new Date(
+                        report.created_at
+                    ).toLocaleString(
+                        "ru-RU",
+                        {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit"
+                        }
+                    );
+
+
+                item.appendChild(reason);
+                item.appendChild(date);
+
+
+                item.addEventListener(
+                    "click",
+                    function() {
+
+                        selectedModerationReportId =
+                            report.id;
+
+                        selectedModerationAnswerId =
+                            report.answer_id;
+
+                        document
+                            .querySelectorAll(
+                                ".admin-moderation-item"
+                            )
+                            .forEach(
+                                element => {
+                                    element
+                                        .classList
+                                        .remove("active");
+                                }
+                            );
+
+                        item.classList.add(
+                            "active"
+                        );
+
+                        adminModerationReason.textContent =
+                            report.report_type ||
+                            "Жалоба";
+
+                        adminModerationAuthor.textContent =
+                            "Загрузка...";
+
+                        adminModerationQuestion.textContent =
+                            "Загрузка...";
+
+                        adminModerationAnswer.textContent =
+                            "Загрузка...";
+
+                        adminModerationPhoto.innerHTML =
+                            "";
+
+                        adminModerationPhoto
+                            .classList
+                            .add("hidden");
+
+                        adminModerationDetails
+                            .classList
+                            .remove("hidden");
+                    }
+                );
+
+
+                adminModerationList.appendChild(
+                    item
+                );
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Admin moderation load error:",
+            error
+        );
+
+        adminModerationList.innerHTML = `
+            <div class="admin-moderation-placeholder">
+                Не удалось загрузить жалобы.
+            </div>
+        `;
+
+        showNotice(
+            error?.message ||
+            "Не удалось загрузить жалобы."
+        );
+    }
+}
+    
+/* =========================================================
    SUPPORT REALTIME
 ========================================================= */
 
