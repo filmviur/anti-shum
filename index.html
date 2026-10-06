@@ -8312,6 +8312,46 @@ async function initializeUser() {
     appInitializedUserId =
         currentUser.id;
 
+
+    /*
+        Сохраняем актуальный email
+        пользователя в таблице users.
+    */
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from("users")
+                .update({
+                    email:
+                        currentUser.email ||
+                        null
+                })
+                .eq(
+                    "id",
+                    currentUser.id
+                );
+
+        if (error) {
+
+            console.error(
+                "User email sync error:",
+                error
+            );
+        }
+
+    } catch (error) {
+
+        console.error(
+            "User email sync error:",
+            error
+        );
+    }
+
+
     authScreen.classList.add(
         "hidden"
     );
@@ -8325,6 +8365,7 @@ async function initializeUser() {
     await loadTodayQuestionAndState();
 
     showInstallOption();
+}
 
 
     /* =====================================================
