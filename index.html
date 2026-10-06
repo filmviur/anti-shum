@@ -8428,9 +8428,31 @@ async function initializeUser() {
         "hidden"
     );
 
+
+    /*
+        Загружаем профиль.
+    */
+
     await loadProfile();
 
+
+    /*
+        Проверяем новые ответы поддержки.
+        Если есть непрочитанный ответ
+        администратора, возле кнопки
+        поддержки появится индикатор.
+    */
+
+    await checkSupportNotifications();
+
+
+    /*
+        Загружаем вопрос дня
+        и текущее состояние приложения.
+    */
+
     await loadTodayQuestionAndState();
+
 
     showInstallOption();
 
@@ -8474,6 +8496,7 @@ async function initializeUser() {
             );
 
         }
+
 
         if (pushEnabled) {
 
