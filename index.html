@@ -11284,6 +11284,117 @@ async function openAdminSupportConversation(
         );
     }
 }
+
+/* =========================
+   SEND ADMIN SUPPORT REPLY
+========================= */
+
+adminSupportSendBtn.addEventListener(
+    "click",
+    async function() {
+
+        if (
+            !currentUser ||
+            !selectedSupportUserId
+        ) {
+
+            showNotice(
+                "Сначала выбери обращение."
+            );
+
+            return;
+        }
+
+
+        const message =
+            adminSupportInput.value.trim();
+
+
+        if (!message) {
+
+            showNotice(
+                "Напиши ответ пользователю."
+            );
+
+            return;
+        }
+
+
+        adminSupportSendBtn.disabled =
+            true;
+
+
+        const originalButtonText =
+            adminSupportSendBtn.textContent;
+
+
+        adminSupportSendBtn.textContent =
+            "Отправляю...";
+
+
+        try {
+
+            const {
+                error
+            } =
+                await supabaseClient
+                    .from("support_messages")
+                    .insert({
+                        user_id:
+                            selectedSupportUserId,
+
+                        message_text:
+                            message,
+
+                        is_from_admin:
+                            true,
+
+                        is_read:
+                            false
+                    });
+
+
+            if (error) {
+                throw error;
+            }
+
+
+            adminSupportInput.value =
+                "";
+
+
+            await openAdminSupportConversation(
+                selectedSupportUserId
+            );
+
+
+            await loadAdminSupportConversations();
+
+
+        } catch (error) {
+
+            console.error(
+                "Admin support reply error:",
+                error
+            );
+
+
+            showNotice(
+                error?.message ||
+                "Не удалось отправить ответ."
+            );
+
+        } finally {
+
+            adminSupportSendBtn.disabled =
+                false;
+
+
+            adminSupportSendBtn.textContent =
+                originalButtonText;
+        }
+    }
+);
     
 /* =========================================================
    OWN ANSWERS
