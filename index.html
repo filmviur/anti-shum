@@ -13195,11 +13195,142 @@ document
    SUPPORT
 ========================================================= */
 
+/*
+    Проверяем, есть ли у пользователя
+    непрочитанные ответы поддержки.
+*/
+
+async function checkSupportNotifications() {
+
+    if (
+        !currentUser ||
+        !supportNotificationBadge
+    ) {
+        return;
+    }
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("support_messages")
+                .select("id")
+                .eq(
+                    "user_id",
+                    currentUser.id
+                )
+                .eq(
+                    "is_from_admin",
+                    true
+                )
+                .eq(
+                    "is_read",
+                    false
+                )
+                .limit(1);
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        const hasUnread =
+            Array.isArray(data) &&
+            data.length > 0;
+
+
+        supportNotificationBadge
+            .classList
+            .toggle(
+                "hidden",
+                !hasUnread
+            );
+
+
+    } catch (error) {
+
+        console.error(
+            "Support notification check error:",
+            error
+        );
+    }
+}
+
+
+/*
+    Отмечаем ответы поддержки
+    как прочитанные.
+*/
+
+async function markSupportMessagesAsRead() {
+
+    if (!currentUser) {
+        return;
+    }
+
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from("support_messages")
+                .update({
+                    is_read: true
+                })
+                .eq(
+                    "user_id",
+                    currentUser.id
+                )
+                .eq(
+                    "is_from_admin",
+                    true
+                )
+                .eq(
+                    "is_read",
+                    false
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        supportNotificationBadge
+            ?.classList
+            .add(
+                "hidden"
+            );
+
+
+    } catch (error) {
+
+        console.error(
+            "Support read error:",
+            error
+        );
+    }
+}
+
+
+/*
+    Загружаем переписку пользователя
+    с поддержкой.
+*/
+
 async function loadSupportMessages() {
 
     if (!currentUser) {
         return;
     }
+
 
     try {
 
@@ -13210,7 +13341,7 @@ async function loadSupportMessages() {
             await supabaseClient
                 .from("support_messages")
                 .select(
-                    "id, message_text, is_from_admin, created_at"
+                    "id, message_text, is_from_admin, is_read, created_at"
                 )
                 .eq(
                     "user_id",
@@ -13223,19 +13354,20 @@ async function loadSupportMessages() {
                     }
                 );
 
+
         if (error) {
             throw error;
         }
 
 
-        supportMessages.innerHTML = "";
+        supportMessages.innerHTML =
+            "";
 
 
         if (
             !data ||
             data.length === 0
         ) {
-
             return;
         }
 
@@ -13247,6 +13379,7 @@ async function loadSupportMessages() {
                     document.createElement(
                         "div"
                     );
+
 
                 messageElement.className =
                     message.is_from_admin
@@ -13268,6 +13401,7 @@ async function loadSupportMessages() {
         supportMessages.scrollTop =
             supportMessages.scrollHeight;
 
+
     } catch (error) {
 
         console.error(
@@ -13277,7 +13411,11 @@ async function loadSupportMessages() {
     }
 }
 
-    
+
+/*
+    Открытие поддержки.
+*/
+
 supportBtn.addEventListener(
     "click",
     async function() {
@@ -13286,13 +13424,28 @@ supportBtn.addEventListener(
             "hidden"
         );
 
+
         await loadSupportMessages();
+
+
+        /*
+            После того как пользователь
+            увидел переписку,
+            ответы поддержки считаются
+            прочитанными.
+        */
+
+        await markSupportMessagesAsRead();
+
 
         supportInput.focus();
     }
 );
 
 
+/*
+    Закрытие поддержки.
+*/
 
 closeSupportBtn.addEventListener(
     "click",
@@ -13304,6 +13457,10 @@ closeSupportBtn.addEventListener(
     }
 );
 
+
+/*
+    Отправка сообщения пользователя.
+*/
 
 sendSupportBtn.addEventListener(
     "click",
@@ -13342,10 +13499,13 @@ sendSupportBtn.addEventListener(
                     .insert({
                         user_id:
                             currentUser.id,
+
                         message_text:
                             message,
+
                         is_from_admin:
                             false,
+
                         is_read:
                             false
                     });
@@ -13362,6 +13522,7 @@ sendSupportBtn.addEventListener(
 
             await loadSupportMessages();
 
+
         } catch (error) {
 
             console.error(
@@ -13369,10 +13530,12 @@ sendSupportBtn.addEventListener(
                 error
             );
 
+
             showNotice(
                 error?.message ||
                 "Не удалось отправить сообщение."
             );
+
 
         } finally {
 
