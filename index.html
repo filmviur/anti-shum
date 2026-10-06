@@ -9672,6 +9672,32 @@ deleteAvatarMenuBtn.classList.toggle(
     }
 }
 
+    /* =========================================================
+   ADMIN PANEL
+========================================================= */
+
+adminPanelBtn.addEventListener(
+    "click",
+    function() {
+
+        if (!currentUser) {
+            return;
+        }
+
+        clearSessionTimer();
+
+        showOnly(adminView);
+    }
+);
+
+
+adminBackBtn.addEventListener(
+    "click",
+    async function() {
+
+        await openProfile();
+    }
+);
 
 /* =========================================================
    OWN ANSWERS
