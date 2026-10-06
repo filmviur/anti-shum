@@ -6435,22 +6435,205 @@
 
 
         <!-- MODERATION -->
-        <div
-            id="adminModerationSection"
-            class="admin-section"
-            data-admin-content="moderation"
-        >
+<div
+    id="adminModerationSection"
+    class="admin-section"
+    data-admin-content="moderation"
+>
 
-            <div class="admin-section-title">
-                МОДЕРАЦИЯ
+    <div class="admin-section-title">
+        МОДЕРАЦИЯ
+    </div>
+
+
+    <!-- ФИЛЬТРЫ -->
+
+    <div class="admin-moderation-filters">
+
+        <button
+            class="admin-moderation-filter active"
+            type="button"
+            data-moderation-filter="new"
+        >
+            Новые
+
+            <span
+                id="adminModerationNewCount"
+                class="admin-moderation-count hidden"
+            >
+                0
+            </span>
+        </button>
+
+
+        <button
+            class="admin-moderation-filter"
+            type="button"
+            data-moderation-filter="hidden"
+        >
+            Скрытые
+        </button>
+
+
+        <button
+            class="admin-moderation-filter"
+            type="button"
+            data-moderation-filter="resolved"
+        >
+            Обработанные
+        </button>
+
+    </div>
+
+
+    <!-- СПИСОК ЖАЛОБ -->
+
+    <div
+        id="adminModerationList"
+        class="admin-moderation-list"
+    >
+
+        <div class="admin-moderation-placeholder">
+            Загрузка жалоб...
+        </div>
+
+    </div>
+
+
+    <!-- ПРОСМОТР ЖАЛОБЫ -->
+
+    <div
+        id="adminModerationDetails"
+        class="admin-moderation-details hidden"
+    >
+
+        <div class="admin-moderation-details-header">
+
+            <div>
+                <div class="admin-moderation-label">
+                    Причина жалобы
+                </div>
+
+                <div
+                    id="adminModerationReason"
+                    class="admin-moderation-reason"
+                ></div>
             </div>
 
-            <div class="admin-empty">
-                Здесь будут ответы, жалобы
-                и инструменты модерации.
+
+            <button
+                id="adminModerationCloseBtn"
+                class="admin-moderation-close"
+                type="button"
+                title="Закрыть"
+                aria-label="Закрыть"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- АВТОР -->
+
+        <div class="admin-moderation-block">
+
+            <div class="admin-moderation-label">
+                Автор
+            </div>
+
+            <div
+                id="adminModerationAuthor"
+                class="admin-moderation-author"
+            >
+                Пользователь
             </div>
 
         </div>
+
+
+        <!-- ВОПРОС -->
+
+        <div class="admin-moderation-block">
+
+            <div class="admin-moderation-label">
+                Вопрос
+            </div>
+
+            <div
+                id="adminModerationQuestion"
+                class="admin-moderation-question"
+            ></div>
+
+        </div>
+
+
+        <!-- ОТВЕТ -->
+
+        <div class="admin-moderation-block">
+
+            <div class="admin-moderation-label">
+                Ответ пользователя
+            </div>
+
+            <div
+                id="adminModerationAnswer"
+                class="admin-moderation-answer"
+            ></div>
+
+
+            <div
+                id="adminModerationPhoto"
+                class="admin-moderation-photo hidden"
+            ></div>
+
+        </div>
+
+
+        <!-- ДЕЙСТВИЯ -->
+
+        <div class="admin-moderation-actions">
+
+            <button
+                id="adminModerationKeepBtn"
+                class="admin-moderation-action"
+                type="button"
+            >
+                Оставить
+            </button>
+
+
+            <button
+                id="adminModerationWarnBtn"
+                class="admin-moderation-action"
+                type="button"
+            >
+                Предупредить
+            </button>
+
+
+            <button
+                id="adminModerationHideBtn"
+                class="admin-moderation-action admin-moderation-action-danger"
+                type="button"
+            >
+                Скрыть ответ
+            </button>
+
+
+            <button
+                id="adminModerationBlockBtn"
+                class="admin-moderation-action admin-moderation-action-danger"
+                type="button"
+            >
+                Заблокировать
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 
 
         <!-- USERS -->
