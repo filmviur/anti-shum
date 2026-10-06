@@ -727,6 +727,50 @@
         0 4px 12px rgba(0, 0, 0, 0.32);
 }
 
+
+/* =========================
+   SUPPORT NOTIFICATION
+========================= */
+
+.support-btn {
+    position: relative;
+}
+
+.support-notification-badge {
+    position: absolute;
+
+    top: 3px;
+    right: 3px;
+
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle at 35% 35%,
+            #f1d38b,
+            #b98532 65%,
+            #76501f
+        );
+
+    border:
+        1px solid
+        rgba(255, 224, 150, 0.55);
+
+    box-shadow:
+        0 0 6px
+        rgba(201, 151, 67, 0.65);
+
+    pointer-events: none;
+}
+
+.support-notification-badge.hidden {
+    display: none;
+}
+
+
 .profile-btn {
     position: relative;
 
