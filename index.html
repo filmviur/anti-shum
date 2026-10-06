@@ -5959,22 +5959,111 @@
 
 
         <!-- SUPPORT -->
-        <div
-            id="adminSupportSection"
-            class="admin-section hidden"
-            data-admin-content="support"
-        >
+<div
+    id="adminSupportSection"
+    class="admin-section hidden"
+    data-admin-content="support"
+>
 
-            <div class="admin-section-title">
-                ПОДДЕРЖКА
+    <div class="admin-section-title">
+        ПОДДЕРЖКА
+    </div>
+
+
+    <div class="admin-support-layout">
+
+
+        <!-- СПИСОК ДИАЛОГОВ -->
+        <div class="admin-support-sidebar">
+
+            <div class="admin-support-sidebar-title">
+                Обращения
             </div>
 
-            <div class="admin-empty">
-                Здесь будут обращения пользователей
-                и ответы от поддержки.
+            <div
+                id="adminSupportConversations"
+                class="admin-support-conversations"
+            >
+
+                <div class="admin-support-placeholder">
+                    Загрузка обращений...
+                </div>
+
             </div>
 
         </div>
+
+
+        <!-- ДИАЛОГ -->
+        <div class="admin-support-chat">
+
+            <div
+                id="adminSupportChatEmpty"
+                class="admin-support-chat-empty"
+            >
+                Выбери обращение слева,
+                чтобы открыть переписку.
+            </div>
+
+
+            <div
+                id="adminSupportChatContent"
+                class="admin-support-chat-content hidden"
+            >
+
+                <!-- ШАПКА ДИАЛОГА -->
+                <div class="admin-support-chat-header">
+
+                    <div
+                        id="adminSupportUserName"
+                        class="admin-support-user-name"
+                    >
+                        Пользователь
+                    </div>
+
+                    <div
+                        id="adminSupportUserEmail"
+                        class="admin-support-user-email"
+                    ></div>
+
+                </div>
+
+
+                <!-- СООБЩЕНИЯ -->
+                <div
+                    id="adminSupportMessages"
+                    class="admin-support-messages"
+                ></div>
+
+
+                <!-- ОТВЕТ -->
+                <div class="admin-support-reply">
+
+                    <textarea
+                        id="adminSupportInput"
+                        class="admin-support-input"
+                        maxlength="1000"
+                        placeholder="Ответить пользователю..."
+                    ></textarea>
+
+                    <button
+                        id="adminSupportSendBtn"
+                        class="admin-support-send-btn"
+                        type="button"
+                    >
+                        Отправить ответ
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
 
 
         <!-- QUESTIONS -->
