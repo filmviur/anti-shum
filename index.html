@@ -11622,6 +11622,18 @@ adminNavButtons.forEach(
                 );
 
 
+                /* МОДЕРАЦИЯ */
+
+                if (
+                    sectionName === "moderation"
+                ) {
+
+                    await loadAdminModeration();
+                }
+
+
+                /* ПОДДЕРЖКА */
+
                 if (
                     sectionName === "support"
                 ) {
