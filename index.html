@@ -14538,6 +14538,99 @@ adminModerationList.appendChild(
         );
     }
 }
+
+/* =========================
+   MODERATION — KEEP ANSWER
+========================= */
+
+adminModerationKeepBtn.addEventListener(
+    "click",
+    async function() {
+
+        if (
+            !currentUser ||
+            !selectedModerationReportId
+        ) {
+            return;
+        }
+
+
+        adminModerationKeepBtn.disabled =
+            true;
+
+        const originalText =
+            adminModerationKeepBtn.textContent;
+
+        adminModerationKeepBtn.textContent =
+            "Сохраняю...";
+
+
+        try {
+
+            const { error } =
+                await supabaseClient
+                    .from("reports")
+                    .update({
+                        is_resolved: true,
+                        resolution: "kept"
+                    })
+                    .eq(
+                        "id",
+                        selectedModerationReportId
+                    );
+
+
+            if (error) {
+                throw error;
+            }
+
+
+            selectedModerationReportId =
+                null;
+
+            selectedModerationAnswerId =
+                null;
+
+            selectedModerationUserId =
+                null;
+
+
+            adminModerationDetails
+                .classList
+                .add("hidden");
+
+
+            await loadAdminModeration();
+
+
+            showNotice(
+                "Жалоба обработана. Ответ оставлен."
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Moderation keep error:",
+                error
+            );
+
+            showNotice(
+                error?.message ||
+                "Не удалось обработать жалобу."
+            );
+
+
+        } finally {
+
+            adminModerationKeepBtn.disabled =
+                false;
+
+            adminModerationKeepBtn.textContent =
+                originalText;
+        }
+    }
+);
     
 /* =========================================================
    SUPPORT REALTIME
