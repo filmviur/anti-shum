@@ -14804,6 +14804,158 @@ adminModerationWarnBtn.addEventListener(
         }
     }
 );
+
+/* =========================
+   MODERATION — BLOCK USER
+========================= */
+
+adminModerationBlockBtn.addEventListener(
+    "click",
+    async function() {
+
+        if (
+            !currentUser ||
+            !selectedModerationReportId ||
+            !selectedModerationAnswerId ||
+            !selectedModerationUserId
+        ) {
+            return;
+        }
+
+
+        adminModerationBlockBtn.disabled =
+            true;
+
+        const originalText =
+            adminModerationBlockBtn.textContent;
+
+        adminModerationBlockBtn.textContent =
+            "Блокирую...";
+
+
+        try {
+
+            /* =========================
+               БЛОКИРУЕМ ПОЛЬЗОВАТЕЛЯ
+            ========================= */
+
+            const {
+                error: userError
+            } =
+                await supabaseClient
+                    .from("users")
+                    .update({
+                        is_blocked: true,
+                        blocked_at:
+                            new Date().toISOString(),
+                        block_reason:
+                            adminModerationReason.textContent ||
+                            "Нарушение правил"
+                    })
+                    .eq(
+                        "id",
+                        selectedModerationUserId
+                    );
+
+
+            if (userError) {
+                throw userError;
+            }
+
+
+            /* =========================
+               СКРЫВАЕМ ОТВЕТ
+            ========================= */
+
+            const {
+                error: answerError
+            } =
+                await supabaseClient
+                    .from("answers")
+                    .update({
+                        is_hidden: true
+                    })
+                    .eq(
+                        "id",
+                        selectedModerationAnswerId
+                    );
+
+
+            if (answerError) {
+                throw answerError;
+            }
+
+
+            /* =========================
+               ЗАКРЫВАЕМ ЖАЛОБУ
+            ========================= */
+
+            const {
+                error: reportError
+            } =
+                await supabaseClient
+                    .from("reports")
+                    .update({
+                        is_resolved: true,
+                        resolution: "blocked"
+                    })
+                    .eq(
+                        "id",
+                        selectedModerationReportId
+                    );
+
+
+            if (reportError) {
+                throw reportError;
+            }
+
+
+            selectedModerationReportId =
+                null;
+
+            selectedModerationAnswerId =
+                null;
+
+            selectedModerationUserId =
+                null;
+
+
+            adminModerationDetails
+                .classList
+                .add("hidden");
+
+
+            await loadAdminModeration();
+
+
+            showNotice(
+                "Пользователь заблокирован. Ответ скрыт."
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Moderation block error:",
+                error
+            );
+
+            showNotice(
+                error?.message ||
+                "Не удалось заблокировать пользователя."
+            );
+
+
+        } finally {
+
+            adminModerationBlockBtn.disabled =
+                false;
+
+            adminModerationBlockBtn.textContent =
+                originalText;
+        }
+    }
+);
     
 /* =========================
    MODERATION — HIDE ANSWER
