@@ -14836,6 +14836,41 @@ adminModerationBlockBtn.addEventListener(
         try {
 
             /* =========================
+               ПРОВЕРЯЕМ ПОЛЬЗОВАТЕЛЯ
+            ========================= */
+
+            const {
+                data: userToBlock,
+                error: checkUserError
+            } =
+                await supabaseClient
+                    .from("users")
+                    .select(
+                        "id, display_name, is_admin"
+                    )
+                    .eq(
+                        "id",
+                        selectedModerationUserId
+                    )
+                    .single();
+
+
+            if (checkUserError) {
+                throw checkUserError;
+            }
+
+
+            if (userToBlock?.is_admin === true) {
+
+                showNotice(
+                    "Администратора нельзя заблокировать."
+                );
+
+                return;
+            }
+
+
+            /* =========================
                БЛОКИРУЕМ ПОЛЬЗОВАТЕЛЯ
             ========================= */
 
