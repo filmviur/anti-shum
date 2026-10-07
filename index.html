@@ -14664,6 +14664,22 @@ adminModerationHideBtn.addEventListener(
     "click",
     async function() {
 
+        /* ЕСЛИ ОТКРЫТ СКРЫТЫЙ ОТВЕТ —
+           ВОССТАНАВЛИВАЕМ ЕГО */
+
+        if (
+            adminModerationHideBtn.dataset.action ===
+            "restore"
+        ) {
+
+            await restoreModerationAnswer();
+
+            return;
+        }
+
+
+        /* ИНАЧЕ — ОБЫЧНОЕ СКРЫТИЕ */
+
         if (
             !currentUser ||
             !selectedModerationReportId ||
