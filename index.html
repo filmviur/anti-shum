@@ -14631,7 +14631,89 @@ adminModerationKeepBtn.addEventListener(
         }
     }
 );
-    
+
+
+/* =========================
+   MODERATION FILTERS
+========================= */
+
+adminModerationFilters.forEach(
+    function(button) {
+
+        button.addEventListener(
+            "click",
+            async function() {
+
+                const filter =
+                    button.dataset.moderationFilter;
+
+
+                if (!filter) {
+                    return;
+                }
+
+
+                currentModerationFilter =
+                    filter;
+
+
+                adminModerationFilters.forEach(
+                    function(item) {
+
+                        item.classList.toggle(
+                            "active",
+                            item === button
+                        );
+                    }
+                );
+
+
+                await loadAdminModeration();
+            }
+        );
+    }
+);
+
+
+/* =========================
+   MODERATION — CLOSE DETAILS
+========================= */
+
+adminModerationCloseBtn.addEventListener(
+    "click",
+    function() {
+
+        selectedModerationReportId =
+            null;
+
+        selectedModerationAnswerId =
+            null;
+
+        selectedModerationUserId =
+            null;
+
+
+        adminModerationDetails
+            .classList
+            .add("hidden");
+
+
+        document
+            .querySelectorAll(
+                ".admin-moderation-item"
+            )
+            .forEach(
+                item => {
+
+                    item.classList.remove(
+                        "active"
+                    );
+                }
+            );
+    }
+);
+
+
 /* =========================================================
    SUPPORT REALTIME
 ========================================================= */
