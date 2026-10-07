@@ -14750,6 +14750,122 @@ adminModerationHideBtn.addEventListener(
         }
     }
 );
+
+/* =========================
+   MODERATION — RESTORE ANSWER
+========================= */
+
+async function restoreModerationAnswer() {
+
+    if (
+        !currentUser ||
+        !selectedModerationReportId ||
+        !selectedModerationAnswerId
+    ) {
+        return;
+    }
+
+
+    adminModerationHideBtn.disabled =
+        true;
+
+    const originalText =
+        adminModerationHideBtn.textContent;
+
+    adminModerationHideBtn.textContent =
+        "Восстанавливаю...";
+
+
+    try {
+
+        /* ВОССТАНАВЛИВАЕМ ОТВЕТ */
+
+        const {
+            error: answerError
+        } =
+            await supabaseClient
+                .from("answers")
+                .update({
+                    is_hidden: false
+                })
+                .eq(
+                    "id",
+                    selectedModerationAnswerId
+                );
+
+
+        if (answerError) {
+            throw answerError;
+        }
+
+
+        /* МЕНЯЕМ РЕЗУЛЬТАТ МОДЕРАЦИИ */
+
+        const {
+            error: reportError
+        } =
+            await supabaseClient
+                .from("reports")
+                .update({
+                    is_resolved: true,
+                    resolution: "restored"
+                })
+                .eq(
+                    "id",
+                    selectedModerationReportId
+                );
+
+
+        if (reportError) {
+            throw reportError;
+        }
+
+
+        selectedModerationReportId =
+            null;
+
+        selectedModerationAnswerId =
+            null;
+
+        selectedModerationUserId =
+            null;
+
+
+        adminModerationDetails
+            .classList
+            .add("hidden");
+
+
+        await loadAdminModeration();
+
+
+        showNotice(
+            "Ответ восстановлен."
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Moderation restore error:",
+            error
+        );
+
+        showNotice(
+            error?.message ||
+            "Не удалось восстановить ответ."
+        );
+
+
+    } finally {
+
+        adminModerationHideBtn.disabled =
+            false;
+
+        adminModerationHideBtn.textContent =
+            originalText;
+    }
+}
     
 /* =========================
    MODERATION FILTERS
