@@ -14632,7 +14632,125 @@ adminModerationKeepBtn.addEventListener(
     }
 );
 
+/* =========================
+   MODERATION — HIDE ANSWER
+========================= */
 
+adminModerationHideBtn.addEventListener(
+    "click",
+    async function() {
+
+        if (
+            !currentUser ||
+            !selectedModerationReportId ||
+            !selectedModerationAnswerId
+        ) {
+            return;
+        }
+
+
+        adminModerationHideBtn.disabled =
+            true;
+
+        const originalText =
+            adminModerationHideBtn.textContent;
+
+        adminModerationHideBtn.textContent =
+            "Скрываю...";
+
+
+        try {
+
+            /* СКРЫВАЕМ ОТВЕТ */
+
+            const {
+                error: answerError
+            } =
+                await supabaseClient
+                    .from("answers")
+                    .update({
+                        is_hidden: true
+                    })
+                    .eq(
+                        "id",
+                        selectedModerationAnswerId
+                    );
+
+
+            if (answerError) {
+                throw answerError;
+            }
+
+
+            /* ЗАКРЫВАЕМ ЖАЛОБУ */
+
+            const {
+                error: reportError
+            } =
+                await supabaseClient
+                    .from("reports")
+                    .update({
+                        is_resolved: true,
+                        resolution: "hidden"
+                    })
+                    .eq(
+                        "id",
+                        selectedModerationReportId
+                    );
+
+
+            if (reportError) {
+                throw reportError;
+            }
+
+
+            selectedModerationReportId =
+                null;
+
+            selectedModerationAnswerId =
+                null;
+
+            selectedModerationUserId =
+                null;
+
+
+            adminModerationDetails
+                .classList
+                .add("hidden");
+
+
+            await loadAdminModeration();
+
+
+            showNotice(
+                "Ответ скрыт. Жалоба обработана."
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Moderation hide error:",
+                error
+            );
+
+            showNotice(
+                error?.message ||
+                "Не удалось скрыть ответ."
+            );
+
+
+        } finally {
+
+            adminModerationHideBtn.disabled =
+                false;
+
+            adminModerationHideBtn.textContent =
+                originalText;
+        }
+    }
+);
+    
 /* =========================
    MODERATION FILTERS
 ========================= */
