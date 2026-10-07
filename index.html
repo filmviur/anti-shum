@@ -14657,6 +14657,155 @@ adminModerationKeepBtn.addEventListener(
 );
 
 /* =========================
+   MODERATION — WARN USER
+========================= */
+
+adminModerationWarnBtn.addEventListener(
+    "click",
+    async function() {
+
+        if (
+            !currentUser ||
+            !selectedModerationReportId ||
+            !selectedModerationUserId
+        ) {
+            return;
+        }
+
+
+        adminModerationWarnBtn.disabled =
+            true;
+
+        const originalText =
+            adminModerationWarnBtn.textContent;
+
+        adminModerationWarnBtn.textContent =
+            "Предупреждаю...";
+
+
+        try {
+
+            /* УЗНАЁМ ТЕКУЩЕЕ ЧИСЛО ПРЕДУПРЕЖДЕНИЙ */
+
+            const {
+                data: userData,
+                error: userError
+            } =
+                await supabaseClient
+                    .from("users")
+                    .select(
+                        "warning_count"
+                    )
+                    .eq(
+                        "id",
+                        selectedModerationUserId
+                    )
+                    .single();
+
+
+            if (userError) {
+                throw userError;
+            }
+
+
+            const currentWarningCount =
+                Number(
+                    userData?.warning_count || 0
+                );
+
+
+            /* ДОБАВЛЯЕМ ПРЕДУПРЕЖДЕНИЕ */
+
+            const {
+                error: warningError
+            } =
+                await supabaseClient
+                    .from("users")
+                    .update({
+                        warning_count:
+                            currentWarningCount + 1
+                    })
+                    .eq(
+                        "id",
+                        selectedModerationUserId
+                    );
+
+
+            if (warningError) {
+                throw warningError;
+            }
+
+
+            /* ЗАКРЫВАЕМ ЖАЛОБУ */
+
+            const {
+                error: reportError
+            } =
+                await supabaseClient
+                    .from("reports")
+                    .update({
+                        is_resolved: true,
+                        resolution: "warned"
+                    })
+                    .eq(
+                        "id",
+                        selectedModerationReportId
+                    );
+
+
+            if (reportError) {
+                throw reportError;
+            }
+
+
+            selectedModerationReportId =
+                null;
+
+            selectedModerationAnswerId =
+                null;
+
+            selectedModerationUserId =
+                null;
+
+
+            adminModerationDetails
+                .classList
+                .add("hidden");
+
+
+            await loadAdminModeration();
+
+
+            showNotice(
+                "Пользователю вынесено предупреждение."
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Moderation warning error:",
+                error
+            );
+
+            showNotice(
+                error?.message ||
+                "Не удалось вынести предупреждение."
+            );
+
+
+        } finally {
+
+            adminModerationWarnBtn.disabled =
+                false;
+
+            adminModerationWarnBtn.textContent =
+                originalText;
+        }
+    }
+);
+    
+/* =========================
    MODERATION — HIDE ANSWER
 ========================= */
 
