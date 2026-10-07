@@ -14270,61 +14270,252 @@ async function loadAdminModeration() {
 
 
                 item.addEventListener(
-                    "click",
-                    function() {
+    "click",
+    async function() {
 
-                        selectedModerationReportId =
-                            report.id;
+        selectedModerationReportId =
+            report.id;
 
-                        selectedModerationAnswerId =
-                            report.answer_id;
+        selectedModerationAnswerId =
+            report.answer_id;
 
-                        document
-                            .querySelectorAll(
-                                ".admin-moderation-item"
-                            )
-                            .forEach(
-                                element => {
-                                    element
-                                        .classList
-                                        .remove("active");
-                                }
-                            );
+        selectedModerationUserId =
+            null;
 
-                        item.classList.add(
-                            "active"
-                        );
 
-                        adminModerationReason.textContent =
-                            report.report_type ||
-                            "Жалоба";
+        document
+            .querySelectorAll(
+                ".admin-moderation-item"
+            )
+            .forEach(
+                element => {
 
-                        adminModerationAuthor.textContent =
-                            "Загрузка...";
+                    element
+                        .classList
+                        .remove("active");
+                }
+            );
 
-                        adminModerationQuestion.textContent =
-                            "Загрузка...";
 
-                        adminModerationAnswer.textContent =
-                            "Загрузка...";
+        item.classList.add(
+            "active"
+        );
 
-                        adminModerationPhoto.innerHTML =
-                            "";
 
-                        adminModerationPhoto
-                            .classList
-                            .add("hidden");
+        adminModerationReason.textContent =
+            report.report_type ||
+            "Жалоба";
 
-                        adminModerationDetails
-                            .classList
-                            .remove("hidden");
-                    }
+        adminModerationAuthor.textContent =
+            "Загрузка...";
+
+        adminModerationQuestion.textContent =
+            "Загрузка...";
+
+        adminModerationAnswer.textContent =
+            "Загрузка...";
+
+        adminModerationPhoto.innerHTML =
+            "";
+
+        adminModerationPhoto
+            .classList
+            .add("hidden");
+
+        adminModerationDetails
+            .classList
+            .remove("hidden");
+
+
+        try {
+
+            /* =========================
+               ЗАГРУЖАЕМ ОТВЕТ
+            ========================= */
+
+            const {
+                data: answer,
+                error: answerError
+            } =
+                await supabaseClient
+                    .from("answers")
+                    .select(`
+                        id,
+                        question_id,
+                        user_id,
+                        answer_text,
+                        photo_url,
+                        is_hidden,
+                        created_at
+                    `)
+                    .eq(
+                        "id",
+                        report.answer_id
+                    )
+                    .maybeSingle();
+
+
+            if (answerError) {
+                throw answerError;
+            }
+
+
+            if (!answer) {
+
+                adminModerationAuthor.textContent =
+                    "Неизвестно";
+
+                adminModerationQuestion.textContent =
+                    "Вопрос не найден";
+
+                adminModerationAnswer.textContent =
+                    "Ответ был удалён или больше не существует.";
+
+                return;
+            }
+
+
+            selectedModerationAnswerId =
+                answer.id;
+
+            selectedModerationUserId =
+                answer.user_id;
+
+
+            adminModerationAnswer.textContent =
+                answer.answer_text ||
+                "Без текста";
+
+
+            /* =========================
+               ЗАГРУЖАЕМ АВТОРА
+            ========================= */
+
+            const {
+                data: author,
+                error: authorError
+            } =
+                await supabaseClient
+                    .from("users")
+                    .select(
+                        "id, display_name, email"
+                    )
+                    .eq(
+                        "id",
+                        answer.user_id
+                    )
+                    .maybeSingle();
+
+
+            if (authorError) {
+
+                console.error(
+                    "Moderation author error:",
+                    authorError
                 );
+            }
 
 
-                adminModerationList.appendChild(
-                    item
+            adminModerationAuthor.textContent =
+                author?.display_name ||
+                author?.email ||
+                "Пользователь";
+
+
+            /* =========================
+               ЗАГРУЖАЕМ ВОПРОС
+            ========================= */
+
+            const {
+                data: question,
+                error: questionError
+            } =
+                await supabaseClient
+                    .from("questions")
+                    .select(
+                        "id, question"
+                    )
+                    .eq(
+                        "id",
+                        answer.question_id
+                    )
+                    .maybeSingle();
+
+
+            if (questionError) {
+
+                console.error(
+                    "Moderation question error:",
+                    questionError
                 );
+            }
+
+
+            adminModerationQuestion.textContent =
+                question?.question ||
+                "Вопрос не найден";
+
+
+            /* =========================
+               ЗАГРУЖАЕМ ФОТО
+            ========================= */
+
+            adminModerationPhoto.innerHTML =
+                "";
+
+            adminModerationPhoto
+                .classList
+                .add("hidden");
+
+
+            if (answer.photo_url) {
+
+                const photo =
+                    await createSignedPhoto(
+                        answer.photo_url
+                    );
+
+
+                if (photo) {
+
+                    adminModerationPhoto
+                        .appendChild(photo);
+
+                    adminModerationPhoto
+                        .classList
+                        .remove("hidden");
+                }
+            }
+
+
+        } catch (error) {
+
+            console.error(
+                "Moderation details error:",
+                error
+            );
+
+            adminModerationAuthor.textContent =
+                "Ошибка загрузки";
+
+            adminModerationQuestion.textContent =
+                "Не удалось загрузить вопрос.";
+
+            adminModerationAnswer.textContent =
+                "Не удалось загрузить ответ.";
+
+            showNotice(
+                error?.message ||
+                "Не удалось открыть жалобу."
+            );
+        }
+    }
+);
+
+
+adminModerationList.appendChild(
+    item
+);
             }
         );
 
