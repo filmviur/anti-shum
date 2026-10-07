@@ -14323,16 +14323,40 @@ async function loadAdminModeration() {
             .add("hidden");
 
         adminModerationDetails
-            .classList
-            .remove("hidden");
+    .classList
+    .remove("hidden");
 
 
-        try {
+/* =========================
+   РЕЖИМ КНОПКИ
+   СКРЫТЬ / ВОССТАНОВИТЬ
+========================= */
 
-            /* =========================
-               ЗАГРУЖАЕМ ОТВЕТ
-            ========================= */
+if (
+    currentModerationFilter === "hidden"
+) {
 
+    adminModerationHideBtn.textContent =
+        "Восстановить ответ";
+
+    adminModerationHideBtn.dataset.action =
+        "restore";
+
+} else {
+
+    adminModerationHideBtn.textContent =
+        "Скрыть ответ";
+
+    adminModerationHideBtn.dataset.action =
+        "hide";
+}
+
+
+try {
+
+    /* =========================
+       ЗАГРУЖАЕМ ОТВЕТ
+    ========================= */
             const {
                 data: answer,
                 error: answerError
