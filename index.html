@@ -837,6 +837,229 @@
     }
 }
 
+    
+/* =========================================
+   BLOCK APPEAL — DESIGN
+========================================= */
+
+/* Отступы между разделами */
+
+#blockedAppealAvailable,
+#blockedAppealFormBox,
+#blockedAppealPending,
+#blockedAppealRejected,
+#blockedAppealFinal {
+    margin-top: 26px;
+}
+
+/* Скрытые элементы */
+
+#blockedScreen .hidden {
+    display: none !important;
+}
+
+/* Кнопка объяснительной */
+
+#openAppealBtn,
+#submitAppealBtn {
+    width: 100%;
+    padding: 15px 18px;
+
+    border: 1px solid rgba(214, 184, 117, 0.55);
+    border-radius: 4px;
+
+    background: linear-gradient(
+        135deg,
+        #86683e,
+        #594329
+    );
+
+    color: #f3dfb5;
+
+    font-family:
+        "Cormorant Garamond",
+        Georgia,
+        serif;
+
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(255, 230, 180, 0.12);
+
+    transition:
+        background 0.25s ease,
+        transform 0.25s ease,
+        border-color 0.25s ease;
+}
+
+#openAppealBtn:hover,
+#submitAppealBtn:not(:disabled):hover {
+    background: linear-gradient(
+        135deg,
+        #9b7948,
+        #685032
+    );
+
+    border-color: #d6b875;
+    transform: translateY(-2px);
+}
+
+/* Неактивная кнопка отправки */
+
+#submitAppealBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Заголовок письма */
+
+#blockedAppealFormBox .blocked-title {
+    margin-top: 12px;
+    font-size: 32px;
+}
+
+/* Поля формы */
+
+#blockedAppealForm .field {
+    margin-bottom: 23px;
+    text-align: left;
+}
+
+/* Названия вопросов */
+
+#blockedAppealForm label {
+    display: block;
+    margin-bottom: 10px;
+
+    color: #d6b875;
+
+    font-family:
+        "Cormorant Garamond",
+        Georgia,
+        serif;
+
+    font-size: 21px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+/* Поля для ответов */
+
+#blockedAppealForm textarea {
+    display: block;
+
+    width: 100%;
+    min-height: 120px;
+
+    box-sizing: border-box;
+
+    padding: 15px 16px;
+
+    border: 1px solid rgba(201, 168, 106, 0.24);
+    border-radius: 4px;
+
+    background: rgba(16, 13, 11, 0.55);
+
+    color: #e6d8c1;
+
+    font-family: Georgia, serif;
+    font-size: 14px;
+    line-height: 1.8;
+
+    resize: vertical;
+    outline: none;
+
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+/* Подсказки внутри полей */
+
+#blockedAppealForm textarea::placeholder {
+    color: #817363;
+    opacity: 0.85;
+}
+
+/* Активное поле */
+
+#blockedAppealForm textarea:focus {
+    border-color: rgba(214, 184, 117, 0.7);
+
+    box-shadow:
+        0 0 0 3px rgba(201, 168, 106, 0.08);
+}
+
+/* Счётчик символов */
+
+#appealCharacterCounter {
+    margin: 10px 0 15px;
+
+    padding: 12px;
+
+    border: 1px solid rgba(201, 168, 106, 0.15);
+    border-radius: 4px;
+
+    background: rgba(20, 16, 13, 0.4);
+
+    color: #c9a86a;
+
+    font-family: Georgia, serif;
+    font-size: 13px;
+
+    text-align: center;
+}
+
+/* Кнопка возвращения из формы */
+
+#cancelAppealBtn {
+    margin-top: 12px;
+}
+
+/* Сообщение об отправке или ошибке */
+
+#appealFormMessage {
+    margin-top: 15px;
+
+    color: #d6b875;
+
+    font-family: Georgia, serif;
+    font-size: 13px;
+    line-height: 1.6;
+
+    text-align: center;
+}
+
+/* Адаптация под телефон */
+
+@media (max-width: 600px) {
+
+    #blockedAppealFormBox .blocked-title {
+        font-size: 27px;
+    }
+
+    #blockedAppealForm label {
+        font-size: 19px;
+    }
+
+    #blockedAppealForm textarea {
+        min-height: 110px;
+        padding: 13px;
+        font-size: 13px;
+    }
+
+    #openAppealBtn,
+    #submitAppealBtn {
+        font-size: 19px;
+    }
+}
+
 
 /* =========================
    APP
