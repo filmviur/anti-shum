@@ -11734,14 +11734,9 @@ async function openFeed() {
 
     if (!sessionEndsAt) {
 
-        sessionEndsAt =
-            new Date(
-                currentAnswer.created_at
-            ).getTime() +
-            SESSION_MINUTES *
-            60 *
-            1000;
-    }
+    sessionEndsAt = getTodaySessionEnd();
+
+}
 
 
     if (
