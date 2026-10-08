@@ -9581,26 +9581,82 @@ async function initializeUser() {
         }
 
 
+        
         if (userStatus?.is_blocked === true) {
+
+            /* =========================
+               ЭКРАН БЛОКИРОВКИ
+            ========================= */
+
+            const blockedScreen =
+                document.getElementById("blockedScreen");
+
+            const blockedReason =
+                document.getElementById("blockedReason");
+
+            const blockedBackBtn =
+                document.getElementById("blockedBackBtn");
+
+            /* Проверяем наличие элементов */
+
+            if (
+                !blockedScreen ||
+                !blockedReason ||
+                !blockedBackBtn
+            ) {
+                throw new Error(
+                    "Элементы экрана блокировки не найдены"
+                );
+            }
+
+            /* Устанавливаем причину */
+
+            blockedReason.textContent =
+                userStatus.block_reason ||
+                "Нарушение правил проекта";
+
+            /* Скрываем остальные экраны */
 
             authScreen.classList.add("hidden");
             appScreen.classList.add("hidden");
 
-            alert(
-                "Твой аккаунт заблокирован.\n\n" +
-                "Причина: " +
-                (
-                    userStatus.block_reason ||
-                    "Нарушение правил проекта"
-                )
-            );
+            /* Завершаем сессию пользователя */
 
-            await supabaseClient.auth.signOut();
+            const { error: signOutError } =
+                await supabaseClient.auth.signOut();
+
+            if (signOutError) {
+                console.error(
+                    "Blocked user sign out error:",
+                    signOutError
+                );
+            }
 
             currentUser = null;
             appInitializedUserId = null;
 
-            authScreen.classList.remove("hidden");
+            /* Показываем экран блокировки */
+
+            authScreen.classList.add("hidden");
+            appScreen.classList.add("hidden");
+
+            blockedScreen.classList.remove("hidden");
+
+            /* Кнопка возвращения ко входу */
+
+            blockedBackBtn.onclick = function () {
+
+                blockedScreen.classList.add("hidden");
+
+                authScreen.classList.remove("hidden");
+
+                window.scrollTo({
+                    top: 0,
+                    left: 0,
+                    behavior: "instant"
+                });
+
+            };
 
             return;
         }
@@ -9619,6 +9675,11 @@ async function initializeUser() {
         return;
     }
 
+
+    /* =========================
+       ПРОВЕРКА ИНИЦИАЛИЗАЦИИ
+    ========================= */
+
     if (
         appInitializedUserId === currentUser.id
     ) {
@@ -9633,16 +9694,13 @@ async function initializeUser() {
         currentUser.id;
 
 
-    /*
-        Сохраняем актуальный email
-        пользователя в таблице users.
-    */
+    /* =========================
+       СИНХРОНИЗАЦИЯ EMAIL
+    ========================= */
 
     try {
 
-        const {
-            error
-        } =
+        const { error } =
             await supabaseClient
                 .from("users")
                 .update({
@@ -9661,6 +9719,7 @@ async function initializeUser() {
                 "User email sync error:",
                 error
             );
+
         }
 
     } catch (error) {
@@ -9669,50 +9728,60 @@ async function initializeUser() {
             "User email sync error:",
             error
         );
+
     }
 
 
-    authScreen.classList.add(
-        "hidden"
-    );
+    /* =========================
+       ОТКРЫВАЕМ ПРИЛОЖЕНИЕ
+    ========================= */
 
-    appScreen.classList.remove(
-        "hidden"
-    );
+    const blockedScreen =
+        document.getElementById("blockedScreen");
+
+    if (blockedScreen) {
+        blockedScreen.classList.add("hidden");
+    }
+
+    authScreen.classList.add("hidden");
+
+    appScreen.classList.remove("hidden");
 
 
-    /*
-        Загружаем профиль.
-    */
+    /* =========================
+       ЗАГРУЖАЕМ ПРОФИЛЬ
+    ========================= */
 
     await loadProfile();
 
 
-/*
-    Проверяем уже существующие
-    непрочитанные ответы поддержки.
-*/
+    /* =========================
+       УВЕДОМЛЕНИЯ ПОДДЕРЖКИ
+    ========================= */
 
-await checkSupportNotifications();
-
-
-/*
-    Запускаем Realtime-подписку.
-    Новые ответы поддержки будут
-    появляться без обновления страницы.
-*/
-
-await startSupportRealtime();
+    await checkSupportNotifications();
 
 
-/*
-    Загружаем вопрос дня
-    и текущее состояние приложения.
-*/
+    /* =========================
+       REALTIME ПОДДЕРЖКИ
+    ========================= */
 
-await loadTodayQuestionAndState();
+    await startSupportRealtime();
+
+
+    /* =========================
+       ВОПРОС ДНЯ
+    ========================= */
+
+    await loadTodayQuestionAndState();
+
+
+    /* =========================
+       УСТАНОВКА ПРИЛОЖЕНИЯ
+    ========================= */
 
     showInstallOption();
+
 
 
     /* =====================================================
