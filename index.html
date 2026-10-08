@@ -15556,6 +15556,10 @@ async function loadAdminAppeals() {
 
             item.addEventListener("click", function() {
 
+/* Запоминаем выбранную объяснительную */
+
+selectedAdminAppealId = appeal.id;
+                
                 list.querySelectorAll(
                     ".admin-moderation-item"
                 ).forEach(element => {
