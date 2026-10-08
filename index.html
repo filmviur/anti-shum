@@ -9235,6 +9235,72 @@ async function initializeUser() {
         return;
     }
 
+
+    /* =========================
+       ПРОВЕРКА БЛОКИРОВКИ
+    ========================= */
+
+    try {
+
+        const {
+            data: userStatus,
+            error: statusError
+        } =
+            await supabaseClient
+                .from("users")
+                .select(
+                    "is_blocked, block_reason"
+                )
+                .eq(
+                    "id",
+                    currentUser.id
+                )
+                .single();
+
+
+        if (statusError) {
+            throw statusError;
+        }
+
+
+        if (userStatus?.is_blocked === true) {
+
+            authScreen.classList.add("hidden");
+            appScreen.classList.add("hidden");
+
+            alert(
+                "Твой аккаунт заблокирован.\n\n" +
+                "Причина: " +
+                (
+                    userStatus.block_reason ||
+                    "Нарушение правил проекта"
+                )
+            );
+
+            await supabaseClient.auth.signOut();
+
+            currentUser = null;
+            appInitializedUserId = null;
+
+            authScreen.classList.remove("hidden");
+
+            return;
+        }
+
+    } catch (error) {
+
+        console.error(
+            "User block check error:",
+            error
+        );
+
+        showNotice(
+            "Не удалось проверить статус аккаунта."
+        );
+
+        return;
+    }
+
     if (
         appInitializedUserId === currentUser.id
     ) {
