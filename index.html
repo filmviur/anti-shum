@@ -11052,16 +11052,7 @@ async function loadTodayQuestionAndState() {
         currentAnswer =
             ownAnswer;
 
-        const createdAt =
-            new Date(
-                ownAnswer.created_at
-            ).getTime();
-
-        const endAt =
-            createdAt +
-            SESSION_MINUTES *
-            60 *
-            1000;
+       const endAt = getTodaySessionEnd();
 
         if (
             Date.now() >= endAt
