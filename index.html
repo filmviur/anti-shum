@@ -9807,9 +9807,11 @@ async function initializeUser() {
         } =
             await supabaseClient
                 .from("users")
-                .select(
-                    "is_blocked, block_reason"
-                )
+                
+.select(
+    "is_blocked, block_reason, block_count, appeal_used"
+)
+
                 .eq(
                     "id",
                     currentUser.id
