@@ -11473,13 +11473,31 @@ async function submitAnswer() {
         return;
     }
 
-    if (!currentQuestionId) {
-        return;
-    }
+   if (!currentQuestionId) {
+    return;
+}
 
-    const text =
-        answerInput.value.trim();
+// Проверяем единое время записи по Киеву.
+const sessionEnd = getTodaySessionEnd();
 
+const sessionStart =
+    sessionEnd - 20 * 60 * 1000;
+
+const currentTime = Date.now();
+
+if (
+    currentTime < sessionStart ||
+    currentTime >= sessionEnd
+) {
+    showNotice(
+        "Дневник открыт только с 20:00 до 20:20 по Киеву."
+    );
+
+    return;
+}
+
+const text =
+    answerInput.value.trim();
     const hasPhoto =
         selectedPhotoFile &&
         selectedPhotoConfirmed;
