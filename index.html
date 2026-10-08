@@ -6691,125 +6691,102 @@
 <div class="page">
     <div class="container">
 
-        <!-- AUTH -->
-        <section id="authScreen" class="auth-screen">
+       
+<!-- =========================
+     AUTH
+========================= -->
 
-            <div class="auth-card">
+<section id="authScreen" class="auth-screen">
 
-                <div class="auth-logo">
-                    АНТИ-ШУМ
-                </div>
+    <div class="auth-card">
 
-                <div class="auth-subtitle">
-                    15 минут без информационного шума
-                </div>
+        <div class="auth-logo">
+            АНТИ-ШУМ
+        </div>
 
-                <div class="auth-tabs">
-                    <button
-                        id="loginTab"
-                        class="auth-tab active"
-                        type="button"
-                    >
-                        Войти
-                    </button>
+        <div class="auth-subtitle">
+            15 минут без информационного шума
+        </div>
 
-                    <button
-                        id="registerTab"
-                        class="auth-tab"
-                        type="button"
-                    >
-                        Регистрация
-                    </button>
-                </div>
+        <div class="auth-tabs">
+            <button id="loginTab" class="auth-tab active" type="button">
+                Войти
+            </button>
 
-                <form id="authForm">
+            <button id="registerTab" class="auth-tab" type="button">
+                Регистрация
+            </button>
+        </div>
 
-                    <div
-                        id="nameField"
-                        class="field hidden"
-                    >
-                        <label for="nameInput">
-                            Имя
-                        </label>
+        <form id="authForm">
 
-                        <input
-                            id="nameInput"
-                            type="text"
-                            maxlength="60"
-                            autocomplete="name"
-                        >
-                    </div>
-
-                    <div class="field">
-                        <label for="emailInput">
-                            Email
-                        </label>
-
-                        <input
-                            id="emailInput"
-                            type="email"
-                            required
-                            autocomplete="email"
-                        >
-                    </div>
-
-                    <div class="field">
-                        <label for="passwordInput">
-                            Пароль
-                        </label>
-
-                        <input
-                            id="passwordInput"
-                            type="password"
-                            required
-                            minlength="6"
-                            autocomplete="current-password"
-                        >
-                    </div>
-
-                    <button
-                        id="authSubmitBtn"
-                        class="primary-btn"
-                        type="submit"
-                    >
-                        Войти
-                    </button>
-
-                </form>
-
-                <div
-                    id="authMessage"
-                    class="auth-message"
-                ></div>
-
-                <div
-                    id="installCard"
-                    class="install-card hidden"
+            <div id="nameField" class="field hidden">
+                <label for="nameInput">Имя</label>
+                <input
+                    id="nameInput"
+                    type="text"
+                    maxlength="60"
+                    autocomplete="name"
                 >
-                    <div class="install-card-title">
-                        📱 Добавить «Анти-Шум»
-                    </div>
-
-                    <div
-                        id="installText"
-                        class="install-card-text"
-                    >
-                        Добавь сайт на главный экран, чтобы открывать
-                        его как отдельное приложение.
-                    </div>
-
-                    <button
-                        id="installBtn"
-                        class="secondary-btn"
-                        type="button"
-                    >
-                        Добавить на экран
-                    </button>
-                </div>
-
             </div>
 
-        </section>
+            <div class="field">
+                <label for="emailInput">Email</label>
+                <input
+                    id="emailInput"
+                    type="email"
+                    required
+                    autocomplete="email"
+                >
+            </div>
+
+            <div class="field">
+                <label for="passwordInput">Пароль</label>
+                <input
+                    id="passwordInput"
+                    type="password"
+                    required
+                    minlength="6"
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <button
+                id="authSubmitBtn"
+                class="primary-btn"
+                type="submit"
+            >
+                Войти
+            </button>
+
+        </form>
+
+        <div id="authMessage" class="auth-message"></div>
+
+        <div id="installCard" class="install-card hidden">
+
+            <div class="install-card-title">
+                📱 Добавить «Анти-Шум»
+            </div>
+
+            <div id="installText" class="install-card-text">
+                Добавь сайт на главный экран, чтобы открывать
+                его как отдельное приложение.
+            </div>
+
+            <button
+                id="installBtn"
+                class="secondary-btn"
+                type="button"
+            >
+                Добавить на экран
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
 
 
 <!-- =========================
@@ -6860,6 +6837,269 @@
 
         </div>
 
+
+        <!-- ПЕРВАЯ БЛОКИРОВКА -->
+
+        <div
+            id="blockedAppealAvailable"
+            class="hidden"
+        >
+
+            <p class="blocked-description">
+                Мы готовы выслушать тебя.
+                Если ты осознал произошедшее
+                и хочешь попросить о втором шансе,
+                ты можешь написать объяснительную.
+            </p>
+
+            <button
+                id="openAppealBtn"
+                class="primary-btn"
+                type="button"
+            >
+                Написать объяснительную
+            </button>
+
+        </div>
+
+
+        <!-- ФОРМА ОБЪЯСНИТЕЛЬНОЙ -->
+
+        <div
+            id="blockedAppealFormBox"
+            class="hidden"
+        >
+
+            <div class="blocked-divider">
+                ✦
+            </div>
+
+            <h2 class="blocked-title">
+                Письмо о втором шансе
+            </h2>
+
+            <p class="blocked-description">
+                Это не формальность.
+                Нам важно понять, что произошло,
+                как ты относишься к своему поступку
+                и что намерен изменить.
+            </p>
+
+            <form id="blockedAppealForm">
+
+                <div class="field">
+
+                    <label for="appealIncident">
+                        1. Что произошло?
+                    </label>
+
+                    <textarea
+                        id="appealIncident"
+                        rows="4"
+                        maxlength="3000"
+                        required
+                        placeholder="Расскажи об обстоятельствах и своих действиях..."
+                    ></textarea>
+
+                </div>
+
+                <div class="field">
+
+                    <label for="appealRules">
+                        2. Почему это было неправильно?
+                    </label>
+
+                    <textarea
+                        id="appealRules"
+                        rows="4"
+                        maxlength="3000"
+                        required
+                        placeholder="Объясни, какие правила были нарушены и почему они важны..."
+                    ></textarea>
+
+                </div>
+
+                <div class="field">
+
+                    <label for="appealImpact">
+                        3. Как твои действия могли повлиять на других?
+                    </label>
+
+                    <textarea
+                        id="appealImpact"
+                        rows="4"
+                        maxlength="3000"
+                        required
+                        placeholder="Попробуй посмотреть на ситуацию глазами других участников..."
+                    ></textarea>
+
+                </div>
+
+                <div class="field">
+
+                    <label for="appealFuture">
+                        4. Что ты изменишь, если получишь второй шанс?
+                    </label>
+
+                    <textarea
+                        id="appealFuture"
+                        rows="4"
+                        maxlength="3000"
+                        required
+                        placeholder="Расскажи, как намерен избежать повторения..."
+                    ></textarea>
+
+                </div>
+
+                <div
+                    id="appealCharacterCounter"
+                    class="blocked-reason-label"
+                >
+                    0 / 3000 символов
+                    (минимум 500)
+                </div>
+
+                <p class="blocked-description">
+                    Каждый ответ должен содержать
+                    не менее 40 символов.
+                    Общий объём письма —
+                    от 500 до 3000 символов.
+                </p>
+
+                <button
+                    id="submitAppealBtn"
+                    class="primary-btn"
+                    type="submit"
+                    disabled
+                >
+                    Отправить объяснительную
+                </button>
+
+                <button
+                    id="cancelAppealBtn"
+                    class="blocked-back-btn"
+                    type="button"
+                >
+                    ← Вернуться
+                </button>
+
+                <div
+                    id="appealFormMessage"
+                    class="auth-message"
+                    role="status"
+                    aria-live="polite"
+                ></div>
+
+            </form>
+
+        </div>
+
+
+        <!-- АПЕЛЛЯЦИЯ НА РАССМОТРЕНИИ -->
+
+        <div
+            id="blockedAppealPending"
+            class="hidden"
+        >
+
+            <div class="blocked-divider">
+                ✦
+            </div>
+
+            <h2 class="blocked-title">
+                Твоё письмо получено
+            </h2>
+
+            <p class="blocked-description">
+                Объяснительная передана
+                администратору и ожидает рассмотрения.
+                Пожалуйста, дождись решения.
+            </p>
+
+        </div>
+
+
+        <!-- ОТКЛОНЁННАЯ АПЕЛЛЯЦИЯ -->
+
+        <div
+            id="blockedAppealRejected"
+            class="hidden"
+        >
+
+            <div class="blocked-divider">
+                ✦
+            </div>
+
+            <h2 class="blocked-title">
+                Решение принято
+            </h2>
+
+            <p class="blocked-description">
+                После рассмотрения твоей объяснительной
+                было принято решение
+                не восстанавливать доступ.
+            </p>
+
+            <div class="blocked-reason-box">
+
+                <div class="blocked-reason-label">
+                    Ответ администратора
+                </div>
+
+                <div
+                    id="appealRejectionReason"
+                    class="blocked-reason"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ОКОНЧАТЕЛЬНАЯ БЛОКИРОВКА -->
+
+        <div
+            id="blockedAppealFinal"
+            class="hidden"
+        >
+
+            <div class="blocked-divider">
+                ✦
+            </div>
+
+            <h2 class="blocked-title">
+                Доступ закрыт окончательно
+            </h2>
+
+            <p class="blocked-description">
+                Возможность восстановить доступ
+                уже была предоставлена.
+                После повторного нарушения
+                новое обращение о восстановлении
+                недоступно.
+            </p>
+
+        </div>
+
+
+        <!-- ОБРАЩЕНИЕ В ПОДДЕРЖКУ -->
+
+        <div
+            id="blockedSupportBox"
+            class="hidden"
+        >
+
+            <button
+                id="blockedSupportBtn"
+                class="blocked-back-btn"
+                type="button"
+            >
+                Написать в поддержку
+            </button>
+
+        </div>
+
+
         <p class="blocked-footer">
             Даже закрытая страница
             не отменяет ценности твоих мыслей.
@@ -6877,8 +7117,9 @@
 
 </section>
 
-        
+
 <!-- MAIN APP -->
+
 <main id="appScreen" class="hidden">
 
     <div class="app-global-actions">
