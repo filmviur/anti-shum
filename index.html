@@ -15367,6 +15367,203 @@ document
         }
     );
 
+
+/* =========================================================
+   ADMIN APPEALS — ЗАГРУЗКА ОБЪЯСНИТЕЛЬНЫХ
+========================================================= */
+
+async function loadAdminAppeals() {
+
+    const list =
+        document.getElementById("adminAppealsList");
+
+    const details =
+        document.getElementById("adminAppealDetails");
+
+    if (!currentUser || !list || !details) {
+        return;
+    }
+
+    list.replaceChildren();
+    details.classList.add("hidden");
+
+    const loading = document.createElement("div");
+    loading.className = "admin-empty";
+    loading.textContent = "Загрузка объяснительных...";
+    list.appendChild(loading);
+
+    try {
+
+        const { data, error } =
+            await supabaseClient
+                .from("block_appeals")
+                .select(`
+                    id,
+                    user_id,
+                    incident_explanation,
+                    rule_understanding,
+                    impact_on_others,
+                    future_changes,
+                    status,
+                    admin_response,
+                    created_at
+                `)
+                .order("created_at", {
+                    ascending: false
+                });
+
+        if (error) {
+            throw error;
+        }
+
+        list.replaceChildren();
+
+        if (!data || data.length === 0) {
+
+            const empty = document.createElement("div");
+            empty.className = "admin-empty";
+            empty.textContent =
+                "Объяснительных пока нет.";
+
+            list.appendChild(empty);
+            return;
+        }
+
+        const userIds = [
+            ...new Set(data.map(appeal => appeal.user_id))
+        ];
+
+        const { data: users, error: usersError } =
+            await supabaseClient
+                .from("users")
+                .select("id, display_name")
+                .in("id", userIds);
+
+        if (usersError) {
+            throw usersError;
+        }
+
+        const userNames = new Map(
+            (users || []).map(user => [
+                user.id,
+                user.display_name || "Пользователь"
+            ])
+        );
+
+        data.forEach(function(appeal) {
+
+            const item = document.createElement("div");
+            item.className = "admin-moderation-item";
+            item.style.cursor = "pointer";
+
+            const author = document.createElement("div");
+            author.className = "admin-moderation-reason";
+            author.textContent =
+                userNames.get(appeal.user_id) ||
+                "Пользователь";
+
+            const status = document.createElement("div");
+            status.className = "admin-moderation-label";
+
+            const statusNames = {
+                pending: "Ожидает рассмотрения",
+                approved: "Одобрена",
+                rejected: "Отклонена"
+            };
+
+            status.textContent =
+                statusNames[appeal.status] ||
+                appeal.status;
+
+            const date = document.createElement("div");
+            date.className = "admin-moderation-label";
+
+            date.textContent = new Date(
+                appeal.created_at
+            ).toLocaleString("ru-RU");
+
+            item.appendChild(author);
+            item.appendChild(status);
+            item.appendChild(date);
+
+            item.addEventListener("click", function() {
+
+                list.querySelectorAll(
+                    ".admin-moderation-item"
+                ).forEach(element => {
+                    element.classList.remove("active");
+                });
+
+                item.classList.add("active");
+
+                document.getElementById(
+                    "adminAppealAuthor"
+                ).textContent = author.textContent;
+
+                document.getElementById(
+                    "adminAppealIncident"
+                ).textContent = appeal.incident_explanation;
+
+                document.getElementById(
+                    "adminAppealRules"
+                ).textContent = appeal.rule_understanding;
+
+                document.getElementById(
+                    "adminAppealImpact"
+                ).textContent = appeal.impact_on_others;
+
+                document.getElementById(
+                    "adminAppealFuture"
+                ).textContent = appeal.future_changes;
+
+                const response = document.getElementById(
+                    "adminAppealResponse"
+                );
+
+                response.value =
+                    appeal.admin_response || "";
+
+                const isPending =
+                    appeal.status === "pending";
+
+                response.disabled = !isPending;
+
+                document.getElementById(
+                    "adminAppealApproveBtn"
+                ).disabled = !isPending;
+
+                document.getElementById(
+                    "adminAppealRejectBtn"
+                ).disabled = !isPending;
+
+                details.classList.remove("hidden");
+
+            });
+
+            list.appendChild(item);
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Admin appeals loading error:",
+            error
+        );
+
+        list.replaceChildren();
+
+        const message = document.createElement("div");
+        message.className = "admin-empty";
+        message.textContent =
+            "Не удалось загрузить объяснительные.";
+
+        list.appendChild(message);
+
+    }
+}
+
+    
 /* =========================================================
    ADMIN MODERATION
 ========================================================= */
