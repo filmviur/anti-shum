@@ -16747,6 +16747,41 @@ installBtn.addEventListener(
     }
 );
 
+    
+/* =========================================================
+   BLOCK APPEAL — OPEN / CLOSE
+========================================================= */
+
+const openAppealBtn =
+    document.getElementById("openAppealBtn");
+
+const cancelAppealBtn =
+    document.getElementById("cancelAppealBtn");
+
+const blockedAppealAvailable =
+    document.getElementById("blockedAppealAvailable");
+
+const blockedAppealFormBox =
+    document.getElementById("blockedAppealFormBox");
+
+
+openAppealBtn.addEventListener("click", function() {
+
+    blockedAppealAvailable.classList.add("hidden");
+
+    blockedAppealFormBox.classList.remove("hidden");
+
+});
+
+
+cancelAppealBtn.addEventListener("click", function() {
+
+    blockedAppealFormBox.classList.add("hidden");
+
+    blockedAppealAvailable.classList.remove("hidden");
+
+});
+
 
 /* =========================================================
    START
