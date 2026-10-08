@@ -8786,16 +8786,38 @@ function formatDate(dateString) {
 }
 
 
+
 function showOnly(view) {
+
+    /* =========================
+       СКРЫВАЕМ ВСЕ ЭКРАНЫ
+    ========================= */
 
     questionView.classList.add("hidden");
     feedView.classList.add("hidden");
     profileView.classList.add("hidden");
     closedView.classList.add("hidden");
+    adminView.classList.add("hidden");
+
+
+    /* =========================
+       ПОКАЗЫВАЕМ НУЖНЫЙ ЭКРАН
+    ========================= */
 
     if (view) {
         view.classList.remove("hidden");
     }
+
+
+    /* =========================
+       ПРОКРУТКА НАВЕРХ
+    ========================= */
+
+    window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "instant"
+    });
 }
 
 
@@ -8887,6 +8909,7 @@ function questionNeedsPhoto(question) {
         Number(question.day)
     );
 }
+
 
 /* =========================================================
    AUTH
