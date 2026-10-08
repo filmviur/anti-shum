@@ -9955,9 +9955,9 @@ function showOnly(view) {
     }
 
 
-    /* =========================
+   /* =========================
        ПРОКРУТКА НАВЕРХ
-    ========================= */
+========================= */
 
     window.scrollTo({
         top: 0,
@@ -9974,35 +9974,80 @@ function setAuthMessage(message) {
 }
 
 
+/* =========================
+   КИЕВСКОЕ ВРЕМЯ
+========================= */
+
+function getKyivDateParts(date = new Date()) {
+
+    const formatter = new Intl.DateTimeFormat(
+        "en-GB",
+        {
+            timeZone: "Europe/Kyiv",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hourCycle: "h23"
+        }
+    );
+
+    return Object.fromEntries(
+        formatter.formatToParts(date)
+            .filter(part => part.type !== "literal")
+            .map(part => [
+                part.type,
+                Number(part.value)
+            ])
+    );
+}
+
+
+/* =========================
+   НОМЕР ДНЯ ПРОЕКТА
+========================= */
+
 function getProjectDay() {
 
     if (!PROJECT_START_DATE) {
         return DEV_PROJECT_DAY;
     }
 
-    const start =
-        new Date(
-            PROJECT_START_DATE + "T20:00:00"
-        );
+    const now = getKyivDateParts();
 
-    const now =
-        new Date();
+    const [year, month, day] =
+        PROJECT_START_DATE.split("-").map(Number);
 
-    if (now < start) {
-        return 0;
+    const startDate = Date.UTC(
+        year,
+        month - 1,
+        day
+    );
+
+    const todayDate = Date.UTC(
+        now.year,
+        now.month - 1,
+        now.day
+    );
+
+    let difference = Math.round(
+        (todayDate - startDate) / 86400000
+    );
+
+    // До 20:00 действует предыдущий день проекта.
+    if (now.hour < 20) {
+        difference--;
     }
 
-    const difference =
-        now.getTime() - start.getTime();
-
-    return (
-        Math.floor(
-            difference /
-            (24 * 60 * 60 * 1000)
-        ) + 1
-    );
+    return Math.max(0, difference + 1);
 }
 
+
+/* =========================
+   ПРОВЕРКА ЗАПУСКА ПРОЕКТА
+========================= */
 
 function isProjectStarted() {
 
@@ -10010,34 +10055,80 @@ function isProjectStarted() {
         return true;
     }
 
-    const start =
-        new Date(
-            PROJECT_START_DATE + "T20:00:00"
-        );
-
-    return new Date() >= start;
+    return getProjectDay() > 0;
 }
 
+
+/* =========================
+   СЛЕДУЮЩИЕ 20:00 ПО КИЕВУ
+========================= */
 
 function getNext20Timestamp() {
 
-    const now =
-        new Date();
+    const now = new Date();
+    const kyiv = getKyivDateParts(now);
 
-    const next =
-        new Date(now);
+    const todayUTC = Date.UTC(
+        kyiv.year,
+        kyiv.month - 1,
+        kyiv.day
+    );
 
-    next.setHours(20, 0, 0, 0);
+    const nextDayUTC =
+        todayUTC +
+        (kyiv.hour >= 20 ? 86400000 : 0);
 
-    if (next <= now) {
-        next.setDate(
-            next.getDate() + 1
-        );
-    }
+    const targetDate = new Date(nextDayUTC);
 
-    return next.getTime();
+    const targetYear = targetDate.getUTCFullYear();
+    const targetMonth = targetDate.getUTCMonth();
+    const targetDay = targetDate.getUTCDate();
+
+    // Определяем смещение Киева на целевую дату.
+    const approximateTarget = new Date(
+        Date.UTC(
+            targetYear,
+            targetMonth,
+            targetDay,
+            12,
+            0,
+            0
+        )
+    );
+
+    const targetKyiv = getKyivDateParts(
+        approximateTarget
+    );
+
+    const kyivAsUTC = Date.UTC(
+        targetKyiv.year,
+        targetKyiv.month - 1,
+        targetKyiv.day,
+        targetKyiv.hour,
+        targetKyiv.minute,
+        targetKyiv.second
+    );
+
+    const offset =
+        kyivAsUTC -
+        Math.floor(
+            approximateTarget.getTime() / 1000
+        ) * 1000;
+
+    return Date.UTC(
+        targetYear,
+        targetMonth,
+        targetDay,
+        20,
+        0,
+        0
+    ) - offset;
 }
 
+
+/* =========================
+   ВОПРОСЫ С ФОТОГРАФИЯМИ
+========================= */
 
 function questionNeedsPhoto(question) {
 
