@@ -8010,6 +8010,7 @@
         </div>
 
 
+        
         <!-- ДЕЙСТВИЯ -->
 
         <div class="admin-moderation-actions">
@@ -8022,7 +8023,6 @@
                 Оставить
             </button>
 
-
             <button
                 id="adminModerationWarnBtn"
                 class="admin-moderation-action"
@@ -8031,7 +8031,6 @@
                 Предупредить
             </button>
 
-
             <button
                 id="adminModerationHideBtn"
                 class="admin-moderation-action admin-moderation-action-danger"
@@ -8039,7 +8038,6 @@
             >
                 Скрыть ответ
             </button>
-
 
             <button
                 id="adminModerationBlockBtn"
@@ -8056,7 +8054,194 @@
 </div>
 
 
-        <!-- USERS -->
+<!-- =========================================================
+     ОБЪЯСНИТЕЛЬНЫЕ — АДМИН-ПАНЕЛЬ
+========================================================= -->
+
+<div
+    id="adminAppealsSection"
+    class="admin-section hidden"
+    data-admin-content="appeals"
+>
+
+    <div class="admin-section-title">
+        ОБЪЯСНИТЕЛЬНЫЕ
+    </div>
+
+    <p class="blocked-description">
+        Здесь рассматриваются обращения
+        пользователей, которые просят
+        восстановить доступ к дневнику.
+    </p>
+
+
+    <!-- СПИСОК ОБЪЯСНИТЕЛЬНЫХ -->
+
+    <div id="adminAppealsList">
+
+        <div class="admin-empty">
+            Загрузка объяснительных...
+        </div>
+
+    </div>
+
+
+    <!-- ПРОСМОТР ОБЪЯСНИТЕЛЬНОЙ -->
+
+    <div
+        id="adminAppealDetails"
+        class="admin-moderation-details hidden"
+    >
+
+        <div class="admin-moderation-details-header">
+
+            <div class="admin-section-title">
+                Письмо пользователя
+            </div>
+
+            <button
+                id="adminAppealCloseBtn"
+                class="admin-moderation-close"
+                type="button"
+                aria-label="Закрыть письмо"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- ПОЛЬЗОВАТЕЛЬ -->
+
+        <div class="admin-moderation-block">
+
+            <div class="admin-moderation-label">
+                Пользователь
+            </div>
+
+            <div
+                id="adminAppealAuthor"
+                class="admin-moderation-author"
+            ></div>
+
+        </div>
+
+
+        <!-- ПЕРВЫЙ ОТВЕТ -->
+
+        <div class="admin-moderation-block">
+
+            <div class="admin-moderation-label">
+                1. Что произошло?
+            </div>
+
+            <div
+                id="adminAppealIncident"
+                class="admin-moderation-answer"
+            ></div>
+
+        </div>
+
+
+        <!-- ВТОРОЙ ОТВЕТ -->
+
+        <div class="admin-moderation-block">
+
+            <div class="admin-moderation-label">
+                2. Почему это было неправильно?
+            </div>
+
+            <div
+                id="adminAppealRules"
+                class="admin-moderation-answer"
+            ></div>
+
+        </div>
+
+
+        <!-- ТРЕТИЙ ОТВЕТ -->
+
+        <div class="admin-moderation-block">
+
+            <div class="admin-moderation-label">
+                3. Как твои действия могли повлиять на других?
+            </div>
+
+            <div
+                id="adminAppealImpact"
+                class="admin-moderation-answer"
+            ></div>
+
+        </div>
+
+
+        <!-- ЧЕТВЁРТЫЙ ОТВЕТ -->
+
+        <div class="admin-moderation-block">
+
+            <div class="admin-moderation-label">
+                4. Что ты изменишь, если получишь второй шанс?
+            </div>
+
+            <div
+                id="adminAppealFuture"
+                class="admin-moderation-answer"
+            ></div>
+
+        </div>
+
+
+        <!-- РЕШЕНИЕ АДМИНИСТРАТОРА -->
+
+        <div class="admin-moderation-block">
+
+            <label
+                for="adminAppealResponse"
+                class="admin-moderation-label"
+            >
+                Ответ администратора
+            </label>
+
+            <textarea
+                id="adminAppealResponse"
+                rows="4"
+                placeholder="Объясни причину принятого решения..."
+            ></textarea>
+
+        </div>
+
+
+        <!-- КНОПКИ РЕШЕНИЯ -->
+
+        <div class="admin-moderation-actions">
+
+            <button
+                id="adminAppealApproveBtn"
+                class="admin-moderation-action"
+                type="button"
+            >
+                Одобрить
+            </button>
+
+            <button
+                id="adminAppealRejectBtn"
+                class="admin-moderation-action admin-moderation-action-danger"
+                type="button"
+            >
+                Отклонить
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     USERS
+========================================================= -->
+
         <div
             id="adminUsersSection"
             class="admin-section hidden"
