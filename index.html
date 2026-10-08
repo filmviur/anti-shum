@@ -9850,42 +9850,100 @@ async function initializeUser() {
                 );
             }
 
-            /* Устанавливаем причину */
+           
+/* Устанавливаем причину */
 
-            blockedReason.textContent =
-                userStatus.block_reason ||
-                "Нарушение правил проекта";
+blockedReason.textContent =
+    userStatus.block_reason ||
+    "Нарушение правил проекта";
 
 
-/* Определяем право на объяснительную */
+/* Проверяем право на объяснительную */
 
 const appealAvailableBox =
     document.getElementById("blockedAppealAvailable");
 
+const appealFormBox =
+    document.getElementById("blockedAppealFormBox");
+
+const appealPendingBox =
+    document.getElementById("blockedAppealPending");
+
+const appealRejectedBox =
+    document.getElementById("blockedAppealRejected");
+
 const appealFinalBox =
     document.getElementById("blockedAppealFinal");
 
-/* Сначала скрываем оба варианта */
+const appealRejectionReason =
+    document.getElementById("appealRejectionReason");
 
-appealAvailableBox.classList.add("hidden");
-appealFinalBox.classList.add("hidden");
 
-/* Проверяем количество блокировок */
+/* Скрываем все варианты */
 
-if (
-    userStatus.block_count === 1 &&
-    userStatus.appeal_used === false
-) {
+[
+    appealAvailableBox,
+    appealFormBox,
+    appealPendingBox,
+    appealRejectedBox,
+    appealFinalBox
+].forEach(function(element) {
+    element.classList.add("hidden");
+});
 
-    appealAvailableBox.classList.remove("hidden");
 
-} else if (
-    userStatus.block_count >= 2
-) {
+/* Повторная блокировка */
+
+if (userStatus.block_count >= 2) {
 
     appealFinalBox.classList.remove("hidden");
 
 }
+
+/* Первая блокировка */
+
+else if (
+    userStatus.block_count === 1 &&
+    userStatus.appeal_used === false
+) {
+
+    const { data: appeal, error: appealError } =
+        await supabaseClient
+            .from("block_appeals")
+            .select("status, admin_response")
+            .eq("user_id", currentUser.id)
+            .maybeSingle();
+
+    if (appealError) {
+        throw appealError;
+    }
+
+    if (!appeal) {
+
+        /* Объяснительная ещё не отправлена */
+
+        appealAvailableBox.classList.remove("hidden");
+
+    } else if (appeal.status === "pending") {
+
+        /* Объяснительная рассматривается */
+
+        appealPendingBox.classList.remove("hidden");
+
+    } else if (appeal.status === "rejected") {
+
+        /* Администратор отказал */
+
+        appealRejectionReason.textContent =
+            appeal.admin_response ||
+            "Решение о восстановлении доступа отрицательное.";
+
+        appealRejectedBox.classList.remove("hidden");
+
+    }
+
+}
+
 
             
             /* Скрываем остальные экраны */
