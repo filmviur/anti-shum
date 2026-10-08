@@ -9860,6 +9860,11 @@ blockedReason.textContent =
 
 /* Проверяем право на объяснительную */
 
+console.log("APPEAL CHECK STARTED", {
+    block_count: userStatus.block_count,
+    appeal_used: userStatus.appeal_used
+});
+            
 const appealAvailableBox =
     document.getElementById("blockedAppealAvailable");
 
