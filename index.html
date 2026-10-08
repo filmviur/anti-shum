@@ -11517,13 +11517,7 @@ try {
             currentAnswer =
                 existingAnswer;
 
-            const endAt =
-                new Date(
-                    existingAnswer.created_at
-                ).getTime() +
-                SESSION_MINUTES *
-                60 *
-                1000;
+            const endAt = getTodaySessionEnd();
 
             if (Date.now() < endAt) {
 
