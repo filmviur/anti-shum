@@ -16887,6 +16887,7 @@ appealFields.forEach(function(field) {
 updateAppealCounter();
 
 
+
 /* =========================================================
    BLOCK APPEAL — FORM SUBMIT
 ========================================================= */
@@ -16897,22 +16898,131 @@ const blockedAppealForm =
 const appealFormMessage =
     document.getElementById("appealFormMessage");
 
-blockedAppealForm.addEventListener("submit", function(event) {
+let appealSubmitting = false;
 
-    event.preventDefault();
+blockedAppealForm.addEventListener(
+    "submit",
+    async function(event) {
 
-    if (!updateAppealCounter()) {
+        event.preventDefault();
+
+        if (appealSubmitting) {
+            return;
+        }
+
+        if (!updateAppealCounter()) {
+
+            appealFormMessage.textContent =
+                "Пожалуйста, подробно ответь на все четыре вопроса.";
+
+            return;
+        }
+
+        appealSubmitting = true;
+        appealSubmitBtn.disabled = true;
 
         appealFormMessage.textContent =
-            "Пожалуйста, подробно ответь на все четыре вопроса.";
+            "Отправляем объяснительную...";
 
-        return;
+        try {
+
+            const { data: authData, error: authError } =
+                await supabaseClient.auth.getUser();
+
+            if (authError || !authData.user) {
+                throw new Error(
+                    "Сессия завершена. Войди в аккаунт повторно."
+                );
+            }
+
+            const userId = authData.user.id;
+
+            const { data: userStatus, error: statusError } =
+                await supabaseClient
+                    .from("users")
+                    .select("is_blocked, block_count, appeal_used")
+                    .eq("id", userId)
+                    .single();
+
+            if (statusError) {
+                throw statusError;
+            }
+
+            if (
+                !userStatus.is_blocked ||
+                userStatus.block_count !== 1 ||
+                userStatus.appeal_used !== false
+            ) {
+                throw new Error(
+                    "Для этого аккаунта подача объяснительной недоступна."
+                );
+            }
+
+            const { error: insertError } =
+                await supabaseClient
+                    .from("block_appeals")
+                    .insert({
+                        user_id: userId,
+
+                        incident_explanation:
+                            document.getElementById("appealIncident").value.trim(),
+
+                        rule_understanding:
+                            document.getElementById("appealRules").value.trim(),
+
+                        impact_on_others:
+                            document.getElementById("appealImpact").value.trim(),
+
+                        future_changes:
+                            document.getElementById("appealFuture").value.trim()
+                    });
+
+            if (insertError) {
+                throw insertError;
+            }
+
+            /* Скрываем форму */
+
+            document.getElementById(
+                "blockedAppealFormBox"
+            ).classList.add("hidden");
+
+            document.getElementById(
+                "blockedAppealAvailable"
+            ).classList.add("hidden");
+
+            /* Показываем ожидание решения */
+
+            document.getElementById(
+                "blockedAppealPending"
+            ).classList.remove("hidden");
+
+            blockedAppealForm.reset();
+
+        } catch (error) {
+
+            console.error(
+                "Block appeal submission error:",
+                error
+            );
+
+            appealFormMessage.textContent =
+                error?.code === "23505"
+                    ? "Ты уже отправил объяснительную. Повторная отправка недоступна."
+                    : (
+                        error?.message ||
+                        "Не удалось отправить объяснительную. Попробуй позже."
+                    );
+
+        } finally {
+
+            appealSubmitting = false;
+            updateAppealCounter();
+
+        }
     }
+);
 
-    appealFormMessage.textContent =
-        "Объяснительная заполнена. Отправка пока не подключена.";
-
-});
 
     
 /* =========================================================
