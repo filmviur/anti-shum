@@ -15635,6 +15635,137 @@ selectedAdminAppealId = appeal.id;
     }
 }
 
+
+/* =========================================================
+   ADMIN APPEALS — РЕШЕНИЕ АДМИНИСТРАТОРА
+========================================================= */
+
+let adminAppealDecisionSaving = false;
+
+async function saveAdminAppealDecision(decision) {
+
+    if (adminAppealDecisionSaving) {
+        return;
+    }
+
+    if (!currentUser || !selectedAdminAppealId) {
+        alert("Сначала выбери объяснительную.");
+        return;
+    }
+
+    const responseField =
+        document.getElementById("adminAppealResponse");
+
+    const response = responseField.value.trim();
+
+    if (!response) {
+        alert("Сначала напиши причину своего решения.");
+        responseField.focus();
+        return;
+    }
+
+    const decisionText =
+        decision === "approved"
+            ? "одобрить"
+            : "отклонить";
+
+    if (!confirm(
+        "Ты действительно хочешь " +
+        decisionText +
+        " эту объяснительную?"
+    )) {
+        return;
+    }
+
+    const approveBtn =
+        document.getElementById("adminAppealApproveBtn");
+
+    const rejectBtn =
+        document.getElementById("adminAppealRejectBtn");
+
+    adminAppealDecisionSaving = true;
+
+    approveBtn.disabled = true;
+    rejectBtn.disabled = true;
+
+    try {
+
+        const { data, error } =
+            await supabaseClient
+                .from("block_appeals")
+                .update({
+                    status: decision,
+                    admin_response: response,
+                    reviewed_at: new Date().toISOString()
+                })
+                .eq("id", selectedAdminAppealId)
+                .eq("status", "pending")
+                .select("id");
+
+        if (error) {
+            throw error;
+        }
+
+        if (!data || data.length !== 1) {
+            throw new Error(
+                "Заявка уже обработана или решение недоступно."
+            );
+        }
+
+        selectedAdminAppealId = null;
+
+        alert(
+            decision === "approved"
+                ? "Объяснительная одобрена. Доступ восстановлен."
+                : "Объяснительная отклонена. Решение сохранено."
+        );
+
+        await loadAdminAppeals();
+
+    } catch (error) {
+
+        console.error(
+            "Admin appeal decision error:",
+            error
+        );
+
+        alert(
+            "Не удалось сохранить решение: " +
+            (error.message || "Неизвестная ошибка")
+        );
+
+        approveBtn.disabled = false;
+        rejectBtn.disabled = false;
+
+    } finally {
+
+        adminAppealDecisionSaving = false;
+
+    }
+}
+
+
+/* КНОПКА ОДОБРЕНИЯ */
+
+document.getElementById(
+    "adminAppealApproveBtn"
+).addEventListener("click", function() {
+
+    saveAdminAppealDecision("approved");
+
+});
+
+
+/* КНОПКА ОТКЛОНЕНИЯ */
+
+document.getElementById(
+    "adminAppealRejectBtn"
+).addEventListener("click", function() {
+
+    saveAdminAppealDecision("rejected");
+
+});
+
     
 /* =========================================================
    ADMIN MODERATION
