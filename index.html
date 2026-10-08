@@ -6934,6 +6934,7 @@
 }
 
 
+
 /* =========================================================
    ОБЪЯСНИТЕЛЬНАЯ — ОТДЕЛЬНОЕ ОФОРМЛЕНИЕ
 ========================================================= */
@@ -6963,6 +6964,73 @@
 .blocked-card:has(#blockedAppealFormBox:not(.hidden))
 > .blocked-divider {
     display: none;
+}
+
+
+/* =========================================================
+   АДМИН-ПАНЕЛЬ — ОТВЕТ НА ОБЪЯСНИТЕЛЬНУЮ
+========================================================= */
+
+/* Поле ответа администратора */
+
+#adminAppealResponse {
+    display: block;
+
+    width: 100%;
+    min-height: 130px;
+
+    box-sizing: border-box;
+
+    margin-top: 12px;
+    padding: 15px 17px;
+
+    border: 1px solid rgba(201, 168, 106, 0.28);
+    border-radius: 6px;
+
+    background: rgba(16, 13, 11, 0.65);
+
+    color: #e6d8c1;
+
+    font-family: Georgia, serif;
+    font-size: 14px;
+    line-height: 1.8;
+
+    resize: vertical;
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+/* Подсказка внутри поля */
+
+#adminAppealResponse::placeholder {
+    color: #8e8274;
+    opacity: 0.85;
+}
+
+/* Подсветка активного поля */
+
+#adminAppealResponse:focus {
+    border-color: rgba(214, 184, 117, 0.7);
+
+    box-shadow:
+        0 0 0 3px rgba(201, 168, 106, 0.08);
+}
+
+/* Поле после принятия решения */
+
+#adminAppealResponse:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+/* Правильный перенос длинных ответов */
+
+#adminAppealDetails .admin-moderation-answer {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 
 
