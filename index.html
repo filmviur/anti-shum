@@ -11939,8 +11939,13 @@ if (answerIds.length) {
         }
 
 
-        feed.innerHTML = "";
+               // Повторная проверка после загрузки данных.
+        if (Date.now() >= sessionEndsAt) {
+            await finishSession();
+            return;
+        }
 
+        feed.innerHTML = "";
 
         for (const answer of answers) {
 
