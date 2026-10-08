@@ -15436,11 +15436,16 @@ document
     );
 
 
+
 /* =========================================================
    ADMIN APPEALS — ЗАГРУЗКА ОБЪЯСНИТЕЛЬНЫХ
 ========================================================= */
 
+/* ID выбранной объяснительной */
+let selectedAdminAppealId = null;
+
 async function loadAdminAppeals() {
+
 
     const list =
         document.getElementById("adminAppealsList");
