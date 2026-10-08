@@ -16800,6 +16800,34 @@ appealFields.forEach(function(field) {
 
 updateAppealCounter();
 
+
+/* =========================================================
+   BLOCK APPEAL — FORM SUBMIT
+========================================================= */
+
+const blockedAppealForm =
+    document.getElementById("blockedAppealForm");
+
+const appealFormMessage =
+    document.getElementById("appealFormMessage");
+
+blockedAppealForm.addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    if (!updateAppealCounter()) {
+
+        appealFormMessage.textContent =
+            "Пожалуйста, подробно ответь на все четыре вопроса.";
+
+        return;
+    }
+
+    appealFormMessage.textContent =
+        "Объяснительная заполнена. Отправка пока не подключена.";
+
+});
+
     
 /* =========================================================
    BLOCK APPEAL — OPEN / CLOSE
