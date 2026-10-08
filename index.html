@@ -12869,6 +12869,7 @@ adminBackBtn.addEventListener(
 );
 
 
+
 /* =========================
    ADMIN NAVIGATION
 ========================= */
@@ -12883,6 +12884,7 @@ adminNavButtons.forEach(
                 const sectionName =
                     button.dataset.adminSection;
 
+                /* Активная кнопка */
 
                 adminNavButtons.forEach(
                     function(item) {
@@ -12894,6 +12896,7 @@ adminNavButtons.forEach(
                     }
                 );
 
+                /* Переключение разделов */
 
                 adminSections.forEach(
                     function(section) {
@@ -12909,29 +12912,29 @@ adminNavButtons.forEach(
                     }
                 );
 
-
                 /* МОДЕРАЦИЯ */
 
-                if (
-                    sectionName === "moderation"
-                ) {
-
+                if (sectionName === "moderation") {
                     await loadAdminModeration();
                 }
 
+                /* ОБЪЯСНИТЕЛЬНЫЕ */
+
+                if (sectionName === "appeals") {
+                    await loadAdminAppeals();
+                }
 
                 /* ПОДДЕРЖКА */
 
-                if (
-                    sectionName === "support"
-                ) {
-
+                if (sectionName === "support") {
                     await loadAdminSupportConversations();
                 }
+
             }
         );
     }
 );
+
 
 
 /* =========================
