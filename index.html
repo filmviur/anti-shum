@@ -16749,6 +16749,59 @@ installBtn.addEventListener(
 
     
 /* =========================================================
+   BLOCK APPEAL — CHARACTER COUNTER
+========================================================= */
+
+const appealFields = [
+    document.getElementById("appealIncident"),
+    document.getElementById("appealRules"),
+    document.getElementById("appealImpact"),
+    document.getElementById("appealFuture")
+];
+
+const appealCounter =
+    document.getElementById("appealCharacterCounter");
+
+const appealSubmitBtn =
+    document.getElementById("submitAppealBtn");
+
+
+function updateAppealCounter() {
+
+    const answers = appealFields.map(function(field) {
+        return field.value.trim();
+    });
+
+    const total = answers.reduce(function(sum, answer) {
+        return sum + answer.length;
+    }, 0);
+
+    const allAnswersValid = answers.every(function(answer) {
+        return answer.length >= 40;
+    });
+
+    const isValid =
+        total >= 500 &&
+        total <= 3000 &&
+        allAnswersValid;
+
+    appealCounter.textContent =
+        total + " / 3000 символов (минимум 500)";
+
+    appealSubmitBtn.disabled = !isValid;
+
+    return isValid;
+}
+
+
+appealFields.forEach(function(field) {
+    field.addEventListener("input", updateAppealCounter);
+});
+
+updateAppealCounter();
+
+    
+/* =========================================================
    BLOCK APPEAL — OPEN / CLOSE
 ========================================================= */
 
