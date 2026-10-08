@@ -11606,17 +11606,11 @@ try {
 
 
         /*
-            created_at берём именно с сервера Supabase.
-            Не localStorage.
-        */
+    Время закрытия общее для всех:
+    20:20 по киевскому времени.
+*/
 
-        sessionEndsAt =
-            new Date(
-                data.created_at
-            ).getTime() +
-            SESSION_MINUTES *
-            60 *
-            1000;
+sessionEndsAt = getTodaySessionEnd();
 
 
         await openFeed();
