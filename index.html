@@ -6860,6 +6860,7 @@
 
 
 
+
 /* =========================================================
    РЕТРО-ПЕРЕЛИСТЫВАНИЕ ЦИФР
 ========================================================= */
@@ -6932,6 +6933,39 @@
 
 }
 
+
+/* =========================================================
+   ОБЪЯСНИТЕЛЬНАЯ — ОТДЕЛЬНОЕ ОФОРМЛЕНИЕ
+========================================================= */
+
+/* Скрываем старый заголовок, описание,
+   причину блокировки и нижнюю подпись */
+
+.blocked-card:has(#blockedAppealFormBox:not(.hidden))
+> .blocked-title,
+
+.blocked-card:has(#blockedAppealFormBox:not(.hidden))
+> .blocked-description,
+
+.blocked-card:has(#blockedAppealFormBox:not(.hidden))
+> .blocked-reason-box,
+
+.blocked-card:has(#blockedAppealFormBox:not(.hidden))
+> .blocked-footer,
+
+.blocked-card:has(#blockedAppealFormBox:not(.hidden))
+> #blockedBackBtn {
+    display: none;
+}
+
+/* Скрываем разделитель старого экрана */
+
+.blocked-card:has(#blockedAppealFormBox:not(.hidden))
+> .blocked-divider {
+    display: none;
+}
+
+
 </style>
 </head>
 
@@ -6944,6 +6978,7 @@
 <!-- =========================
      AUTH
 ========================= -->
+
 
 <section id="authScreen" class="auth-screen">
 
