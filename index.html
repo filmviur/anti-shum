@@ -9861,20 +9861,16 @@ async function initializeUser() {
             authScreen.classList.add("hidden");
             appScreen.classList.add("hidden");
 
-            /* Завершаем сессию пользователя */
+            
+/* Сохраняем авторизацию для подачи объяснительной,
+   но не допускаем пользователя к дневнику */
 
-            const { error: signOutError } =
-                await supabaseClient.auth.signOut();
+clearTimers();
 
-            if (signOutError) {
-                console.error(
-                    "Blocked user sign out error:",
-                    signOutError
-                );
-            }
+appInitializedUserId = null;
 
-            currentUser = null;
-            appInitializedUserId = null;
+authScreen.classList.add("hidden");
+appScreen.classList.add("hidden");
 
             /* Показываем экран блокировки */
 
