@@ -11055,12 +11055,24 @@ async function loadTodayQuestionAndState() {
         return;
     }
 
-    const projectDay =
+        const projectDay =
         getProjectDay();
 
-    if (projectDay <= 0) {
+    const now = getKyivDateParts();
 
-        showClosedScreen();
+    const currentMinutes =
+        now.hour * 60 + now.minute;
+
+    const sessionStartMinutes = 20 * 60;
+    const sessionEndMinutes = 20 * 60 + 20;
+
+    if (
+        projectDay <= 0 ||
+        currentMinutes < sessionStartMinutes ||
+        currentMinutes >= sessionEndMinutes
+    ) {
+
+        await finishSession();
 
         return;
     }
