@@ -9856,6 +9856,38 @@ async function initializeUser() {
                 userStatus.block_reason ||
                 "Нарушение правил проекта";
 
+
+/* Определяем право на объяснительную */
+
+const appealAvailableBox =
+    document.getElementById("blockedAppealAvailable");
+
+const appealFinalBox =
+    document.getElementById("blockedAppealFinal");
+
+/* Сначала скрываем оба варианта */
+
+appealAvailableBox.classList.add("hidden");
+appealFinalBox.classList.add("hidden");
+
+/* Проверяем количество блокировок */
+
+if (
+    userStatus.block_count === 1 &&
+    userStatus.appeal_used === false
+) {
+
+    appealAvailableBox.classList.remove("hidden");
+
+} else if (
+    userStatus.block_count >= 2
+) {
+
+    appealFinalBox.classList.remove("hidden");
+
+}
+
+            
             /* Скрываем остальные экраны */
 
             authScreen.classList.add("hidden");
