@@ -12075,20 +12075,18 @@ if (answerIds.length) {
 
 
                // Повторная проверка после загрузки данных.
-        if (Date.now() >= sessionEndsAt) {
-            await finishSession();
-            return;
-        }
+if (!isAdminPreview && Date.now() >= sessionEndsAt) {
+    await finishSession();
+    return;
+}
 
         feed.innerHTML = "";
 
         for (const answer of answers) {
 
-            if (
-                Date.now() >= sessionEndsAt
-            ) {
-                break;
-            }
+            if (!isAdminPreview && Date.now() >= sessionEndsAt) {
+    break;
+}
 
             const user =
                 usersMap.get(
