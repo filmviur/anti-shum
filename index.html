@@ -17812,10 +17812,10 @@ if (guestSupportBtn) {
 
                 supportModal.classList.remove("hidden");
 
-                supportMessages.innerHTML = "";
+                await loadSupportMessages();
+await markSupportMessagesAsRead();
 
-                supportInput.focus();
-
+supportInput.focus();
             } catch (error) {
 
                 console.error(
