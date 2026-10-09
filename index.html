@@ -13418,39 +13418,45 @@ async function loadAdminSupportConversations() {
             в отдельные диалоги.
         */
 
-        const conversations =
-            new Map();
+        
+const conversations = new Map();
 
+messages.forEach(message => {
 
-        messages.forEach(
-            message => {
+    const conversationKey = message.user_id
+        ? `user:${message.user_id}`
+        : message.guest_conversation_id
+            ? `guest:${message.guest_conversation_id}`
+            : null;
 
-                if (
-                    !conversations.has(
-                        message.user_id
-                    )
-                ) {
+    if (!conversationKey) {
+        return;
+    }
 
-                    conversations.set(
-                        message.user_id,
-                        {
-                            userId:
-                                message.user_id,
+    if (!conversations.has(conversationKey)) {
 
-                            lastMessage:
-                                message,
+        conversations.set(conversationKey, {
+            userId: message.user_id || null,
+            guestConversationId:
+                message.guest_conversation_id || null,
+            lastMessage: message,
+            unreadCount: 0
+        });
 
-                            unreadCount:
-                                0
-                        }
-                    );
-                }
+    }
 
+    const conversation =
+        conversations.get(conversationKey);
 
-                const conversation =
-                    conversations.get(
-                        message.user_id
-                    );
+    if (
+        message.is_from_admin === false &&
+        message.is_read === false
+    ) {
+        conversation.unreadCount += 1;
+    }
+
+});
+
 
 
                 /*
