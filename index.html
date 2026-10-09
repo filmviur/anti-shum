@@ -13628,9 +13628,10 @@ messages.forEach(message => {
                         );
 
 
-                        await openAdminSupportConversation(
-                            conversation.userId
-                        );
+                       await openAdminSupportConversation(
+    conversation.userId,
+    conversation.guestConversationId
+);
                     }
                 );
 
