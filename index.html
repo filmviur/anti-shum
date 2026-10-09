@@ -13690,25 +13690,22 @@ async function openAdminSupportConversation(
             Загружаем данные пользователя.
         */
 
-        const {
-            data: user,
-            error: userError
-        } =
-            await supabaseClient
-                .from("users")
-                .select(
-                    "id, display_name, email"
-                )
-                .eq(
-                    "id",
-                    userId
-                )
-                .maybeSingle();
+       
+let user = null;
 
+if (userId) {
+    const { data, error } = await supabaseClient
+        .from("users")
+        .select("id, display_name, email")
+        .eq("id", userId)
+        .maybeSingle();
 
-        if (userError) {
-            throw userError;
-        }
+    if (error) {
+        throw error;
+    }
+
+    user = data;
+}
 
 
         /*
