@@ -13666,11 +13666,16 @@ messages.forEach(message => {
    OPEN SUPPORT CONVERSATION
 ========================= */
 
+
 async function openAdminSupportConversation(
-    userId
+    userId,
+    guestConversationId = null
 ) {
 
-    if (!currentUser || !userId) {
+    if (
+        !currentUser ||
+        (!userId && !guestConversationId)
+    ) {
         return;
     }
 
