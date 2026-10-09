@@ -11851,6 +11851,29 @@ async function deleteAnswerPhoto(path) {
 // По умолчанию выключен.
 let adminFeedPreview = false;
 
+async function verifyAdminFeedAccess() {
+
+    if (!currentUser) {
+        return false;
+    }
+
+    const { data, error } =
+        await supabaseClient.rpc(
+            "is_anti_shum_admin"
+        );
+
+    if (error) {
+        console.error(
+            "Admin access check:",
+            error
+        );
+
+        return false;
+    }
+
+    return data === true;
+}
+
 async function openFeed() {
 
     if (!currentAnswer) {
