@@ -13912,9 +13912,12 @@ adminSupportSendBtn.addEventListener(
     async function() {
 
         if (
-            !currentUser ||
-            !selectedSupportUserId
-        ) {
+    !currentUser ||
+    (
+        !selectedSupportUserId &&
+        !selectedSupportGuestConversationId
+    )
+) {
 
             showNotice(
                 "Сначала выбери обращение."
