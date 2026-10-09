@@ -11910,15 +11910,22 @@ async function openFeed() {
 
 async function loadFeed() {
 
+    const isAdminPreview =
+        adminFeedPreview &&
+        await verifyAdminFeedAccess();
+
     if (
         !currentUser ||
         !currentQuestionId ||
-        !sessionEndsAt ||
-        Date.now() >= sessionEndsAt
+        (
+            !isAdminPreview &&
+            (
+                !sessionEndsAt ||
+                Date.now() >= sessionEndsAt
+            )
+        )
     ) {
-
         feed.innerHTML = "";
-
         return;
     }
 
