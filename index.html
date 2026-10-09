@@ -16998,17 +16998,19 @@ async function restoreModerationAnswer() {
         /* ВОССТАНАВЛИВАЕМ ОТВЕТ */
 
         const {
-            error: answerError
-        } =
-            await supabaseClient
-                .from("answers")
-                .update({
-                    is_hidden: false
-                })
-                .eq(
-                    "id",
-                    selectedModerationAnswerId
-                );
+    error: answerError
+} =
+    await supabaseClient
+        .rpc(
+            "admin_set_answer_hidden",
+            {
+                p_answer_id:
+                    selectedModerationAnswerId,
+
+                p_hidden:
+                    false
+            }
+        );
 
 
         if (answerError) {
