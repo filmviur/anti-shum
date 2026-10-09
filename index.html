@@ -16877,17 +16877,19 @@ adminModerationHideBtn.addEventListener(
             /* СКРЫВАЕМ ОТВЕТ */
 
             const {
-                error: answerError
-            } =
-                await supabaseClient
-                    .from("answers")
-                    .update({
-                        is_hidden: true
-                    })
-                    .eq(
-                        "id",
-                        selectedModerationAnswerId
-                    );
+    error: answerError
+} =
+    await supabaseClient
+        .rpc(
+            "admin_set_answer_hidden",
+            {
+                p_answer_id:
+                    selectedModerationAnswerId,
+
+                p_hidden:
+                    true
+            }
+        );
 
 
             if (answerError) {
