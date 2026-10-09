@@ -13726,16 +13726,20 @@ async function openAdminSupportConversation(
                 .select(
                     "id, user_id, message_text, is_from_admin, is_read, created_at"
                 )
-                .eq(
-                    "user_id",
-                    userId
-                )
-                .order(
-                    "created_at",
-                    {
-                        ascending: true
-                    }
-                );
+                
+.eq(
+    guestConversationId
+        ? "guest_conversation_id"
+        : "user_id",
+    guestConversationId || userId
+)
+.order(
+    "created_at",
+    {
+        ascending: true
+    }
+);
+
 
 
         if (messagesError) {
