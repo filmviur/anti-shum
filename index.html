@@ -13806,26 +13806,21 @@ adminSupportUserEmail.textContent =
             пользователя как прочитанные.
         */
 
-        const {
-            error: readError
-        } =
-            await supabaseClient
-                .from("support_messages")
-                .update({
-                    is_read: true
-                })
-                .eq(
-                    "user_id",
-                    userId
-                )
-                .eq(
-                    "is_from_admin",
-                    false
-                )
-                .eq(
-                    "is_read",
-                    false
-                );
+        
+const { error: readError } = await supabaseClient
+    .from("support_messages")
+    .update({
+        is_read: true
+    })
+    .eq(
+        guestConversationId
+            ? "guest_conversation_id"
+            : "user_id",
+        guestConversationId || userId
+    )
+    .eq("is_from_admin", false)
+    .eq("is_read", false);
+
 
 
         if (readError) {
