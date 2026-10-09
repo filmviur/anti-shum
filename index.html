@@ -13326,7 +13326,7 @@ async function loadAdminSupportConversations() {
             await supabaseClient
                 .from("support_messages")
                 .select(
-                    "id, user_id, message_text, is_from_admin, is_read, created_at"
+                    "id, user_id, guest_conversation_id, message_text, is_from_admin, is_read, created_at"
                 )
                 .order(
                     "created_at",
