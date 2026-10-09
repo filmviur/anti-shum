@@ -17687,6 +17687,39 @@ supportBtn.addEventListener(
 );
 
 /* =========================================================
+   GUEST SUPPORT SESSION
+========================================================= */
+
+async function ensureGuestSupportSession() {
+
+    const { data: sessionData, error: sessionError } =
+        await supabaseClient.auth.getSession();
+
+    if (sessionError) {
+        throw sessionError;
+    }
+
+    // Уже есть сессия — повторно входить не нужно.
+    if (sessionData.session) {
+        return sessionData.session;
+    }
+
+    // Создаём анонимную сессию Supabase.
+    const { data, error } =
+        await supabaseClient.auth.signInAnonymously();
+
+    if (error) {
+        throw error;
+    }
+
+    if (!data.session) {
+        throw new Error("Не удалось создать гостевую сессию.");
+    }
+
+    return data.session;
+}
+    
+/* =========================================================
    GUEST SUPPORT BUTTON
 ========================================================= */
 
