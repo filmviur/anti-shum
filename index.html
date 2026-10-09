@@ -10352,55 +10352,103 @@ function getFriendlyAuthError(error) {
 }
 
 
+
 /* =========================================================
    SESSION RESTORE
 ========================================================= */
 
-supabaseClient.auth.onAuthStateChange(
-    async function(event, session) {
+/*
+    Определяем анонимную сессию Supabase.
+    Гость не считается зарегистрированным пользователем.
+*/
 
-        currentSession =
-            session;
+function isGuestSession(session) {
+    return session?.user?.is_anonymous === true;
+}
+
+
+/*
+    Показываем экран авторизации.
+*/
+
+function showAuthScreen() {
+
+    authScreen.classList.remove("hidden");
+    appScreen.classList.add("hidden");
+}
+
+
+/*
+    Следим за изменениями авторизации.
+*/
+
+supabaseClient.auth.onAuthStateChange(
+    function(event, session) {
+
+        currentSession = session;
 
         currentUser =
-            session?.user || null;
+            session && !isGuestSession(session)
+                ? session.user
+                : null;
 
-        if (
-            event === "SIGNED_OUT"
-        ) {
 
-            appInitializedUserId =
-                null;
+        /*
+            Пользователь вышел из аккаунта.
+        */
+
+        if (event === "SIGNED_OUT") {
+
+            appInitializedUserId = null;
 
             clearTimers();
 
-            authScreen.classList.remove(
-                "hidden"
-            );
-
-            appScreen.classList.add(
-                "hidden"
-            );
+            showAuthScreen();
 
             setAuthMode("login");
 
             return;
         }
 
+
+        /*
+            Гость остаётся на экране авторизации.
+            Основное приложение ему недоступно.
+        */
+
+        if (isGuestSession(session)) {
+
+            appInitializedUserId = null;
+
+            clearTimers();
+
+            showAuthScreen();
+
+            return;
+        }
+
+
+        /*
+            Зарегистрированный пользователь
+            входит в основное приложение.
+        */
+
         if (
-            session &&
             currentUser &&
             appInitializedUserId !== currentUser.id
         ) {
 
-            /*
-                Небольшая задержка нужна, чтобы
-                auth state успел полностью установиться.
-            */
-
             setTimeout(
                 () => {
-                    initializeUser();
+
+                    if (
+                        currentUser &&
+                        !isGuestSession(currentSession) &&
+                        appInitializedUserId !== currentUser.id
+                    ) {
+                        initializeUser();
+                    }
+
                 },
                 0
             );
@@ -10409,40 +10457,50 @@ supabaseClient.auth.onAuthStateChange(
 );
 
 
+/*
+    Восстанавливаем сессию после
+    перезагрузки или повторного открытия сайта.
+*/
+
 async function restoreSession() {
 
     try {
 
-        const {
-            data,
-            error
-        } =
+        const { data, error } =
             await supabaseClient.auth.getSession();
 
         if (error) {
             throw error;
         }
 
-        currentSession =
-            data.session;
+        currentSession = data.session;
 
         currentUser =
-            data.session?.user || null;
+            currentSession &&
+            !isGuestSession(currentSession)
+                ? currentSession.user
+                : null;
 
-        if (currentSession && currentUser) {
+
+        /*
+            Обычный зарегистрированный пользователь.
+        */
+
+        if (currentUser) {
 
             await initializeUser();
 
-        } else {
-
-            authScreen.classList.remove(
-                "hidden"
-            );
-
-            appScreen.classList.add(
-                "hidden"
-            );
+            return;
         }
+
+
+        /*
+            Гость или посетитель без сессии.
+        */
+
+        appInitializedUserId = null;
+
+        showAuthScreen();
 
     } catch (error) {
 
@@ -10451,15 +10509,14 @@ async function restoreSession() {
             error
         );
 
-        authScreen.classList.remove(
-            "hidden"
-        );
+        currentSession = null;
+        currentUser = null;
+        appInitializedUserId = null;
 
-        appScreen.classList.add(
-            "hidden"
-        );
+        showAuthScreen();
     }
 }
+
 
 
 /* =========================================================
