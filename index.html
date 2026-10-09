@@ -13496,8 +13496,9 @@ messages.forEach(message => {
 
 
                 const displayName =
-                    user?.display_name ||
-                    "Пользователь";
+    conversation.guestConversationId
+        ? "Гость"
+        : (user?.display_name || "Пользователь");
 
 
                 const lastText =
