@@ -11884,35 +11884,29 @@ async function openFeed() {
         return;
     }
 
-    if (!sessionEndsAt) {
+    if (!isAdminPreview) {
 
-    sessionEndsAt = getTodaySessionEnd();
+        if (!sessionEndsAt) {
+            sessionEndsAt = getTodaySessionEnd();
+        }
 
-}
-
-
-    if (
-        Date.now() >= sessionEndsAt
-    ) {
-
-        await finishSession();
-
-        return;
+        if (Date.now() >= sessionEndsAt) {
+            await finishSession();
+            return;
+        }
     }
-
 
     showOnly(feedView);
 
     feed.innerHTML =
         "<div style='color:#888;'>Загрузка ответов...</div>";
 
-
     await loadFeed();
 
-
-    startSessionTimer();
+    if (!isAdminPreview) {
+        startSessionTimer();
+    }
 }
-
 
 async function loadFeed() {
 
