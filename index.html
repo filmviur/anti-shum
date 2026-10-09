@@ -17435,66 +17435,85 @@ async function startSupportRealtime() {
             );
 }
     
+
 /* =========================================================
    SUPPORT
 ========================================================= */
 
 /*
-    Проверяем, есть ли у пользователя
-    непрочитанные ответы поддержки.
+    Определяем гостевую переписку.
+*/
+
+function getGuestSupportConversationId() {
+
+    if (
+        currentUser ||
+        !isGuestSession(currentSession)
+    ) {
+        return null;
+    }
+
+    return window.guestSupportConversationId || null;
+}
+
+
+/*
+    Проверяем непрочитанные ответы поддержки.
 */
 
 async function checkSupportNotifications() {
 
-    if (
-        !currentUser ||
-        !supportNotificationBadge
-    ) {
+    if (!supportNotificationBadge) {
         return;
     }
 
+    const guestConversationId =
+        getGuestSupportConversationId();
+
+    if (!currentUser && !guestConversationId) {
+        supportNotificationBadge.classList.add("hidden");
+        return;
+    }
 
     try {
 
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
+        let query =
+            supabaseClient
                 .from("support_messages")
                 .select("id")
-                .eq(
-                    "user_id",
-                    currentUser.id
-                )
-                .eq(
-                    "is_from_admin",
-                    true
-                )
-                .eq(
-                    "is_read",
-                    false
-                )
-                .limit(1);
+                .eq("is_from_admin", true)
+                .eq("is_read", false);
 
+        if (currentUser) {
+
+            query = query.eq(
+                "user_id",
+                currentUser.id
+            );
+
+        } else {
+
+            query = query.eq(
+                "guest_conversation_id",
+                guestConversationId
+            );
+        }
+
+        const { data, error } =
+            await query.limit(1);
 
         if (error) {
             throw error;
         }
 
-
         const hasUnread =
             Array.isArray(data) &&
             data.length > 0;
 
-
-        supportNotificationBadge
-            .classList
-            .toggle(
-                "hidden",
-                !hasUnread
-            );
-
+        supportNotificationBadge.classList.toggle(
+            "hidden",
+            !hasUnread
+        );
 
     } catch (error) {
 
@@ -17507,52 +17526,53 @@ async function checkSupportNotifications() {
 
 
 /*
-    Отмечаем ответы поддержки
-    как прочитанные.
+    Отмечаем ответы поддержки как прочитанные.
 */
 
 async function markSupportMessagesAsRead() {
 
-    if (!currentUser) {
+    const guestConversationId =
+        getGuestSupportConversationId();
+
+    if (!currentUser && !guestConversationId) {
         return;
     }
 
-
     try {
 
-        const {
-            error
-        } =
-            await supabaseClient
+        let query =
+            supabaseClient
                 .from("support_messages")
                 .update({
                     is_read: true
                 })
-                .eq(
-                    "user_id",
-                    currentUser.id
-                )
-                .eq(
-                    "is_from_admin",
-                    true
-                )
-                .eq(
-                    "is_read",
-                    false
-                );
+                .eq("is_from_admin", true)
+                .eq("is_read", false);
 
+        if (currentUser) {
+
+            query = query.eq(
+                "user_id",
+                currentUser.id
+            );
+
+        } else {
+
+            query = query.eq(
+                "guest_conversation_id",
+                guestConversationId
+            );
+        }
+
+        const { error } = await query;
 
         if (error) {
             throw error;
         }
 
-
         supportNotificationBadge
             ?.classList
-            .add(
-                "hidden"
-            );
-
+            .add("hidden");
 
     } catch (error) {
 
@@ -17565,86 +17585,77 @@ async function markSupportMessagesAsRead() {
 
 
 /*
-    Загружаем переписку пользователя
-    с поддержкой.
+    Загружаем полную переписку с поддержкой.
+    Работает для пользователей и гостей.
 */
 
 async function loadSupportMessages() {
 
-    if (!currentUser) {
+    const guestConversationId =
+        getGuestSupportConversationId();
+
+    if (!currentUser && !guestConversationId) {
         return;
     }
 
-
     try {
 
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
+        let query =
+            supabaseClient
                 .from("support_messages")
                 .select(
                     "id, message_text, is_from_admin, is_read, created_at"
-                )
-                .eq(
-                    "user_id",
-                    currentUser.id
-                )
-                .order(
-                    "created_at",
-                    {
-                        ascending: true
-                    }
                 );
 
+        if (currentUser) {
+
+            query = query.eq(
+                "user_id",
+                currentUser.id
+            );
+
+        } else {
+
+            query = query.eq(
+                "guest_conversation_id",
+                guestConversationId
+            );
+        }
+
+        const { data, error } =
+            await query.order(
+                "created_at",
+                {
+                    ascending: true
+                }
+            );
 
         if (error) {
             throw error;
         }
 
+        supportMessages.innerHTML = "";
 
-        supportMessages.innerHTML =
-            "";
+        (data || []).forEach(message => {
 
+            const messageElement =
+                document.createElement("div");
 
-        if (
-            !data ||
-            data.length === 0
-        ) {
-            return;
-        }
+            messageElement.className =
+                message.is_from_admin
+                    ? "support-message support-message-admin"
+                    : "support-message support-message-user";
 
+            messageElement.textContent =
+                message.message_text;
 
-        data.forEach(
-            message => {
-
-                const messageElement =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                messageElement.className =
-                    message.is_from_admin
-                        ? "support-message support-message-admin"
-                        : "support-message support-message-user";
-
-
-                messageElement.textContent =
-                    message.message_text;
-
-
-                supportMessages.appendChild(
-                    messageElement
-                );
-            }
-        );
-
+            supportMessages.appendChild(
+                messageElement
+            );
+        });
 
         supportMessages.scrollTop =
             supportMessages.scrollHeight;
-
 
     } catch (error) {
 
@@ -17652,39 +17663,37 @@ async function loadSupportMessages() {
             "Support load error:",
             error
         );
+
+        showNotice(
+            "Не удалось загрузить переписку."
+        );
     }
 }
 
 
 /*
-    Открытие поддержки.
+    Открытие поддержки зарегистрированным пользователем.
 */
 
 supportBtn.addEventListener(
     "click",
     async function() {
 
-        supportModal.classList.remove(
-            "hidden"
-        );
-
+        supportModal.classList.remove("hidden");
 
         await loadSupportMessages();
 
-
         /*
-            После того как пользователь
-            увидел переписку,
-            ответы поддержки считаются
-            прочитанными.
+            После открытия переписки
+            отмечаем ответы как прочитанные.
         */
 
         await markSupportMessagesAsRead();
 
-
         supportInput.focus();
     }
 );
+
 
 /* =========================================================
    GUEST SUPPORT SESSION
