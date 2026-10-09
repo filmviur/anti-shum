@@ -13983,9 +13983,12 @@ const { error } = await supabaseClient
                 "";
 
 
-            await openAdminSupportConversation(
-                selectedSupportUserId
-            );
+            
+await openAdminSupportConversation(
+    selectedSupportUserId,
+    selectedSupportGuestConversationId
+);
+
 
 
             await loadAdminSupportConversations();
