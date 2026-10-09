@@ -9710,6 +9710,11 @@ const takePhotoBtn =
 const supportModal =
     document.getElementById("supportModal");
 
+// Переносим окно поддержки за пределы скрываемого appScreen.
+// Теперь оно доступно и на экране входа.
+
+document.body.appendChild(supportModal);
+    
 const closeSupportBtn =
     document.getElementById("closeSupportBtn");
 
