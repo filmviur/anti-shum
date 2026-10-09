@@ -17686,7 +17686,43 @@ supportBtn.addEventListener(
     }
 );
 
+/* =========================================================
+   GUEST SUPPORT BUTTON
+========================================================= */
 
+const guestSupportBtn =
+    document.getElementById("guestSupportBtn");
+
+if (guestSupportBtn) {
+
+    guestSupportBtn.addEventListener(
+        "click",
+        async function() {
+
+            supportModal.classList.remove("hidden");
+
+            /*
+                Пока показываем существующую
+                переписку, если пользователь
+                авторизован.
+            */
+
+            if (currentUser) {
+
+                await loadSupportMessages();
+                await markSupportMessagesAsRead();
+
+            } else {
+
+                supportMessages.innerHTML = "";
+
+            }
+
+            supportInput.focus();
+        }
+    );
+}
+    
 /*
     Закрытие поддержки.
 */
