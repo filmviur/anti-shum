@@ -11874,6 +11874,47 @@ async function verifyAdminFeedAccess() {
     return data === true;
 }
 
+async function openAdminDayFeed(day) {
+
+    const isAdmin = await verifyAdminFeedAccess();
+
+    if (!isAdmin) {
+        showNotice("Нет прав администратора.");
+        return;
+    }
+
+    const dayNumber = Number(day);
+
+    if (
+        !Number.isInteger(dayNumber) ||
+        dayNumber < 1 ||
+        dayNumber > 365
+    ) {
+        showNotice("Некорректный день проекта.");
+        return;
+    }
+
+    const { data: question, error } =
+        await supabaseClient
+            .from("questions")
+            .select("id, day, question")
+            .eq("day", dayNumber)
+            .maybeSingle();
+
+    if (error || !question) {
+        showNotice("Не удалось найти вопрос.");
+        return;
+    }
+
+    adminFeedPreview = true;
+
+    currentQuestionId = question.id;
+
+    currentAnswer = null;
+
+    await openFeed();
+}
+    
 async function openFeed() {
 
     const isAdminPreview =
