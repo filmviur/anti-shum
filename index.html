@@ -13748,14 +13748,17 @@ if (userId) {
             Заполняем данные пользователя.
         */
 
-        adminSupportUserName.textContent =
-            user?.display_name ||
-            "Пользователь";
+        
+adminSupportUserName.textContent =
+    guestConversationId
+        ? "Гость"
+        : (user?.display_name || "Пользователь");
 
+adminSupportUserEmail.textContent =
+    guestConversationId
+        ? "Обращение без регистрации"
+        : (user?.email || "");
 
-        adminSupportUserEmail.textContent =
-            user?.email ||
-            "";
 
 
         /*
