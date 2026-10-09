@@ -13517,9 +13517,8 @@ messages.forEach(message => {
                     "admin-support-conversation";
 
 
-                item.dataset.userId =
-                    conversation.userId;
-
+               selectedSupportGuestConversationId =
+    conversation.guestConversationId || null;
 
                 /*
                     Имя пользователя.
