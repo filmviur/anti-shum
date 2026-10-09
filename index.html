@@ -11847,6 +11847,10 @@ async function deleteAnswerPhoto(path) {
    FEED
 ========================================================= */
 
+// Административный просмотр старых ответов.
+// По умолчанию выключен.
+let adminFeedPreview = false;
+
 async function openFeed() {
 
     if (!currentAnswer) {
