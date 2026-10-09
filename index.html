@@ -13458,25 +13458,6 @@ messages.forEach(message => {
 
 });
 
-
-
-                /*
-                    Считаем только непрочитанные
-                    сообщения от пользователя.
-                */
-
-                if (
-                    message.is_from_admin === false &&
-                    message.is_read === false
-                ) {
-
-                    conversation.unreadCount +=
-                        1;
-                }
-            }
-        );
-
-
         adminSupportConversations.innerHTML =
             "";
 
