@@ -13955,24 +13955,23 @@ adminSupportSendBtn.addEventListener(
 
         try {
 
-            const {
-                error
-            } =
-                await supabaseClient
-                    .from("support_messages")
-                    .insert({
-                        user_id:
-                            selectedSupportUserId,
+           
+const { error } = await supabaseClient
+    .from("support_messages")
+    .insert({
+        user_id:
+            selectedSupportUserId || null,
 
-                        message_text:
-                            message,
+        guest_conversation_id:
+            selectedSupportGuestConversationId || null,
 
-                        is_from_admin:
-                            true,
+        message_text: message,
 
-                        is_read:
-                            false
-                    });
+        is_from_admin: true,
+
+        is_read: false
+    });
+
 
 
             if (error) {
