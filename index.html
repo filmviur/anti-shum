@@ -17836,6 +17836,99 @@ supportInput.focus();
     );
 }
 
+    
+/* =========================================================
+   SUPPORT CONTROLS AND SEND
+========================================================= */
+
+const supportMessages =
+    document.getElementById("supportMessages");
+
+const supportInput =
+    document.getElementById("supportInput");
+
+const sendSupportBtn =
+    document.getElementById("sendSupportBtn");
+
+
+/*
+    Закрытие окна поддержки.
+*/
+
+closeSupportBtn.addEventListener("click", function() {
+    supportModal.classList.add("hidden");
+});
+
+
+/*
+    Отправка сообщений пользователя или гостя.
+*/
+
+sendSupportBtn.addEventListener(
+    "click",
+    async function() {
+
+        const guestConversationId =
+            getGuestSupportConversationId();
+
+        if (!currentUser && !guestConversationId) {
+            showNotice("Сначала открой поддержку.");
+            return;
+        }
+
+        const message = supportInput.value.trim();
+
+        if (!message) {
+            showNotice("Напиши сообщение.");
+            return;
+        }
+
+        sendSupportBtn.disabled = true;
+
+        try {
+
+            const messageData = {
+                message_text: message,
+                is_from_admin: false,
+                is_read: false
+            };
+
+            if (currentUser) {
+                messageData.user_id = currentUser.id;
+            } else {
+                messageData.user_id = null;
+                messageData.guest_conversation_id =
+                    guestConversationId;
+            }
+
+            const { error } =
+                await supabaseClient
+                    .from("support_messages")
+                    .insert(messageData);
+
+            if (error) {
+                throw error;
+            }
+
+            supportInput.value = "";
+
+            await loadSupportMessages();
+
+        } catch (error) {
+
+            console.error("Support send error:", error);
+
+            showNotice(
+                error?.message ||
+                "Не удалось отправить сообщение."
+            );
+
+        } finally {
+            sendSupportBtn.disabled = false;
+        }
+    }
+);
+
 
 /* =========================================================
    AVATAR PLACEHOLDER
