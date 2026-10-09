@@ -11876,7 +11876,11 @@ async function verifyAdminFeedAccess() {
 
 async function openFeed() {
 
-    if (!currentAnswer) {
+    const isAdminPreview =
+        adminFeedPreview &&
+        await verifyAdminFeedAccess();
+
+    if (!currentAnswer && !isAdminPreview) {
         return;
     }
 
