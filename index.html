@@ -17719,6 +17719,7 @@ async function ensureGuestSupportSession() {
     return data.session;
 }
     
+
 /* =========================================================
    GUEST SUPPORT BUTTON
 ========================================================= */
@@ -17732,131 +17733,99 @@ if (guestSupportBtn) {
         "click",
         async function() {
 
-            supportModal.classList.remove("hidden");
+            guestSupportBtn.disabled = true;
 
-            /*
-                Пока показываем существующую
-                переписку, если пользователь
-                авторизован.
-            */
+            try {
 
-            if (currentUser) {
+                // Получаем существующую сессию
+                // или создаём анонимную.
 
-                await loadSupportMessages();
-                await markSupportMessagesAsRead();
+                const session =
+                    await ensureGuestSupportSession();
 
-            } else {
+                // Если вошёл обычный пользователь,
+                // открываем его существующую поддержку.
+
+                if (!isGuestSession(session)) {
+
+                    supportModal.classList.remove("hidden");
+
+                    await loadSupportMessages();
+                    await markSupportMessagesAsRead();
+
+                    supportInput.focus();
+                    return;
+                }
+
+                // Ищем гостевую переписку.
+
+                const { data: existingConversation, error: findError } =
+                    await supabaseClient
+                        .from("support_guest_conversations")
+                        .select("id")
+                        .eq("guest_auth_id", session.user.id)
+                        .maybeSingle();
+
+                if (findError) {
+                    throw findError;
+                }
+
+                let conversationId =
+                    existingConversation?.id;
+
+                // Если гость пишет впервые,
+                // создаём отдельную переписку.
+
+                if (!conversationId) {
+
+                    const { data, error } =
+                        await supabaseClient
+                            .from("support_guest_conversations")
+                            .insert({
+                                guest_auth_id: session.user.id
+                            })
+                            .select("id")
+                            .single();
+
+                    if (error) {
+                        throw error;
+                    }
+
+                    conversationId = data.id;
+                }
+
+                // Запоминаем ID гостевой переписки.
+
+                window.guestSupportConversationId =
+                    conversationId;
+
+                // Открываем существующее окно поддержки.
+
+                supportModal.classList.remove("hidden");
 
                 supportMessages.innerHTML = "";
 
-            }
+                supportInput.focus();
 
-            supportInput.focus();
+            } catch (error) {
+
+                console.error(
+                    "Guest support error:",
+                    error
+                );
+
+                showNotice(
+                    error?.message ||
+                    "Не удалось открыть поддержку."
+                );
+
+            } finally {
+
+                guestSupportBtn.disabled = false;
+            }
         }
     );
 }
-    
-/*
-    Закрытие поддержки.
-*/
-
-closeSupportBtn.addEventListener(
-    "click",
-    function() {
-
-        supportModal.classList.add(
-            "hidden"
-        );
-    }
-);
-
-
-/*
-    Отправка сообщения пользователя.
-*/
-
-sendSupportBtn.addEventListener(
-    "click",
-    async function() {
-
-        if (!currentUser) {
-            return;
-        }
-
-
-        const message =
-            supportInput.value.trim();
-
-
-        if (!message) {
-
-            showNotice(
-                "Напиши сообщение."
-            );
-
-            return;
-        }
-
-
-        sendSupportBtn.disabled =
-            true;
-
-
-        try {
-
-            const {
-                error
-            } =
-                await supabaseClient
-                    .from("support_messages")
-                    .insert({
-                        user_id:
-                            currentUser.id,
-
-                        message_text:
-                            message,
-
-                        is_from_admin:
-                            false,
-
-                        is_read:
-                            false
-                    });
-
-
-            if (error) {
-                throw error;
-            }
-
-
-            supportInput.value =
-                "";
-
-
-            await loadSupportMessages();
-
-
-        } catch (error) {
-
-            console.error(
-                "Support send error:",
-                error
-            );
-
-
-            showNotice(
-                error?.message ||
-                "Не удалось отправить сообщение."
-            );
-
-
-        } finally {
-
-            sendSupportBtn.disabled =
-                false;
-        }
-    }
-);
 
 
 /* =========================================================
