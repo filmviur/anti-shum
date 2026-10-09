@@ -13680,8 +13680,10 @@ async function openAdminSupportConversation(
     }
 
 
-    selectedSupportUserId =
-        userId;
+    selectedSupportUserId = userId || null;
+
+selectedSupportGuestConversationId =
+    guestConversationId || null;
 
 
     try {
