@@ -13640,9 +13640,14 @@ messages.forEach(message => {
 }
 
 
+
 /* =========================
    OPEN SUPPORT CONVERSATION
 ========================= */
+
+let adminSupportRealtimeChannel = null;
+let adminSupportRealtimeConversationKey = null;
+let adminSupportOpenRequestId = 0;
 
 
 async function openAdminSupportConversation(
@@ -13657,230 +13662,216 @@ async function openAdminSupportConversation(
         return;
     }
 
+    const normalizedUserId = userId || null;
+    const normalizedGuestId = guestConversationId || null;
 
-    selectedSupportUserId = userId || null;
+    const conversationKey = normalizedGuestId
+        ? `guest:${normalizedGuestId}`
+        : `user:${normalizedUserId}`;
 
-selectedSupportGuestConversationId =
-    guestConversationId || null;
+    const conversationChanged =
+        selectedSupportUserId !== normalizedUserId ||
+        selectedSupportGuestConversationId !== normalizedGuestId;
 
+    selectedSupportUserId = normalizedUserId;
+    selectedSupportGuestConversationId = normalizedGuestId;
+
+    // Защита от результатов устаревших запросов.
+    const requestId = ++adminSupportOpenRequestId;
+
+    const isCurrentRequest = () =>
+        requestId === adminSupportOpenRequestId &&
+        selectedSupportUserId === normalizedUserId &&
+        selectedSupportGuestConversationId === normalizedGuestId;
 
     try {
+
+        /*
+            При смене диалога переключаем Realtime.
+        */
+
+        if (
+            conversationChanged ||
+            !adminSupportRealtimeChannel ||
+            adminSupportRealtimeConversationKey !== conversationKey ||
+            adminSupportRealtimeChannel.state === "closed"
+        ) {
+            startAdminSupportRealtime(
+                normalizedUserId,
+                normalizedGuestId
+            );
+        }
 
         /*
             Загружаем данные пользователя.
         */
 
-       
-let user = null;
+        let user = null;
 
-if (userId) {
-    const { data, error } = await supabaseClient
-        .from("users")
-        .select("id, display_name, email")
-        .eq("id", userId)
-        .maybeSingle();
+        if (normalizedUserId && !normalizedGuestId) {
 
-    if (error) {
-        throw error;
-    }
+            const { data, error } = await supabaseClient
+                .from("users")
+                .select("id, display_name, email")
+                .eq("id", normalizedUserId)
+                .maybeSingle();
 
-    user = data;
-}
+            if (!isCurrentRequest()) return;
 
+            if (error) {
+                throw error;
+            }
+
+            user = data;
+        }
 
         /*
-            Загружаем всю переписку.
-            Старые сообщения сверху,
-            новые снизу.
+            Загружаем переписку.
+            Старые сообщения сверху.
         */
+
+        const conversationColumn = normalizedGuestId
+            ? "guest_conversation_id"
+            : "user_id";
+
+        const conversationId =
+            normalizedGuestId || normalizedUserId;
 
         const {
             data: messages,
             error: messagesError
-        } =
-            await supabaseClient
-                .from("support_messages")
-                .select(
-                    "id, user_id, message_text, is_from_admin, is_read, created_at"
-                )
-                
-.eq(
-    guestConversationId
-        ? "guest_conversation_id"
-        : "user_id",
-    guestConversationId || userId
-)
-.order(
-    "created_at",
-    {
-        ascending: true
-    }
-);
+        } = await supabaseClient
+            .from("support_messages")
+            .select(
+                "id, user_id, message_text, is_from_admin, is_read, created_at"
+            )
+            .eq(conversationColumn, conversationId)
+            .order("created_at", {
+                ascending: true
+            });
 
-
+        if (!isCurrentRequest()) return;
 
         if (messagesError) {
             throw messagesError;
         }
 
-
         /*
             Заполняем данные пользователя.
         */
 
-        
-adminSupportUserName.textContent =
-    guestConversationId
-        ? "Гость"
-        : (user?.display_name || "Пользователь");
+        adminSupportUserName.textContent =
+            normalizedGuestId
+                ? "Гость"
+                : (user?.display_name || "Пользователь");
 
-adminSupportUserEmail.textContent =
-    guestConversationId
-        ? "Обращение без регистрации"
-        : (user?.email || "");
-
-
+        adminSupportUserEmail.textContent =
+            normalizedGuestId
+                ? "Обращение без регистрации"
+                : (user?.email || "");
 
         /*
             Открываем область переписки.
         */
 
-        adminSupportChatEmpty.classList.add(
-            "hidden"
-        );
+        adminSupportChatEmpty.classList.add("hidden");
 
-
-        adminSupportChatContent.classList.remove(
-            "hidden"
-        );
-
+        adminSupportChatContent.classList.remove("hidden");
 
         /*
             Выводим сообщения.
         */
 
-        adminSupportMessages.innerHTML =
-            "";
+        adminSupportMessages.innerHTML = "";
 
+        (messages || []).forEach(message => {
 
-        (
-            messages ||
-            []
-        ).forEach(
-            message => {
+            const messageElement =
+                document.createElement("div");
 
-                const messageElement =
-                    document.createElement(
-                        "div"
-                    );
+            messageElement.className =
+                message.is_from_admin
+                    ? "admin-support-message admin-support-message-admin"
+                    : "admin-support-message admin-support-message-user";
 
+            messageElement.textContent =
+                message.message_text;
 
-                messageElement.className =
-                    message.is_from_admin
-                        ? "admin-support-message admin-support-message-admin"
-                        : "admin-support-message admin-support-message-user";
-
-
-                messageElement.textContent =
-                    message.message_text;
-
-
-                adminSupportMessages.appendChild(
-                    messageElement
-                );
-            }
-        );
-
+            adminSupportMessages.appendChild(
+                messageElement
+            );
+        });
 
         /*
-            Прокручиваем чат
-            к последнему сообщению.
+            Прокручиваем к последнему сообщению.
         */
 
         adminSupportMessages.scrollTop =
             adminSupportMessages.scrollHeight;
 
-
         /*
-            Отмечаем непрочитанные сообщения
-            пользователя как прочитанные.
+            Отмечаем сообщения пользователя
+            как прочитанные.
         */
 
-        
-const { error: readError } = await supabaseClient
-    .from("support_messages")
-    .update({
-        is_read: true
-    })
-    .eq(
-        guestConversationId
-            ? "guest_conversation_id"
-            : "user_id",
-        guestConversationId || userId
-    )
-    .eq("is_from_admin", false)
-    .eq("is_read", false);
+        const { error: readError } = await supabaseClient
+            .from("support_messages")
+            .update({
+                is_read: true
+            })
+            .eq(conversationColumn, conversationId)
+            .eq("is_from_admin", false)
+            .eq("is_read", false);
 
-
+        if (!isCurrentRequest()) return;
 
         if (readError) {
             throw readError;
         }
-
 
         /*
             Убираем счётчик непрочитанных
             возле открытого диалога.
         */
 
-        const activeConversation =
-            document.querySelector(
-                `.admin-support-conversation[data-user-id="${userId}"]`
+        const conversations =
+            document.querySelectorAll(
+                ".admin-support-conversation"
             );
 
+        conversations.forEach(conversation => {
 
-        if (activeConversation) {
+            const matches = normalizedGuestId
+                ? conversation.dataset.guestConversationId === normalizedGuestId
+                : conversation.dataset.userId === normalizedUserId &&
+                  !conversation.dataset.guestConversationId;
+
+            if (!matches) return;
 
             const unread =
-                activeConversation.querySelector(
+                conversation.querySelector(
                     ".admin-support-unread"
                 );
 
-
             if (unread) {
-
                 unread.remove();
             }
-        }
-
+        });
 
         /*
-    Запускаем Realtime для открытой переписки.
-    Повторно подписку не создаём.
-*/
+            Ставим курсор в поле ответа.
+        */
 
-if (
-    !adminSupportRealtimeChannel ||
-    selectedSupportUserId !== (userId || null) ||
-    selectedSupportGuestConversationId !== (guestConversationId || null)
-) {
-    startAdminSupportRealtime(userId, guestConversationId);
-}
-
-/*
-    Ставим курсор в поле ответа.
-*/
-
-adminSupportInput.focus();
-
+        adminSupportInput.focus();
 
     } catch (error) {
+
+        if (!isCurrentRequest()) return;
 
         console.error(
             "Admin support conversation error:",
             error
         );
-
 
         showNotice(
             error?.message ||
@@ -13889,49 +13880,123 @@ adminSupportInput.focus();
     }
 }
 
-let adminSupportRealtimeChannel = null;
 
-function startAdminSupportRealtime(userId, guestConversationId = null) {
+/* =========================
+   ADMIN SUPPORT REALTIME
+========================= */
 
-    if (adminSupportRealtimeChannel) {
-        supabaseClient.removeChannel(adminSupportRealtimeChannel);
-        adminSupportRealtimeChannel = null;
-    }
+function startAdminSupportRealtime(
+    userId,
+    guestConversationId = null
+) {
 
-    const conversationId = guestConversationId || userId;
+    const normalizedUserId = userId || null;
+    const normalizedGuestId = guestConversationId || null;
+
+    const conversationId =
+        normalizedGuestId || normalizedUserId;
 
     if (!conversationId) return;
 
-    const filter = guestConversationId
-        ? `guest_conversation_id=eq.${guestConversationId}`
-        : `user_id=eq.${userId}`;
+    const conversationKey = normalizedGuestId
+        ? `guest:${normalizedGuestId}`
+        : `user:${normalizedUserId}`;
 
-    adminSupportRealtimeChannel = supabaseClient
-        .channel("admin-support-" + conversationId)
+    /*
+        Если подписка уже существует
+        для этого диалога — не дублируем.
+    */
+
+    if (
+        adminSupportRealtimeChannel &&
+        adminSupportRealtimeConversationKey === conversationKey &&
+        adminSupportRealtimeChannel.state !== "closed"
+    ) {
+        return;
+    }
+
+    /*
+        Удаляем предыдущую подписку.
+    */
+
+    if (adminSupportRealtimeChannel) {
+
+        supabaseClient.removeChannel(
+            adminSupportRealtimeChannel
+        );
+
+        adminSupportRealtimeChannel = null;
+    }
+
+    adminSupportRealtimeConversationKey = conversationKey;
+
+    /*
+        Определяем фильтр сообщений.
+    */
+
+    const filter = normalizedGuestId
+        ? `guest_conversation_id=eq.${normalizedGuestId}`
+        : `user_id=eq.${normalizedUserId}`;
+
+    /*
+        Создаём новую подписку.
+    */
+
+    const channel = supabaseClient
+        .channel("admin-support-" + conversationKey)
         .on(
             "postgres_changes",
             {
                 event: "INSERT",
                 schema: "public",
                 table: "support_messages",
-                filter
+                filter: filter
             },
             async () => {
 
-                // Обновляем только открытую переписку.
+                /*
+                    Проверяем, что диалог
+                    всё ещё открыт.
+                */
+
                 if (
-                    selectedSupportUserId === (userId || null) &&
-                    selectedSupportGuestConversationId === (guestConversationId || null)
+                    adminSupportRealtimeChannel !== channel ||
+                    selectedSupportUserId !== normalizedUserId ||
+                    selectedSupportGuestConversationId !== normalizedGuestId
                 ) {
-                    await openAdminSupportConversation(
-                        userId,
-                        guestConversationId
-                    );
+                    return;
                 }
+
+                /*
+                    Обновляем открытую переписку.
+                */
+
+                await openAdminSupportConversation(
+                    normalizedUserId,
+                    normalizedGuestId
+                );
             }
-        )
-        .subscribe();
+        );
+
+    adminSupportRealtimeChannel = channel;
+
+    channel.subscribe(status => {
+
+        if (adminSupportRealtimeChannel !== channel) {
+            return;
+        }
+
+        if (status === "CHANNEL_ERROR" ||
+            status === "TIMED_OUT") {
+
+            console.warn(
+                "Admin support Realtime:",
+                status
+            );
+        }
+    });
 }
+
     
 /* =========================
    SEND ADMIN SUPPORT REPLY
