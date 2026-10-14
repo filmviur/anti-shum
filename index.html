@@ -13855,10 +13855,23 @@ const { error: readError } = await supabaseClient
 
 
         /*
-            Ставим курсор в поле ответа.
-        */
+    Запускаем Realtime для открытой переписки.
+    Повторно подписку не создаём.
+*/
 
-        adminSupportInput.focus();
+if (
+    !adminSupportRealtimeChannel ||
+    selectedSupportUserId !== (userId || null) ||
+    selectedSupportGuestConversationId !== (guestConversationId || null)
+) {
+    startAdminSupportRealtime(userId, guestConversationId);
+}
+
+/*
+    Ставим курсор в поле ответа.
+*/
+
+adminSupportInput.focus();
 
 
     } catch (error) {
