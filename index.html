@@ -13514,6 +13514,43 @@ async function loadAdminSupportConversations() {
 ========================= */
 
 let adminSupportListRealtimeChannel = null;
+
+
+function startAdminSupportListRealtime() {
+
+    // Не создаём повторную подписку.
+    if (adminSupportListRealtimeChannel) {
+        return;
+    }
+
+    // Подписываемся на новые сообщения поддержки.
+    adminSupportListRealtimeChannel = supabaseClient
+        .channel("admin-support-list")
+        .on(
+            "postgres_changes",
+            {
+                event: "INSERT",
+                schema: "public",
+                table: "support_messages"
+            },
+            async () => {
+
+                // Обновляем список обращений.
+                const supportSection = document.querySelector(
+                    '[data-admin-content="support"]'
+                );
+
+                if (
+                    supportSection &&
+                    !supportSection.classList.contains("hidden")
+                ) {
+                    await loadAdminSupportConversations();
+                }
+            }
+        )
+        .subscribe();
+}
+
     
 /* =========================
    ADMIN SUPPORT REALTIME
