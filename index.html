@@ -17837,8 +17837,10 @@ return;
 
                 // Запоминаем ID гостевой переписки.
 
-                window.guestSupportConversationId =
-                    conversationId;
+                await loadSupportMessages();
+await markSupportMessagesAsRead();
+
+supportInput.focus();
 
                 // Открываем существующее окно поддержки.
 
