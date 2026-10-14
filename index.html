@@ -13283,9 +13283,16 @@ adminNavButtons.forEach(
 
                 /* ПОДДЕРЖКА */
 
-                if (sectionName === "support") {
-                    await loadAdminSupportConversations();
-                }
+                /* ПОДДЕРЖКА */
+
+if (sectionName === "support") {
+
+    // Загружаем список обращений.
+    await loadAdminSupportConversations();
+
+    // Запускаем Realtime для всех диалогов.
+    startAdminSupportListRealtime();
+}
 
             }
         );
