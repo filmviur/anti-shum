@@ -13641,245 +13641,223 @@ messages.forEach(message => {
 
 
 
+
 /* =========================
-   OPEN SUPPORT CONVERSATION
+   ADMIN SUPPORT CONVERSATIONS
 ========================= */
 
-let adminSupportRealtimeChannel = null;
-let adminSupportRealtimeConversationKey = null;
-let adminSupportOpenRequestId = 0;
+let adminSupportListRequestId = 0;
 
+async function loadAdminSupportConversations() {
 
-async function openAdminSupportConversation(
-    userId,
-    guestConversationId = null
-) {
+    if (!currentUser) return;
 
-    if (
-        !currentUser ||
-        (!userId && !guestConversationId)
-    ) {
-        return;
-    }
-
-    const normalizedUserId = userId || null;
-    const normalizedGuestId = guestConversationId || null;
-
-    const conversationKey = normalizedGuestId
-        ? `guest:${normalizedGuestId}`
-        : `user:${normalizedUserId}`;
-
-    const conversationChanged =
-        selectedSupportUserId !== normalizedUserId ||
-        selectedSupportGuestConversationId !== normalizedGuestId;
-
-    selectedSupportUserId = normalizedUserId;
-    selectedSupportGuestConversationId = normalizedGuestId;
-
-    // Защита от результатов устаревших запросов.
-    const requestId = ++adminSupportOpenRequestId;
-
-    const isCurrentRequest = () =>
-        requestId === adminSupportOpenRequestId &&
-        selectedSupportUserId === normalizedUserId &&
-        selectedSupportGuestConversationId === normalizedGuestId;
+    const requestId = ++adminSupportListRequestId;
 
     try {
 
-        /*
-            При смене диалога переключаем Realtime.
-        */
+        const { data: messages, error: messagesError } =
+            await supabaseClient
+                .from("support_messages")
+                .select(
+                    "id, user_id, guest_conversation_id, message_text, is_from_admin, is_read, created_at"
+                )
+                .order("created_at", {
+                    ascending: false
+                });
 
-        if (
-            conversationChanged ||
-            !adminSupportRealtimeChannel ||
-            adminSupportRealtimeConversationKey !== conversationKey ||
-            adminSupportRealtimeChannel.state === "closed"
-        ) {
-            startAdminSupportRealtime(
-                normalizedUserId,
-                normalizedGuestId
-            );
+        if (requestId !== adminSupportListRequestId) return;
+
+        if (messagesError) throw messagesError;
+
+        if (!messages || messages.length === 0) {
+
+            adminSupportConversations.innerHTML =
+                '<div class="admin-support-placeholder">Пока нет обращений.</div>';
+
+            return;
         }
 
         /*
-            Загружаем данные пользователя.
+            Собираем ID зарегистрированных пользователей.
         */
 
-        let user = null;
+        const userIds = [
+            ...new Set(
+                messages
+                    .map(message => message.user_id)
+                    .filter(Boolean)
+            )
+        ];
 
-        if (normalizedUserId && !normalizedGuestId) {
+        let users = [];
+
+        if (userIds.length > 0) {
 
             const { data, error } = await supabaseClient
                 .from("users")
                 .select("id, display_name, email")
-                .eq("id", normalizedUserId)
-                .maybeSingle();
+                .in("id", userIds);
 
-            if (!isCurrentRequest()) return;
+            if (requestId !== adminSupportListRequestId) return;
 
-            if (error) {
-                throw error;
+            if (error) throw error;
+
+            users = data || [];
+        }
+
+        const usersById = new Map(
+            users.map(user => [user.id, user])
+        );
+
+        /*
+            Группируем сообщения по диалогам.
+        */
+
+        const conversations = new Map();
+
+        messages.forEach(message => {
+
+            const conversationKey = message.guest_conversation_id
+                ? `guest:${message.guest_conversation_id}`
+                : message.user_id
+                    ? `user:${message.user_id}`
+                    : null;
+
+            if (!conversationKey) return;
+
+            if (!conversations.has(conversationKey)) {
+
+                conversations.set(conversationKey, {
+                    userId: message.guest_conversation_id
+                        ? null
+                        : (message.user_id || null),
+                    guestConversationId:
+                        message.guest_conversation_id || null,
+                    lastMessage: message,
+                    unreadCount: 0
+                });
             }
 
-            user = data;
-        }
+            const conversation = conversations.get(conversationKey);
 
-        /*
-            Загружаем переписку.
-            Старые сообщения сверху.
-        */
-
-        const conversationColumn = normalizedGuestId
-            ? "guest_conversation_id"
-            : "user_id";
-
-        const conversationId =
-            normalizedGuestId || normalizedUserId;
-
-        const {
-            data: messages,
-            error: messagesError
-        } = await supabaseClient
-            .from("support_messages")
-            .select(
-                "id, user_id, message_text, is_from_admin, is_read, created_at"
-            )
-            .eq(conversationColumn, conversationId)
-            .order("created_at", {
-                ascending: true
-            });
-
-        if (!isCurrentRequest()) return;
-
-        if (messagesError) {
-            throw messagesError;
-        }
-
-        /*
-            Заполняем данные пользователя.
-        */
-
-        adminSupportUserName.textContent =
-            normalizedGuestId
-                ? "Гость"
-                : (user?.display_name || "Пользователь");
-
-        adminSupportUserEmail.textContent =
-            normalizedGuestId
-                ? "Обращение без регистрации"
-                : (user?.email || "");
-
-        /*
-            Открываем область переписки.
-        */
-
-        adminSupportChatEmpty.classList.add("hidden");
-
-        adminSupportChatContent.classList.remove("hidden");
-
-        /*
-            Выводим сообщения.
-        */
-
-        adminSupportMessages.innerHTML = "";
-
-        (messages || []).forEach(message => {
-
-            const messageElement =
-                document.createElement("div");
-
-            messageElement.className =
-                message.is_from_admin
-                    ? "admin-support-message admin-support-message-admin"
-                    : "admin-support-message admin-support-message-user";
-
-            messageElement.textContent =
-                message.message_text;
-
-            adminSupportMessages.appendChild(
-                messageElement
-            );
+            if (
+                message.is_from_admin === false &&
+                message.is_read === false
+            ) {
+                conversation.unreadCount++;
+            }
         });
 
         /*
-            Прокручиваем к последнему сообщению.
+            Создаём список.
         */
 
-        adminSupportMessages.scrollTop =
-            adminSupportMessages.scrollHeight;
-
-        /*
-            Отмечаем сообщения пользователя
-            как прочитанные.
-        */
-
-        const { error: readError } = await supabaseClient
-            .from("support_messages")
-            .update({
-                is_read: true
-            })
-            .eq(conversationColumn, conversationId)
-            .eq("is_from_admin", false)
-            .eq("is_read", false);
-
-        if (!isCurrentRequest()) return;
-
-        if (readError) {
-            throw readError;
-        }
-
-        /*
-            Убираем счётчик непрочитанных
-            возле открытого диалога.
-        */
-
-        const conversations =
-            document.querySelectorAll(
-                ".admin-support-conversation"
-            );
+        const fragment = document.createDocumentFragment();
 
         conversations.forEach(conversation => {
 
-            const matches = normalizedGuestId
-                ? conversation.dataset.guestConversationId === normalizedGuestId
-                : conversation.dataset.userId === normalizedUserId &&
-                  !conversation.dataset.guestConversationId;
+            const user = usersById.get(conversation.userId);
 
-            if (!matches) return;
+            const item = document.createElement("div");
 
-            const unread =
-                conversation.querySelector(
-                    ".admin-support-unread"
-                );
+            item.className = "admin-support-conversation";
 
-            if (unread) {
-                unread.remove();
+            if (conversation.userId) {
+                item.dataset.userId = conversation.userId;
             }
+
+            if (conversation.guestConversationId) {
+                item.dataset.guestConversationId =
+                    conversation.guestConversationId;
+            }
+
+            /*
+                Сохраняем активный диалог.
+            */
+
+            const isActive =
+                selectedSupportUserId === conversation.userId &&
+                selectedSupportGuestConversationId ===
+                    conversation.guestConversationId;
+
+            if (isActive) {
+                item.classList.add("active");
+            }
+
+            const name = document.createElement("div");
+            name.className = "admin-support-conversation-name";
+
+            name.textContent = conversation.guestConversationId
+                ? "Гость"
+                : (user?.display_name || "Пользователь");
+
+            const preview = document.createElement("div");
+            preview.className = "admin-support-conversation-preview";
+
+            preview.textContent =
+                conversation.lastMessage?.message_text || "";
+
+            item.appendChild(name);
+            item.appendChild(preview);
+
+            /*
+                Счётчик непрочитанных.
+            */
+
+            if (conversation.unreadCount > 0) {
+
+                const unread = document.createElement("div");
+
+                unread.className = "admin-support-unread";
+
+                unread.textContent = conversation.unreadCount;
+
+                item.appendChild(unread);
+            }
+
+            /*
+                Открытие переписки.
+                ID заранее не меняем.
+            */
+
+            item.addEventListener("click", async () => {
+
+                document
+                    .querySelectorAll(".admin-support-conversation")
+                    .forEach(element => {
+                        element.classList.remove("active");
+                    });
+
+                item.classList.add("active");
+
+                await openAdminSupportConversation(
+                    conversation.userId,
+                    conversation.guestConversationId
+                );
+            });
+
+            fragment.appendChild(item);
         });
 
-        /*
-            Ставим курсор в поле ответа.
-        */
+        if (requestId !== adminSupportListRequestId) return;
 
-        adminSupportInput.focus();
+        adminSupportConversations.replaceChildren(fragment);
 
     } catch (error) {
 
-        if (!isCurrentRequest()) return;
+        if (requestId !== adminSupportListRequestId) return;
 
         console.error(
-            "Admin support conversation error:",
+            "Admin support conversations error:",
             error
         );
 
         showNotice(
-            error?.message ||
-            "Не удалось открыть переписку."
+            "Не удалось обновить список обращений."
         );
     }
 }
-
 
 /* =========================
    ADMIN SUPPORT REALTIME
