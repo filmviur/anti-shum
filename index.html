@@ -17835,21 +17835,17 @@ return;
                     conversationId = data.id;
                 }
 
-                // Запоминаем ID гостевой переписки.
+               // Запоминаем ID гостевой переписки.
+               window.guestSupportConversationId = conversationId;
 
-                await loadSupportMessages();
-await markSupportMessagesAsRead();
+              // Открываем существующее окно поддержки.
+              supportModal.classList.remove("hidden");
 
-supportInput.focus();
+              await loadSupportMessages();
+              startSupportRealtime();
+              await markSupportMessagesAsRead();
 
-                // Открываем существующее окно поддержки.
-
-                supportModal.classList.remove("hidden");
-
-                await loadSupportMessages();
-await markSupportMessagesAsRead();
-
-supportInput.focus();
+              supportInput.focus();
             } catch (error) {
 
                 console.error(
