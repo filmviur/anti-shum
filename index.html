@@ -17788,13 +17788,14 @@ if (guestSupportBtn) {
 
                 if (!isGuestSession(session)) {
 
-                    supportModal.classList.remove("hidden");
+                   supportModal.classList.remove("hidden");
 
-                    await loadSupportMessages();
-                    await markSupportMessagesAsRead();
+await loadSupportMessages();
+startSupportRealtime();
+await markSupportMessagesAsRead();
 
-                    supportInput.focus();
-                    return;
+supportInput.focus();
+return;
                 }
 
                 // Ищем гостевую переписку.
