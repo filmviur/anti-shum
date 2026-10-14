@@ -13876,6 +13876,50 @@ const { error: readError } = await supabaseClient
     }
 }
 
+let adminSupportRealtimeChannel = null;
+
+function startAdminSupportRealtime(userId, guestConversationId = null) {
+
+    if (adminSupportRealtimeChannel) {
+        supabaseClient.removeChannel(adminSupportRealtimeChannel);
+        adminSupportRealtimeChannel = null;
+    }
+
+    const conversationId = guestConversationId || userId;
+
+    if (!conversationId) return;
+
+    const filter = guestConversationId
+        ? `guest_conversation_id=eq.${guestConversationId}`
+        : `user_id=eq.${userId}`;
+
+    adminSupportRealtimeChannel = supabaseClient
+        .channel("admin-support-" + conversationId)
+        .on(
+            "postgres_changes",
+            {
+                event: "INSERT",
+                schema: "public",
+                table: "support_messages",
+                filter
+            },
+            async () => {
+
+                // Обновляем только открытую переписку.
+                if (
+                    selectedSupportUserId === (userId || null) &&
+                    selectedSupportGuestConversationId === (guestConversationId || null)
+                ) {
+                    await openAdminSupportConversation(
+                        userId,
+                        guestConversationId
+                    );
+                }
+            }
+        )
+        .subscribe();
+}
+    
 /* =========================
    SEND ADMIN SUPPORT REPLY
 ========================= */
