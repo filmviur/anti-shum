@@ -17976,6 +17976,16 @@ return;
                // Запоминаем ID гостевой переписки.
                window.guestSupportConversationId = conversationId;
 
+// Показываем гостю кнопку Push-уведомлений.
+const guestNotificationsBtn =
+    document.getElementById(
+        "guestSupportNotificationsBtn"
+    );
+
+if (guestNotificationsBtn) {
+    guestNotificationsBtn.classList.remove("hidden");
+}
+                
               // Открываем существующее окно поддержки.
               supportModal.classList.remove("hidden");
 
