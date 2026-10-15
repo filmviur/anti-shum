@@ -1,7 +1,7 @@
 {
   "name": "Анти-Шум",
   "short_name": "Анти-Шум",
-  "description": "15 минут без информационного шума",
+  "description": "20 минут без информационного шума",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0b0b16",
