@@ -10942,6 +10942,7 @@ appScreen.classList.add("hidden");
     }
 }
 
+
 /* =========================================================
    PUSH NOTIFICATIONS
 ========================================================= */
@@ -10960,7 +10961,6 @@ async function enablePushNotifications() {
         console.error(
             "Анти-Шум: Push-уведомления не поддерживаются."
         );
-
         return;
     }
 
@@ -10970,11 +10970,9 @@ async function enablePushNotifications() {
             await Notification.requestPermission();
 
         if (permission !== "granted") {
-
             console.log(
                 "Анти-Шум: уведомления не разрешены."
             );
-
             return;
         }
 
@@ -10985,7 +10983,6 @@ async function enablePushNotifications() {
             await registration.pushManager.getSubscription();
 
         if (!subscription) {
-
             subscription =
                 await registration.pushManager.subscribe({
                     userVisibleOnly: true,
@@ -11008,38 +11005,25 @@ async function enablePushNotifications() {
         const auth =
             subscriptionJson.keys?.auth;
 
-        if (
-            !endpoint ||
-            !p256dh ||
-            !auth
-        ) {
+        if (!endpoint || !p256dh || !auth) {
             throw new Error(
-                "Не удалось получить данные push-подписки."
+                "Не удалось получить данные Push-подписки."
             );
         }
 
-        const {
-            error
-        } =
+        const { error } =
             await supabaseClient
                 .from("push_subscriptions")
                 .upsert(
                     {
-                        user_id:
-                            currentUser.id,
-
-                        endpoint:
-                            endpoint,
-
-                        p256dh:
-                            p256dh,
-
-                        auth:
-                            auth
+                        user_id: currentUser.id,
+                        guest_conversation_id: null,
+                        endpoint,
+                        p256dh,
+                        auth
                     },
                     {
-                        onConflict:
-                            "endpoint"
+                        onConflict: "endpoint"
                     }
                 );
 
@@ -11052,11 +11036,9 @@ async function enablePushNotifications() {
         );
 
         if (enableNotificationsBtn) {
-
             enableNotificationsBtn.classList.add(
                 "hidden"
             );
-
         }
 
     } catch (error) {
@@ -11065,15 +11047,27 @@ async function enablePushNotifications() {
             "Анти-Шум: ошибка Push:",
             error
         );
+
+        showNotice(
+            error?.message ||
+            "Не удалось включить уведомления."
+        );
     }
 }
 
+
+/* =========================================================
+   GUEST PUSH NOTIFICATIONS
+========================================================= */
 
 async function enableGuestPushNotifications(
     conversationId
 ) {
 
     if (!conversationId) {
+        showNotice(
+            "Сначала открой гостевую переписку."
+        );
         return;
     }
 
@@ -11082,23 +11076,55 @@ async function enableGuestPushNotifications(
         !("PushManager" in window) ||
         !("Notification" in window)
     ) {
+        showNotice(
+            "Этот браузер не поддерживает Push-уведомления."
+        );
         return;
     }
 
     try {
 
         const {
-            data: { session }
+            data: { session },
+            error: sessionError
         } = await supabaseClient.auth.getSession();
 
+        if (sessionError) {
+            throw sessionError;
+        }
+
         if (!isGuestSession(session)) {
+            showNotice(
+                "Уведомления доступны только для гостевой переписки."
+            );
             return;
+        }
+
+        const { data: conversation, error: conversationError } =
+            await supabaseClient
+                .from("support_guest_conversations")
+                .select("id")
+                .eq("id", conversationId)
+                .eq("guest_auth_id", session.user.id)
+                .maybeSingle();
+
+        if (conversationError) {
+            throw conversationError;
+        }
+
+        if (!conversation) {
+            throw new Error(
+                "Гостевая переписка не найдена."
+            );
         }
 
         const permission =
             await Notification.requestPermission();
 
         if (permission !== "granted") {
+            showNotice(
+                "Разрешение на уведомления не предоставлено."
+            );
             return;
         }
 
@@ -11109,7 +11135,6 @@ async function enableGuestPushNotifications(
             await registration.pushManager.getSubscription();
 
         if (!subscription) {
-
             subscription =
                 await registration.pushManager.subscribe({
                     userVisibleOnly: true,
@@ -11163,55 +11188,60 @@ async function enableGuestPushNotifications(
             "Анти-Шум: гостевая Push-подписка сохранена."
         );
 
+        if (guestSupportNotificationsBtn) {
+            guestSupportNotificationsBtn.classList.add(
+                "hidden"
+            );
+        }
+
+        showNotice(
+            "Уведомления об ответах поддержки включены."
+        );
+
     } catch (error) {
 
         console.error(
             "Анти-Шум: ошибка гостевой Push-подписки:",
             error
         );
+
+        showNotice(
+            error?.message ||
+            "Не удалось включить уведомления."
+        );
     }
 }
 
-    
+
+/* =========================================================
+   VAPID KEY CONVERSION
+========================================================= */
+
 function urlBase64ToUint8Array(
     base64String
 ) {
 
     const padding =
         "=".repeat(
-            (4 -
-                base64String.length % 4
-            ) % 4
+            (4 - base64String.length % 4) % 4
         );
 
     const base64 =
-        (
-            base64String +
-            padding
-        )
-            .replace(
-                /-/g,
-                "+"
-            )
-            .replace(
-                /_/g,
-                "/"
-            );
+        (base64String + padding)
+            .replace(/-/g, "+")
+            .replace(/_/g, "/");
 
     const rawData =
         window.atob(base64);
 
     const outputArray =
-        new Uint8Array(
-            rawData.length
-        );
+        new Uint8Array(rawData.length);
 
     for (
         let index = 0;
         index < rawData.length;
         ++index
     ) {
-
         outputArray[index] =
             rawData.charCodeAt(index);
     }
@@ -11219,6 +11249,10 @@ function urlBase64ToUint8Array(
     return outputArray;
 }
 
+
+/* =========================================================
+   PUSH NOTIFICATION BUTTONS
+========================================================= */
 
 if (enableNotificationsBtn) {
 
@@ -11230,8 +11264,42 @@ if (enableNotificationsBtn) {
 
         }
     );
-
 }
+
+const guestSupportNotificationsBtn =
+    document.getElementById(
+        "guestSupportNotificationsBtn"
+    );
+
+if (guestSupportNotificationsBtn) {
+
+    guestSupportNotificationsBtn.addEventListener(
+        "click",
+        async function() {
+
+            const conversationId =
+                window.guestSupportConversationId;
+
+            if (!conversationId) {
+                showNotice(
+                    "Сначала открой гостевую переписку."
+                );
+                return;
+            }
+
+            guestSupportNotificationsBtn.disabled = true;
+
+            try {
+                await enableGuestPushNotifications(
+                    conversationId
+                );
+            } finally {
+                guestSupportNotificationsBtn.disabled = false;
+            }
+        }
+    );
+}
+
     
 /* =========================================================
    QUESTIONS
