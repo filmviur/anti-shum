@@ -17821,6 +17821,7 @@ return;
                 let conversationId =
                     existingConversation?.id;
 
+                
                 // Если гость пишет впервые,
                 // создаём отдельную переписку.
 
@@ -17842,18 +17843,11 @@ return;
                     conversationId = data.id;
                 }
 
-               // Запоминаем ID гостевой переписки.
-               window.guestSupportConversationId = conversationId;
+                // Запоминаем ID гостевой переписки.
 
-// Показываем гостю кнопку Push-уведомлений.
-const guestNotificationsBtn =
-    document.getElementById(
-        "guestSupportNotificationsBtn"
-    );
+                window.guestSupportConversationId =
+                    conversationId;
 
-if (guestNotificationsBtn) {
-    guestNotificationsBtn.classList.remove("hidden");
-}
                 
               // Открываем существующее окно поддержки.
               supportModal.classList.remove("hidden");
