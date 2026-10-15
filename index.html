@@ -11083,6 +11083,7 @@ function urlBase64ToUint8Array(
 }
 
 
+
 /* =========================================================
    PUSH NOTIFICATION BUTTONS
 ========================================================= */
@@ -11099,39 +11100,6 @@ if (enableNotificationsBtn) {
     );
 }
 
-const guestSupportNotificationsBtn =
-    document.getElementById(
-        "guestSupportNotificationsBtn"
-    );
-
-if (guestSupportNotificationsBtn) {
-
-    guestSupportNotificationsBtn.addEventListener(
-        "click",
-        async function() {
-
-            const conversationId =
-                window.guestSupportConversationId;
-
-            if (!conversationId) {
-                showNotice(
-                    "Сначала открой гостевую переписку."
-                );
-                return;
-            }
-
-            guestSupportNotificationsBtn.disabled = true;
-
-            try {
-                await enableGuestPushNotifications(
-                    conversationId
-                );
-            } finally {
-                guestSupportNotificationsBtn.disabled = false;
-            }
-        }
-    );
-}
 
     
 /* =========================================================
