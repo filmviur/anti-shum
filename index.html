@@ -11057,6 +11057,110 @@ async function enablePushNotifications() {
 }
 
 
+async function enableGuestPushNotifications(
+    conversationId
+) {
+
+    if (!conversationId) {
+        return;
+    }
+
+    if (
+        !("serviceWorker" in navigator) ||
+        !("PushManager" in window) ||
+        !("Notification" in window)
+    ) {
+        return;
+    }
+
+    try {
+
+        const {
+            data: { session }
+        } = await supabaseClient.auth.getSession();
+
+        if (!isGuestSession(session)) {
+            return;
+        }
+
+        const permission =
+            await Notification.requestPermission();
+
+        if (permission !== "granted") {
+            return;
+        }
+
+        const registration =
+            await navigator.serviceWorker.ready;
+
+        let subscription =
+            await registration.pushManager.getSubscription();
+
+        if (!subscription) {
+
+            subscription =
+                await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey:
+                        urlBase64ToUint8Array(
+                            VAPID_PUBLIC_KEY
+                        )
+                });
+        }
+
+        const subscriptionJson =
+            subscription.toJSON();
+
+        const endpoint =
+            subscriptionJson.endpoint;
+
+        const p256dh =
+            subscriptionJson.keys?.p256dh;
+
+        const auth =
+            subscriptionJson.keys?.auth;
+
+        if (!endpoint || !p256dh || !auth) {
+            throw new Error(
+                "Не удалось получить данные Push-подписки гостя."
+            );
+        }
+
+        const { error } =
+            await supabaseClient
+                .from("push_subscriptions")
+                .upsert(
+                    {
+                        user_id: null,
+                        guest_conversation_id:
+                            conversationId,
+                        endpoint,
+                        p256dh,
+                        auth
+                    },
+                    {
+                        onConflict: "endpoint"
+                    }
+                );
+
+        if (error) {
+            throw error;
+        }
+
+        console.log(
+            "Анти-Шум: гостевая Push-подписка сохранена."
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Анти-Шум: ошибка гостевой Push-подписки:",
+            error
+        );
+    }
+}
+
+    
 function urlBase64ToUint8Array(
     base64String
 ) {
