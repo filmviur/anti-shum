@@ -11324,12 +11324,20 @@ function showAuthScreen() {
 }
 
 
-/*
-    Следим за изменениями авторизации.
-*/
+
+/* =========================================================
+   ОТСЛЕЖИВАНИЕ АВТОРИЗАЦИИ
+========================================================= */
 
 supabaseClient.auth.onAuthStateChange(
     function(event, session) {
+
+        /* Запоминаем предыдущего пользователя */
+
+        const previousUserId = currentUser?.id || null;
+
+
+        /* Обновляем текущую сессию */
 
         currentSession = session;
 
@@ -11338,12 +11346,33 @@ supabaseClient.auth.onAuthStateChange(
                 ? session.user
                 : null;
 
+        const newUserId = currentUser?.id || null;
 
-        /*
-            Пользователь вышел из аккаунта.
-        */
+
+        /* =========================
+           СМЕНА ПОЛЬЗОВАТЕЛЯ
+        ========================= */
+
+        if (previousUserId !== newUserId) {
+
+            stopAnnouncementsRealtime();
+
+            setAnnouncementsUnread(false);
+
+            appInitializedUserId = null;
+
+        }
+
+
+        /* =========================
+           ВЫХОД ИЗ АККАУНТА
+        ========================= */
 
         if (event === "SIGNED_OUT") {
+
+            stopAnnouncementsRealtime();
+
+            setAnnouncementsUnread(false);
 
             appInitializedUserId = null;
 
@@ -11357,12 +11386,15 @@ supabaseClient.auth.onAuthStateChange(
         }
 
 
-        /*
-            Гость остаётся на экране авторизации.
-            Основное приложение ему недоступно.
-        */
+        /* =========================
+           ГОСТЕВАЯ СЕССИЯ
+        ========================= */
 
         if (isGuestSession(session)) {
+
+            stopAnnouncementsRealtime();
+
+            setAnnouncementsUnread(false);
 
             appInitializedUserId = null;
 
@@ -11374,33 +11406,42 @@ supabaseClient.auth.onAuthStateChange(
         }
 
 
-        /*
-            Зарегистрированный пользователь
-            входит в основное приложение.
-        */
+        /* =========================
+           ЗАРЕГИСТРИРОВАННЫЙ ПОЛЬЗОВАТЕЛЬ
+        ========================= */
 
         if (
             currentUser &&
             appInitializedUserId !== currentUser.id
         ) {
 
+            /*
+                Запускаем инициализацию
+                после обработки авторизации.
+            */
+
             setTimeout(
-                () => {
+                function() {
 
                     if (
                         currentUser &&
                         !isGuestSession(currentSession) &&
                         appInitializedUserId !== currentUser.id
                     ) {
+
                         initializeUser();
+
                     }
 
                 },
                 0
             );
+
         }
+
     }
 );
+
 
 
 /*
