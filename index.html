@@ -7495,6 +7495,54 @@
 }
 
 
+
+/* =========================================================
+   КНОПКА ЗАКРЫТИЯ ОКНА ОБЪЯВЛЕНИЙ
+========================================================= */
+
+/* Основное оформление */
+
+#closeAnnouncementsBtn {
+    min-width: 120px;
+    padding: 11px 22px;
+
+    border: 1px solid rgba(201, 168, 106, 0.4);
+    border-radius: 9px;
+
+    background: rgba(201, 168, 106, 0.08);
+    color: #e0c48e;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 14px;
+    font-weight: normal;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+/* Наведение */
+
+#closeAnnouncementsBtn:hover {
+    background: rgba(201, 168, 106, 0.17);
+    border-color: rgba(214, 184, 117, 0.7);
+
+    box-shadow: 0 4px 18px rgba(201, 168, 106, 0.1);
+
+    transform: translateY(-1px);
+}
+
+/* Нажатие */
+
+#closeAnnouncementsBtn:active {
+    transform: translateY(0);
+}
+
+
 /* =========================================================
    МОБИЛЬНАЯ АДАПТАЦИЯ ОКНА ОБЪЯВЛЕНИЙ
 ========================================================= */
@@ -7528,6 +7576,14 @@
 
     .announcements-empty {
         padding: 18px 10px;
+    }
+
+    /* Кнопка закрытия */
+
+    #closeAnnouncementsBtn {
+        min-width: 110px;
+        padding: 11px 18px;
+        font-size: 14px;
     }
 }
 
