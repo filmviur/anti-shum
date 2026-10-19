@@ -9969,7 +9969,10 @@ adminPublishAnnouncementBtn.addEventListener(
             adminAnnouncementStatus.classList.remove(
                 "hidden"
             );
+            // Обновляем историю после успешной публикации.
+            await loadAdminAnnouncements();
 
+            
         } catch (error) {
 
             console.error(
