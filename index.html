@@ -9698,6 +9698,91 @@ const adminAnnouncementStatus =
 
 
 /* =========================
+   PUBLISH ANNOUNCEMENT
+========================= */
+
+// Кнопка активна только при наличии текста.
+adminAnnouncementText.addEventListener(
+    "input",
+    function() {
+        adminPublishAnnouncementBtn.disabled =
+            !adminAnnouncementText.value.trim();
+    }
+);
+
+// Публикация объявления.
+adminPublishAnnouncementBtn.addEventListener(
+    "click",
+    async function() {
+
+        const body =
+            adminAnnouncementText.value.trim();
+
+        if (!body || !currentUser) {
+            return;
+        }
+
+        const isAdmin =
+            await verifyAdminFeedAccess();
+
+        if (!isAdmin) {
+            showNotice("Нет прав администратора.");
+            return;
+        }
+
+        adminPublishAnnouncementBtn.disabled = true;
+
+        adminAnnouncementStatus.classList.add("hidden");
+
+        try {
+
+            const { error } =
+                await supabaseClient
+                    .from("announcements")
+                    .insert({
+                        title: "Объявление",
+                        body: body,
+                        created_by: currentUser.id
+                    });
+
+            if (error) {
+                throw error;
+            }
+
+            adminAnnouncementText.value = "";
+
+            adminAnnouncementStatus.textContent =
+                "Объявление успешно опубликовано.";
+
+            adminAnnouncementStatus.classList.remove(
+                "hidden"
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Announcement publish error:",
+                error
+            );
+
+            adminAnnouncementStatus.textContent =
+                "Ошибка публикации: " +
+                (error.message || "Попробуйте ещё раз.");
+
+            adminAnnouncementStatus.classList.remove(
+                "hidden"
+            );
+
+        } finally {
+
+            adminPublishAnnouncementBtn.disabled =
+                !adminAnnouncementText.value.trim();
+        }
+    }
+);
+
+    
+/* =========================
    ADMIN MODERATION
 ========================= */
 
