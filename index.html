@@ -9098,7 +9098,11 @@
 
     
 
-<!-- SUPPORT MODAL -->
+
+<!-- =====================================================
+     SUPPORT MODAL
+===================================================== -->
+
 <div
     id="supportModal"
     class="modal-backdrop hidden"
@@ -9140,12 +9144,68 @@
                 Отправить
             </button>
 
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ANNOUNCEMENTS MODAL
+===================================================== -->
+
+<div
+    id="announcementsModal"
+    class="modal-backdrop hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="announcementsModalTitle"
+>
+
+    <div class="modal announcements-modal">
+
+        <!-- Заголовок -->
+
+        <div
+            id="announcementsModalTitle"
+            class="modal-title"
+        >
+            📢 Объявления
+        </div>
+
+        <!-- Список объявлений -->
+
+        <div
+            id="userAnnouncementsList"
+            class="user-announcements-list"
+            aria-live="polite"
+        >
+
+            <div class="announcements-empty">
+                Загрузка объявлений...
+            </div>
+
+        </div>
+
+        <!-- Кнопка закрытия -->
+
+        <div class="modal-actions">
+
+            <button
+                id="closeAnnouncementsBtn"
+                class="secondary-btn"
+                type="button"
+            >
+                Закрыть
+            </button>
 
         </div>
 
     </div>
 
 </div>
+
 
 
 <!-- REPORT MODAL -->
