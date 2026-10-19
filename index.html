@@ -13759,23 +13759,44 @@ async function createSignedPhoto(path) {
 }
 
 
+
 /* =========================================================
    SESSION TIMER
 ========================================================= */
+
+/*
+    Запускаем таймер только для обычных пользователей.
+    Администратор имеет постоянный доступ к текущей ленте.
+*/
 
 function startSessionTimer() {
 
     clearSessionTimer();
 
+    if (isCurrentUserAdmin === true) {
+        return;
+    }
+
+    if (!sessionEndsAt) {
+        return;
+    }
+
     updateSessionTimer();
 
-    sessionTimerInterval =
-        setInterval(
-            updateSessionTimer,
-            1000
-        );
+    if (isCurrentUserAdmin === true) {
+        return;
+    }
+
+    sessionTimerInterval = setInterval(
+        updateSessionTimer,
+        1000
+    );
 }
 
+
+/* =========================================================
+   ANIMATED TIMER DIGITS
+========================================================= */
 
 function updateSessionDigit(id, value) {
 
@@ -13796,8 +13817,7 @@ function updateSessionDigit(id, value) {
 
     void element.offsetWidth;
 
-    element.textContent =
-        value;
+    element.textContent = value;
 
     element.classList.add(
         "retro-digit-drop"
@@ -13805,31 +13825,39 @@ function updateSessionDigit(id, value) {
 }
 
 
+/* =========================================================
+   UPDATE SESSION TIMER
+========================================================= */
+
 function updateSessionTimer() {
+
+    /*
+        Для администратора таймер не действует.
+    */
+
+    if (isCurrentUserAdmin === true) {
+        clearSessionTimer();
+        return;
+    }
 
     if (!sessionEndsAt) {
         return;
     }
 
-    const remaining =
-        Math.max(
-            0,
-            sessionEndsAt -
-            Date.now()
-        );
+    const remaining = Math.max(
+        0,
+        sessionEndsAt - Date.now()
+    );
 
-    const totalSeconds =
-        Math.ceil(
-            remaining / 1000
-        );
+    const totalSeconds = Math.ceil(
+        remaining / 1000
+    );
 
-    const minutes =
-        Math.floor(
-            totalSeconds / 60
-        );
+    const minutes = Math.floor(
+        totalSeconds / 60
+    );
 
-    const seconds =
-        totalSeconds % 60;
+    const seconds = totalSeconds % 60;
 
     const minutesText =
         String(minutes).padStart(2, "0");
@@ -13858,38 +13886,50 @@ function updateSessionTimer() {
     );
 
     if (remaining <= 0) {
-
         finishSession();
-
-        return;
     }
 }
 
 
+/* =========================================================
+   FINISH SESSION
+========================================================= */
+
 async function finishSession() {
+
+    /*
+        Администратора не закрываем по таймеру.
+    */
+
+    if (isCurrentUserAdmin === true) {
+        clearSessionTimer();
+        return;
+    }
 
     clearSessionTimer();
 
-    sessionEndsAt =
-        null;
+    sessionEndsAt = null;
 
     /*
-        Очень важно:
-        полностью очищаем DOM ленты,
-        чтобы чужие ответы больше не оставались
-        на странице.
+        Удаляем содержимое ленты,
+        чтобы ответы не оставались на экране.
     */
 
-    feed.innerHTML =
-        "";
+    if (feed) {
+        feed.replaceChildren();
+    }
 
-    feedView.classList.add(
-        "hidden"
-    );
+    if (feedView) {
+        feedView.classList.add("hidden");
+    }
 
     showClosedScreen();
 }
 
+
+/* =========================================================
+   CLEAR SESSION TIMER
+========================================================= */
 
 function clearSessionTimer() {
 
@@ -13899,11 +13939,14 @@ function clearSessionTimer() {
             sessionTimerInterval
         );
 
-        sessionTimerInterval =
-            null;
+        sessionTimerInterval = null;
     }
 }
 
+
+/* =========================================================
+   CLEAR ALL TIMERS
+========================================================= */
 
 function clearTimers() {
 
@@ -13915,11 +13958,14 @@ function clearTimers() {
             nextDayInterval
         );
 
-        nextDayInterval =
-            null;
+        nextDayInterval = null;
     }
 }
 
+
+/* =========================================================
+   ANIMATED RETRO DIGITS
+========================================================= */
 
 function updateRetroDigit(id, value) {
 
@@ -13940,13 +13986,13 @@ function updateRetroDigit(id, value) {
 
     void element.offsetWidth;
 
-    element.textContent =
-        value;
+    element.textContent = value;
 
     element.classList.add(
         "retro-digit-drop"
     );
 }
+
 
 
 /* =========================================================
