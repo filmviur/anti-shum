@@ -11747,13 +11747,17 @@ appScreen.classList.add("hidden");
     }
 
     
+   
     /* =========================
        ПРОВЕРКА НОВЫХ ОБЪЯВЛЕНИЙ
+       И ПОДКЛЮЧЕНИЕ REALTIME
     ========================= */
 
     try {
 
         await checkUnreadAnnouncements();
+
+        startAnnouncementsRealtime();
 
     } catch (error) {
 
