@@ -7310,12 +7310,71 @@
         padding: 16px;
     }
 
-    /* Текст объявления */
+    
+/* Текст объявления */
 
     .admin-announcement-body {
         font-size: 14px;
         line-height: 1.7;
     }
+}
+
+
+/* =========================================================
+   КНОПКА ОБЪЯВЛЕНИЙ НА ЗАКРЫТОМ ЭКРАНЕ
+========================================================= */
+
+/* Расположение кнопки над карточкой ожидания */
+
+.closed-announcements-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    box-sizing: border-box;
+
+    width: 100%;
+    max-width: 600px;
+
+    margin: 0 auto 18px;
+    padding: 0 8px;
+}
+
+/* Оформление и анимация кнопки */
+
+.closed-announcements-actions .announcements-btn {
+    flex-shrink: 0;
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+/* Наведение на кнопку */
+
+.closed-announcements-actions .announcements-btn:hover {
+    transform: translateY(-2px);
+
+    border-color: rgba(201, 168, 106, 0.65);
+    background: rgba(201, 168, 106, 0.12);
+}
+
+
+/* =========================================================
+   МОБИЛЬНАЯ АДАПТАЦИЯ КНОПКИ ОБЪЯВЛЕНИЙ
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .closed-announcements-actions {
+        width: 100%;
+        max-width: 100%;
+
+        margin-bottom: 14px;
+        padding: 0 4px;
+    }
+
 }
 
 </style>
@@ -7325,6 +7384,7 @@
 
 <div class="page">
     <div class="container">
+
 
 
 
