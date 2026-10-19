@@ -8533,10 +8533,36 @@
                 📢 ОБЪЯВЛЕНИЯ
             </div>
 
-            <div class="admin-empty">
-                Здесь администратор сможет
-                создавать объявления для всех пользователей.
-            </div>
+           <div class="admin-announcement-form">
+
+    <textarea
+        id="adminAnnouncementText"
+        class="admin-announcement-textarea"
+        placeholder="Напишите объявление для пользователей..."
+        maxlength="2000"
+        rows="5"
+    ></textarea>
+
+    <div class="admin-announcement-actions">
+
+        <button
+            id="adminPublishAnnouncementBtn"
+            class="secondary-btn"
+            type="button"
+            disabled
+        >
+            📢 Опубликовать
+        </button>
+
+    </div>
+
+    <div
+        id="adminAnnouncementStatus"
+        class="hidden"
+        role="status"
+    ></div>
+
+</div>
 
         </div>
 
