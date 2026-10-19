@@ -12089,6 +12089,7 @@ if (enableNotificationsBtn) {
 
 
     
+
 /* =========================================================
    QUESTIONS
 ========================================================= */
@@ -12099,15 +12100,23 @@ async function loadTodayQuestionAndState() {
 
     if (!isProjectStarted()) {
 
-        showClosedScreen();
+        const isAdmin =
+            await verifyAdminFeedAccess();
 
-        return;
+        if (!isAdmin) {
+            showClosedScreen();
+            return;
+        }
     }
 
-        const projectDay =
+    const isAdmin =
+        await verifyAdminFeedAccess();
+
+    const projectDay =
         getProjectDay();
 
-    const now = getKyivDateParts();
+    const now =
+        getKyivDateParts();
 
     const currentMinutes =
         now.hour * 60 + now.minute;
@@ -12115,34 +12124,45 @@ async function loadTodayQuestionAndState() {
     const sessionStartMinutes = 20 * 60;
     const sessionEndMinutes = 20 * 60 + 20;
 
+    /*
+        Ограничение времени действует
+        только для обычных пользователей.
+    */
+
     if (
-        projectDay <= 0 ||
-        currentMinutes < sessionStartMinutes ||
-        currentMinutes >= sessionEndMinutes
+        !isAdmin &&
+        (
+            projectDay <= 0 ||
+            currentMinutes < sessionStartMinutes ||
+            currentMinutes >= sessionEndMinutes
+        )
     ) {
 
         await finishSession();
+        return;
+    }
 
+    if (projectDay <= 0) {
+
+        showClosedScreen();
         return;
     }
 
     try {
 
         /*
-            ВАЖНО:
-            ищем вопрос текущего дня.
+            Загружаем вопрос текущего дня.
         */
 
         const {
             data,
             error
-        } =
-            await supabaseClient
-                .from("questions")
-                .select("*")
-                .eq("day", projectDay)
-                .limit(1)
-                .maybeSingle();
+        } = await supabaseClient
+            .from("questions")
+            .select("*")
+            .eq("day", projectDay)
+            .limit(1)
+            .maybeSingle();
 
         if (error) {
             throw error;
@@ -12154,15 +12174,11 @@ async function loadTodayQuestionAndState() {
                 "Вопрос дня пока не добавлен.";
 
             showOnly(questionView);
-
             return;
         }
 
-        currentQuestion =
-            data;
-
-        currentQuestionId =
-            data.id;
+        currentQuestion = data;
+        currentQuestionId = data.id;
 
         questionText.textContent =
             data.question ||
@@ -12184,9 +12200,22 @@ async function loadTodayQuestionAndState() {
         resetAnswerForm();
 
         /*
-            Проверяем собственный ответ.
-            Его created_at становится началом
-            персональной 15-минутной ленты.
+            Администратору не требуется
+            отправлять собственный ответ.
+        */
+
+        if (isAdmin) {
+
+            currentAnswer = null;
+            sessionEndsAt = null;
+
+            await openFeed();
+            return;
+        }
+
+        /*
+            Обычный пользователь:
+            проверяем собственный ответ.
         */
 
         const ownAnswer =
@@ -12197,26 +12226,20 @@ async function loadTodayQuestionAndState() {
         if (!ownAnswer) {
 
             showOnly(questionView);
-
             return;
         }
 
-        currentAnswer =
-            ownAnswer;
+        currentAnswer = ownAnswer;
 
-       const endAt = getTodaySessionEnd();
+        const endAt = getTodaySessionEnd();
 
-        if (
-            Date.now() >= endAt
-        ) {
+        if (Date.now() >= endAt) {
 
             await finishSession();
-
             return;
         }
 
-        sessionEndsAt =
-            endAt;
+        sessionEndsAt = endAt;
 
         await openFeed();
 
@@ -12229,7 +12252,7 @@ async function loadTodayQuestionAndState() {
 
         questionText.textContent =
             "Не удалось загрузить вопрос.";
-        
+
         showOnly(questionView);
     }
 }
