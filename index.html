@@ -14159,11 +14159,41 @@ profileBackBtn.addEventListener(
 let isCurrentUserAdmin = false;
 
 
+
 /* =========================================================
    LOAD PROFILE
 ========================================================= */
 
 async function loadProfile() {
+
+    /*
+        Управление пользовательской кнопкой объявлений.
+        У администратора кнопка полностью скрыта.
+    */
+
+    function updateAnnouncementButtonVisibility() {
+
+        const button =
+            document.getElementById("announcementBtn");
+
+        if (!button) {
+            return;
+        }
+
+        const shouldHide =
+            !currentUser || isCurrentUserAdmin;
+
+        button.classList.toggle(
+            "hidden",
+            shouldHide
+        );
+
+        button.style.setProperty(
+            "display",
+            shouldHide ? "none" : "",
+            shouldHide ? "important" : ""
+        );
+    }
 
     if (!currentUser) {
 
@@ -14171,9 +14201,10 @@ async function loadProfile() {
 
         adminPanelBtn.classList.add("hidden");
 
+        updateAnnouncementButtonVisibility();
+
         return;
     }
-
 
     try {
 
@@ -14193,11 +14224,18 @@ async function loadProfile() {
         }
 
         /*
-            Роль берётся из таблицы users.
+            Определяем роль пользователя.
         */
 
         isCurrentUserAdmin =
             data?.is_admin === true;
+
+        /*
+            Скрываем пользовательские объявления
+            для администратора.
+        */
+
+        updateAnnouncementButtonVisibility();
 
         const displayName =
             data?.display_name ||
@@ -14205,7 +14243,8 @@ async function loadProfile() {
             currentUser.email?.split("@")[0] ||
             "Пользователь";
 
-        profileName.textContent = displayName;
+        profileName.textContent =
+            displayName;
 
         profileEmail.textContent =
             currentUser.email || "";
@@ -14215,12 +14254,15 @@ async function loadProfile() {
 
         if (currentAvatarUrl) {
 
-            profileAvatar.src = currentAvatarUrl;
+            profileAvatar.src =
+                currentAvatarUrl;
 
         } else {
 
             profileAvatar.src =
-                createAvatarPlaceholder(displayName);
+                createAvatarPlaceholder(
+                    displayName
+                );
         }
 
         deleteAvatarMenuBtn.classList.toggle(
@@ -14235,11 +14277,6 @@ async function loadProfile() {
 
     } catch (error) {
 
-        /*
-            При ошибке не предоставляем
-            административные привилегии.
-        */
-
         isCurrentUserAdmin = false;
 
         console.error(
@@ -14247,9 +14284,14 @@ async function loadProfile() {
             error
         );
 
-        adminPanelBtn.classList.add("hidden");
+        adminPanelBtn.classList.add(
+            "hidden"
+        );
+
+        updateAnnouncementButtonVisibility();
     }
 }
+
 
 
    /* =========================================================
