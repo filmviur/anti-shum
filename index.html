@@ -18983,13 +18983,16 @@ function setAnnouncementsUnread(hasUnread) {
 }
 
 
-/*
-    Проверяем дату последнего объявления.
-*/
+
+/* =========================================================
+   ПРОВЕРКА НЕПРОЧИТАННЫХ ОБЪЯВЛЕНИЙ
+========================================================= */
 
 async function checkUnreadAnnouncements() {
 
-    if (!currentUser) {
+    const userId = currentUser?.id;
+
+    if (!userId) {
         setAnnouncementsUnread(false);
         return;
     }
@@ -19004,6 +19007,11 @@ async function checkUnreadAnnouncements() {
 
         if (error) {
             throw error;
+        }
+
+        // За время запроса пользователь мог выйти.
+        if (currentUser?.id !== userId) {
+            return;
         }
 
         if (!data || data.length === 0) {
@@ -19030,6 +19038,95 @@ async function checkUnreadAnnouncements() {
 
     }
 }
+
+
+/* =========================================================
+   REALTIME ОБЪЯВЛЕНИЙ
+========================================================= */
+
+let announcementsRealtimeChannel = null;
+let announcementsRealtimeUserId = null;
+
+function stopAnnouncementsRealtime() {
+
+    if (announcementsRealtimeChannel) {
+
+        supabaseClient.removeChannel(
+            announcementsRealtimeChannel
+        );
+
+        announcementsRealtimeChannel = null;
+    }
+
+    announcementsRealtimeUserId = null;
+}
+
+
+function startAnnouncementsRealtime() {
+
+    if (!currentUser) {
+        return;
+    }
+
+    const userId = currentUser.id;
+
+    // Не создаём повторную подписку.
+    if (
+        announcementsRealtimeChannel &&
+        announcementsRealtimeUserId === userId
+    ) {
+        return;
+    }
+
+    // Удаляем подписку предыдущего пользователя.
+    stopAnnouncementsRealtime();
+
+    announcementsRealtimeUserId = userId;
+
+    announcementsRealtimeChannel = supabaseClient
+        .channel("announcements-live-" + userId)
+        .on(
+            "postgres_changes",
+            {
+                event: "INSERT",
+                schema: "public",
+                table: "announcements"
+            },
+            function(payload) {
+
+                if (currentUser?.id !== userId) {
+                    return;
+                }
+
+                console.log(
+                    "Получено новое объявление:",
+                    payload.new
+                );
+
+                // Обновляем золотистый индикатор.
+                checkUnreadAnnouncements();
+            }
+        )
+        .subscribe(function(status) {
+
+            if (status === "CHANNEL_ERROR") {
+
+                console.error(
+                    "Ошибка Realtime объявлений"
+                );
+
+            }
+
+            if (status === "TIMED_OUT") {
+
+                console.warn(
+                    "Превышено время подключения Realtime"
+                );
+
+            }
+        });
+}
+
 
 
 /* =========================================================
