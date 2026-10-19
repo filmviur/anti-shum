@@ -7320,13 +7320,26 @@
 }
 
 
+
+/* =========================================================
+   ЗАКРЫТЫЙ ЭКРАН — ИСПРАВЛЕНИЕ РАСПОЛОЖЕНИЯ
+========================================================= */
+
+/* Карточка ожидания и кнопка располагаются вертикально */
+
+#closedView {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 /* =========================================================
    КНОПКА ОБЪЯВЛЕНИЙ НА ЗАКРЫТОМ ЭКРАНЕ
 ========================================================= */
 
-/* Расположение кнопки над карточкой ожидания */
+/* Контейнер кнопки */
 
-.closed-announcements-actions {
+#closedView .closed-announcements-actions {
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -7336,13 +7349,13 @@
     width: 100%;
     max-width: 600px;
 
-    margin: 0 auto 18px;
+    margin: 0 auto 14px;
     padding: 0 8px;
 }
 
-/* Оформление и анимация кнопки */
+/* Оформление и анимация */
 
-.closed-announcements-actions .announcements-btn {
+#closedView .closed-announcements-actions .announcements-btn {
     flex-shrink: 0;
 
     transition:
@@ -7351,23 +7364,35 @@
         background 0.2s ease;
 }
 
-/* Наведение на кнопку */
+/* Наведение */
 
-.closed-announcements-actions .announcements-btn:hover {
+#closedView .closed-announcements-actions .announcements-btn:hover {
     transform: translateY(-2px);
 
     border-color: rgba(201, 168, 106, 0.65);
     background: rgba(201, 168, 106, 0.12);
 }
 
+/* =========================================================
+   КАРТОЧКА ОЖИДАНИЯ
+========================================================= */
+
+/* Центрирование карточки */
+
+#closedView .closed-card {
+    box-sizing: border-box;
+
+    width: 100%;
+    max-width: 600px;
+}
 
 /* =========================================================
-   МОБИЛЬНАЯ АДАПТАЦИЯ КНОПКИ ОБЪЯВЛЕНИЙ
+   МОБИЛЬНАЯ АДАПТАЦИЯ
 ========================================================= */
 
 @media (max-width: 600px) {
 
-    .closed-announcements-actions {
+    #closedView .closed-announcements-actions {
         width: 100%;
         max-width: 100%;
 
@@ -7375,6 +7400,10 @@
         padding: 0 4px;
     }
 
+    #closedView .closed-card {
+        width: 100%;
+        max-width: 100%;
+    }
 }
 
 </style>
@@ -7384,6 +7413,7 @@
 
 <div class="page">
     <div class="container">
+
 
 
 
