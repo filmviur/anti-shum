@@ -12964,17 +12964,43 @@ async function openAdminDayFeed(day) {
     await openFeed();
 }
     
+
+/* =========================================================
+   OPEN FEED
+========================================================= */
+
 async function openFeed() {
 
-    const isAdminPreview =
-        adminFeedPreview &&
+    /*
+        Проверяем права администратора
+        на стороне Supabase.
+    */
+
+    const isAdmin =
         await verifyAdminFeedAccess();
 
-    if (!currentAnswer && !isAdminPreview) {
+    const isAdminPreview =
+        adminFeedPreview && isAdmin;
+
+    /*
+        Обычному пользователю нужен собственный ответ.
+        Администратор может открыть текущую ленту без него.
+    */
+
+    if (
+        !currentAnswer &&
+        !isAdminPreview &&
+        !isAdmin
+    ) {
         return;
     }
 
-    if (!isAdminPreview) {
+    /*
+        Ограничение времени действует
+        только для обычных пользователей.
+    */
+
+    if (!isAdmin) {
 
         if (!sessionEndsAt) {
             sessionEndsAt = getTodaySessionEnd();
@@ -12993,22 +13019,39 @@ async function openFeed() {
 
     await loadFeed();
 
-    if (!isAdminPreview) {
+    /*
+        Таймер остаётся у обычных пользователей.
+        Администратор может читать ленту без ограничения.
+    */
+
+    if (isAdmin) {
+        clearSessionTimer();
+    } else {
         startSessionTimer();
     }
 }
 
+
+/* =========================================================
+   LOAD FEED
+========================================================= */
+
 async function loadFeed() {
 
-    const isAdminPreview =
-        adminFeedPreview &&
+    const isAdmin =
         await verifyAdminFeedAccess();
+
+    const isAdminPreview =
+        adminFeedPreview && isAdmin;
+
+    const canViewWithoutSession =
+        isAdmin || isAdminPreview;
 
     if (
         !currentUser ||
         !currentQuestionId ||
         (
-            !isAdminPreview &&
+            !canViewWithoutSession &&
             (
                 !sessionEndsAt ||
                 Date.now() >= sessionEndsAt
@@ -13019,92 +13062,76 @@ async function loadFeed() {
         return;
     }
 
-
     try {
 
         const {
             data,
             error
-        } =
-            await supabaseClient
-                .from("answers")
-                .select("*")
-                .eq(
-                    "question_id",
-                    currentQuestionId
-                )
-                .eq(
-                    "is_hidden",
-                    false
-                )
-                .order(
-                    "created_at",
-                    {
-                        ascending: true
-                    }
-                );
+        } = await supabaseClient
+            .from("answers")
+            .select("*")
+            .eq("question_id", currentQuestionId)
+            .eq("is_hidden", false)
+            .order("created_at", {
+                ascending: true
+            });
 
         if (error) {
             throw error;
         }
 
+        const answers = data || [];
 
-        const answers =
-            data || [];
+        const answerIds = answers.map(
+            answer => answer.id
+        );
 
-        const answerIds =
-    answers.map(
-        answer => answer.id
-    );
+        const reactionsMap = new Map();
 
-let reactionsMap =
-    new Map();
+        if (answerIds.length) {
 
-if (answerIds.length) {
-
-    const {
-        data: reactions,
-        error: reactionsError
-    } =
-        await supabaseClient
-            .from("reactions")
-            .select(
-                "answer_id, user_id, reaction_type"
-            )
-            .in(
-                "answer_id",
-                answerIds
-            );
-
-    if (reactionsError) {
-        throw reactionsError;
-    }
-
-    (reactions || []).forEach(
-        reaction => {
-
-            if (
-                !reactionsMap.has(
-                    reaction.answer_id
+            const {
+                data: reactions,
+                error: reactionsError
+            } = await supabaseClient
+                .from("reactions")
+                .select(
+                    "answer_id, user_id, reaction_type"
                 )
-            ) {
+                .in("answer_id", answerIds);
 
-                reactionsMap.set(
-                    reaction.answer_id,
-                    []
-                );
+            if (reactionsError) {
+                throw reactionsError;
             }
 
-            reactionsMap
-                .get(
-                    reaction.answer_id
-                )
-                .push(
-                    reaction
-                );
+            (reactions || []).forEach(
+                reaction => {
+
+                    if (
+                        !reactionsMap.has(
+                            reaction.answer_id
+                        )
+                    ) {
+                        reactionsMap.set(
+                            reaction.answer_id,
+                            []
+                        );
+                    }
+
+                    reactionsMap
+                        .get(reaction.answer_id)
+                        .push(reaction);
+                }
+            );
         }
-    );
-}
+
+        /*
+            Ниже оставь существующий код loadFeed()
+            начиная с получения пользователей:
+            const userIds = ...
+        */
+
+
 
         /*
             Получаем только пользователей,
