@@ -12090,6 +12090,7 @@ if (enableNotificationsBtn) {
 
     
 
+
 /* =========================================================
    QUESTIONS
 ========================================================= */
@@ -12098,19 +12099,18 @@ async function loadTodayQuestionAndState() {
 
     clearTimers();
 
-    if (!isProjectStarted()) {
-
-        const isAdmin =
-            await verifyAdminFeedAccess();
-
-        if (!isAdmin) {
-            showClosedScreen();
-            return;
-        }
-    }
-
     const isAdmin =
         await verifyAdminFeedAccess();
+
+    /*
+        До начала проекта обычным пользователям
+        доступ закрыт.
+    */
+
+    if (!isProjectStarted() && !isAdmin) {
+        showClosedScreen();
+        return;
+    }
 
     const projectDay =
         getProjectDay();
@@ -12121,12 +12121,15 @@ async function loadTodayQuestionAndState() {
     const currentMinutes =
         now.hour * 60 + now.minute;
 
-    const sessionStartMinutes = 20 * 60;
-    const sessionEndMinutes = 20 * 60 + 20;
+    const sessionStartMinutes =
+        20 * 60;
+
+    const sessionEndMinutes =
+        20 * 60 + 20;
 
     /*
-        Ограничение времени действует
-        только для обычных пользователей.
+        Ограничение времени только
+        для обычных пользователей.
     */
 
     if (
@@ -12137,13 +12140,11 @@ async function loadTodayQuestionAndState() {
             currentMinutes >= sessionEndMinutes
         )
     ) {
-
         await finishSession();
         return;
     }
 
     if (projectDay <= 0) {
-
         showClosedScreen();
         return;
     }
@@ -12151,7 +12152,9 @@ async function loadTodayQuestionAndState() {
     try {
 
         /*
-            Загружаем вопрос текущего дня.
+            Получаем вопрос активного дня.
+            До 20:00 getProjectDay() возвращает
+            предыдущий день проекта.
         */
 
         const {
@@ -12177,20 +12180,26 @@ async function loadTodayQuestionAndState() {
             return;
         }
 
+        /*
+            Обновляем текущий вопрос.
+        */
+
+        adminFeedPreview = false;
+
         currentQuestion = data;
         currentQuestionId = data.id;
 
-        questionText.textContent =
+        const question =
             data.question ||
             data.text ||
             data.question_text ||
             "";
 
+        questionText.textContent =
+            question;
+
         feedQuestion.textContent =
-            data.question ||
-            data.text ||
-            data.question_text ||
-            "";
+            question;
 
         photoSection.classList.toggle(
             "hidden",
@@ -12200,22 +12209,8 @@ async function loadTodayQuestionAndState() {
         resetAnswerForm();
 
         /*
-            Администратору не требуется
-            отправлять собственный ответ.
-        */
-
-        if (isAdmin) {
-
-            currentAnswer = null;
-            sessionEndsAt = null;
-
-            await openFeed();
-            return;
-        }
-
-        /*
-            Обычный пользователь:
-            проверяем собственный ответ.
+            Проверяем, отправлял ли
+            пользователь ответ на этот вопрос.
         */
 
         const ownAnswer =
@@ -12223,15 +12218,47 @@ async function loadTodayQuestionAndState() {
                 currentQuestionId
             );
 
+        currentAnswer =
+            ownAnswer || null;
+
+        /*
+            Администратор:
+            без ограничения времени.
+        */
+
+        if (isAdmin) {
+
+            sessionEndsAt = null;
+
+            if (!ownAnswer) {
+
+                showOnly(questionView);
+                return;
+            }
+
+            await openFeed();
+            return;
+        }
+
+        /*
+            Обычный пользователь:
+            если ещё не ответил,
+            показываем вопрос.
+        */
+
         if (!ownAnswer) {
 
             showOnly(questionView);
             return;
         }
 
-        currentAnswer = ownAnswer;
+        /*
+            Если ответ уже есть,
+            открываем ленту до 20:20.
+        */
 
-        const endAt = getTodaySessionEnd();
+        const endAt =
+            getTodaySessionEnd();
 
         if (Date.now() >= endAt) {
 
@@ -12256,6 +12283,7 @@ async function loadTodayQuestionAndState() {
         showOnly(questionView);
     }
 }
+
 
 
 /* =========================================================
