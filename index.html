@@ -18925,6 +18925,95 @@ const userAnnouncementsList =
 
 
 
+
+/* =========================================================
+   ОБЪЯВЛЕНИЯ — ПРОЧИТАННЫЕ И НЕПРОЧИТАННЫЕ
+========================================================= */
+
+const announcementsNotificationBadge =
+    document.getElementById("announcementsNotificationBadge");
+
+/*
+    Отдельный ключ для каждого пользователя.
+    Состояние сохраняется в текущем браузере.
+*/
+
+function getAnnouncementsReadKey() {
+
+    if (!currentUser) {
+        return null;
+    }
+
+    return "anti_shum_announcements_read_" + currentUser.id;
+}
+
+
+/*
+    Показываем или скрываем золотистую точку.
+*/
+
+function setAnnouncementsUnread(hasUnread) {
+
+    if (!announcementsNotificationBadge) {
+        return;
+    }
+
+    announcementsNotificationBadge.classList.toggle(
+        "hidden",
+        !hasUnread
+    );
+}
+
+
+/*
+    Проверяем дату последнего объявления.
+*/
+
+async function checkUnreadAnnouncements() {
+
+    if (!currentUser) {
+        setAnnouncementsUnread(false);
+        return;
+    }
+
+    try {
+
+        const { data, error } = await supabaseClient
+            .from("announcements")
+            .select("created_at")
+            .order("created_at", { ascending: false })
+            .limit(1);
+
+        if (error) {
+            throw error;
+        }
+
+        if (!data || data.length === 0) {
+            setAnnouncementsUnread(false);
+            return;
+        }
+
+        const readKey = getAnnouncementsReadKey();
+
+        const lastRead = localStorage.getItem(readKey);
+
+        const latestAnnouncement = data[0].created_at;
+
+        setAnnouncementsUnread(
+            !lastRead || latestAnnouncement > lastRead
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Unread announcements check error:",
+            error
+        );
+
+    }
+}
+
+
 /* =========================================================
    ОТКРЫТИЕ ОКНА И ЗАГРУЗКА ОБЪЯВЛЕНИЙ
 ========================================================= */
@@ -18958,6 +19047,8 @@ async function openAnnouncementsModal() {
             userAnnouncementsList.textContent =
                 "Пока нет опубликованных объявлений.";
 
+            setAnnouncementsUnread(false);
+
             return;
         }
 
@@ -18989,6 +19080,32 @@ async function openAnnouncementsModal() {
 
         });
 
+        /*
+            После успешного отображения объявлений
+            запоминаем дату самой новой публикации.
+        */
+
+        const readKey = getAnnouncementsReadKey();
+
+        if (readKey) {
+
+            const latestAnnouncement = data[0].created_at;
+
+            const previousRead = localStorage.getItem(readKey);
+
+            if (
+                !previousRead ||
+                latestAnnouncement > previousRead
+            ) {
+                localStorage.setItem(
+                    readKey,
+                    latestAnnouncement
+                );
+            }
+
+            setAnnouncementsUnread(false);
+        }
+
     } catch (error) {
 
         console.error(
@@ -19003,10 +19120,11 @@ async function openAnnouncementsModal() {
 }
 
 
+/* =========================================================
+   КНОПКИ ОТКРЫТИЯ ОБЪЯВЛЕНИЙ
+========================================================= */
 
-/*
-    Кнопка объявлений на основном экране.
-*/
+/* Кнопка на основном экране */
 
 if (announcementsBtn) {
 
@@ -19018,12 +19136,7 @@ if (announcementsBtn) {
 }
 
 
-/*
-    Кнопка на закрытом экране.
-
-    Если отдельная кнопка отсутствует,
-    обработчик не создаётся.
-*/
+/* Кнопка на закрытом экране, если существует */
 
 if (closedAnnouncementsBtn) {
 
@@ -19035,20 +19148,23 @@ if (closedAnnouncementsBtn) {
 }
 
 
-/*
-    Закрытие окна объявлений.
-*/
+/* =========================================================
+   ЗАКРЫТИЕ ОКНА ОБЪЯВЛЕНИЙ
+========================================================= */
 
 if (closeAnnouncementsBtn && announcementsModal) {
 
     closeAnnouncementsBtn.addEventListener(
         "click",
         function() {
+
             announcementsModal.classList.add("hidden");
+
         }
     );
 
 }
+
 
 
 /* =========================================================
