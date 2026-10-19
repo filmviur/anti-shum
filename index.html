@@ -18799,6 +18799,88 @@ sendSupportBtn.addEventListener(
     }
 );
 
+    
+/* =========================================================
+   ANNOUNCEMENTS MODAL CONTROLS
+========================================================= */
+
+const announcementsBtn =
+    document.getElementById("announcementsBtn");
+
+const closedAnnouncementsBtn =
+    document.getElementById("closedAnnouncementsBtn");
+
+const announcementsModal =
+    document.getElementById("announcementsModal");
+
+const closeAnnouncementsBtn =
+    document.getElementById("closeAnnouncementsBtn");
+
+const userAnnouncementsList =
+    document.getElementById("userAnnouncementsList");
+
+
+/*
+    Открытие окна объявлений.
+*/
+
+function openAnnouncementsModal() {
+
+    if (!announcementsModal) {
+        return;
+    }
+
+    announcementsModal.classList.remove("hidden");
+
+}
+
+
+/*
+    Кнопка объявлений на основном экране.
+*/
+
+if (announcementsBtn) {
+
+    announcementsBtn.addEventListener(
+        "click",
+        openAnnouncementsModal
+    );
+
+}
+
+
+/*
+    Кнопка на закрытом экране.
+
+    Если отдельная кнопка отсутствует,
+    обработчик не создаётся.
+*/
+
+if (closedAnnouncementsBtn) {
+
+    closedAnnouncementsBtn.addEventListener(
+        "click",
+        openAnnouncementsModal
+    );
+
+}
+
+
+/*
+    Закрытие окна объявлений.
+*/
+
+if (closeAnnouncementsBtn && announcementsModal) {
+
+    closeAnnouncementsBtn.addEventListener(
+        "click",
+        function() {
+            announcementsModal.classList.add("hidden");
+        }
+    );
+
+}
+
 
 /* =========================================================
    AVATAR PLACEHOLDER
