@@ -7062,6 +7062,7 @@
 }
 
 
+
 /* =========================================================
    АДМИН-ПАНЕЛЬ — ОБЪЯВЛЕНИЯ
 ========================================================= */
@@ -7085,8 +7086,8 @@
 
 .admin-announcement-textarea {
     display: block;
-
     box-sizing: border-box;
+
     width: 100%;
     min-height: 150px;
 
@@ -7135,8 +7136,7 @@
     gap: 12px;
 }
 
-
-/* Кнопка публикации объявления */
+/* Кнопка публикации */
 
 #adminPublishAnnouncementBtn {
     min-width: 190px;
@@ -7166,7 +7166,7 @@
         transform 0.2s ease;
 }
 
-/* Наведение */
+/* Наведение на кнопку */
 
 #adminPublishAnnouncementBtn:not(:disabled):hover {
     background: rgba(201, 168, 106, 0.18);
@@ -7191,11 +7191,11 @@
     transform: translateY(0);
 }
 
-
-/* Сообщение о результате публикации */
+/* Результат публикации */
 
 #adminAnnouncementStatus {
     color: #d6b875;
+
     font-family: Georgia, serif;
     font-size: 14px;
     line-height: 1.6;
@@ -7203,27 +7203,118 @@
     overflow-wrap: anywhere;
 }
 
-/* Адаптация для телефонов */
+
+/* =========================================================
+   АДМИН-ПАНЕЛЬ — ИСТОРИЯ ОБЪЯВЛЕНИЙ
+========================================================= */
+
+/* Контейнер истории */
+
+.admin-announcements-history {
+    margin-top: 32px;
+}
+
+/* Заголовок истории */
+
+.admin-announcements-history .admin-section-title {
+    margin-bottom: 18px;
+}
+
+/* Список объявлений */
+
+.admin-announcements-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Карточка объявления */
+
+.admin-announcement-item {
+    padding: 20px 22px;
+
+    border: 1px solid rgba(201, 168, 106, 0.18);
+    border-radius: 10px;
+
+    background: rgba(201, 168, 106, 0.025);
+}
+
+/* Дата публикации */
+
+.admin-announcement-date {
+    margin-bottom: 12px;
+
+    color: #9f9384;
+
+    font-family: Georgia, serif;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* Текст объявления */
+
+.admin-announcement-body {
+    color: #e6d8c1;
+
+    font-family: Georgia, serif;
+    font-size: 14px;
+    line-height: 1.8;
+
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   МОБИЛЬНАЯ АДАПТАЦИЯ ОБЪЯВЛЕНИЙ
+========================================================= */
 
 @media (max-width: 600px) {
+
+    /* Форма публикации */
 
     .admin-announcement-form {
         padding: 16px;
         gap: 15px;
     }
 
+    /* Поле текста */
+
     .admin-announcement-textarea {
         min-height: 140px;
         font-size: 14px;
     }
 
+    /* Контейнер кнопки */
+
     .admin-announcement-actions {
         width: 100%;
     }
 
+    /* Кнопка публикации */
+
     #adminPublishAnnouncementBtn {
         width: 100%;
         min-width: 0;
+    }
+
+    /* История объявлений */
+
+    .admin-announcements-history {
+        margin-top: 24px;
+    }
+
+    /* Карточка объявления */
+
+    .admin-announcement-item {
+        padding: 16px;
+    }
+
+    /* Текст объявления */
+
+    .admin-announcement-body {
+        font-size: 14px;
+        line-height: 1.7;
     }
 }
 
