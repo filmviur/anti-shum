@@ -7135,18 +7135,62 @@
     gap: 12px;
 }
 
-/* Кнопка публикации */
+
+/* Кнопка публикации объявления */
 
 #adminPublishAnnouncementBtn {
-    min-width: 170px;
+    min-width: 190px;
+    padding: 12px 22px;
+
+    border: 1px solid rgba(201, 168, 106, 0.45);
+    border-radius: 9px;
+
+    background: linear-gradient(
+        180deg,
+        rgba(201, 168, 106, 0.16),
+        rgba(201, 168, 106, 0.06)
+    );
+
+    color: #e0c48e;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 14px;
+    font-weight: normal;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+/* Наведение */
+
+#adminPublishAnnouncementBtn:not(:disabled):hover {
+    background: rgba(201, 168, 106, 0.18);
+    border-color: rgba(214, 184, 117, 0.75);
+
+    box-shadow: 0 4px 18px rgba(201, 168, 106, 0.1);
+
+    transform: translateY(-1px);
 }
 
 /* Неактивная кнопка */
 
 #adminPublishAnnouncementBtn:disabled {
-    opacity: 0.45;
+    opacity: 0.55;
     cursor: not-allowed;
+    transform: none;
 }
+
+/* Нажатие */
+
+#adminPublishAnnouncementBtn:not(:disabled):active {
+    transform: translateY(0);
+}
+
 
 /* Сообщение о результате публикации */
 
