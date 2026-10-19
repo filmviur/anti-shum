@@ -13785,9 +13785,8 @@ adminNavButtons.forEach(
                     await loadAdminAppeals();
                 }
 
-                /* ПОДДЕРЖКА */
-
-                /* ПОДДЕРЖКА */
+                
+/* ПОДДЕРЖКА */
 
 if (sectionName === "support") {
 
@@ -13798,10 +13797,20 @@ if (sectionName === "support") {
     startAdminSupportListRealtime();
 }
 
+/* ОБЪЯВЛЕНИЯ */
+
+if (sectionName === "announcements") {
+
+    // Загружаем историю опубликованных объявлений.
+    await loadAdminAnnouncements();
+
+}
+
             }
         );
     }
 );
+
 
 /* =========================
    ADMIN SUPPORT CONVERSATIONS
