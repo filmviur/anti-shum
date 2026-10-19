@@ -11746,6 +11746,24 @@ appScreen.classList.add("hidden");
 
     }
 
+    
+    /* =========================
+       ПРОВЕРКА НОВЫХ ОБЪЯВЛЕНИЙ
+    ========================= */
+
+    try {
+
+        await checkUnreadAnnouncements();
+
+    } catch (error) {
+
+        console.error(
+            "Announcements initialization error:",
+            error
+        );
+
+    }
+
 
     /* =========================
        ОТКРЫВАЕМ ПРИЛОЖЕНИЕ
