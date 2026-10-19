@@ -13898,6 +13898,7 @@ function updateRetroDigit(id, value) {
     );
 }
 
+
 /* =========================================================
    CLOSED SCREEN
 ========================================================= */
@@ -13909,48 +13910,36 @@ function showClosedScreen() {
     updateNextDayTimer();
 
     if (nextDayInterval) {
-        clearInterval(
-            nextDayInterval
-        );
+        clearInterval(nextDayInterval);
     }
 
-    nextDayInterval =
-        setInterval(
-            updateNextDayTimer,
-            1000
-        );
+    nextDayInterval = setInterval(
+        updateNextDayTimer,
+        1000
+    );
 }
 
 
 function updateNextDayTimer() {
 
-    const difference =
-        Math.max(
-            0,
-            getNext20Timestamp() -
-            Date.now()
-        );
+    const difference = Math.max(
+        0,
+        getNext20Timestamp() - Date.now()
+    );
 
+    const totalSeconds = Math.floor(
+        difference / 1000
+    );
 
-    const totalSeconds =
-        Math.floor(
-            difference / 1000
-        );
+    const hours = Math.floor(
+        totalSeconds / 3600
+    );
 
+    const minutes = Math.floor(
+        (totalSeconds % 3600) / 60
+    );
 
-    const hours =
-        Math.floor(
-            totalSeconds / 3600
-        );
-
-    const minutes =
-        Math.floor(
-            (totalSeconds % 3600) / 60
-        );
-
-    const seconds =
-        totalSeconds % 60;
-
+    const seconds = totalSeconds % 60;
 
     const hoursText =
         String(hours).padStart(2, "0");
@@ -13960,7 +13949,6 @@ function updateNextDayTimer() {
 
     const secondsText =
         String(seconds).padStart(2, "0");
-
 
     updateRetroDigit(
         "timerHoursTens",
@@ -13972,7 +13960,6 @@ function updateNextDayTimer() {
         hoursText[1]
     );
 
-
     updateRetroDigit(
         "timerMinutesTens",
         minutesText[0]
@@ -13982,7 +13969,6 @@ function updateNextDayTimer() {
         "timerMinutesOnes",
         minutesText[1]
     );
-
 
     updateRetroDigit(
         "timerSecondsTens",
@@ -13994,22 +13980,15 @@ function updateNextDayTimer() {
         secondsText[1]
     );
 
-
     /*
-        Если наступило 20:00,
-        пытаемся загрузить новый вопрос.
+        В 20:00 обновляем состояние дневника.
     */
 
     if (difference <= 0) {
 
         if (nextDayInterval) {
-
-            clearInterval(
-                nextDayInterval
-            );
-
-            nextDayInterval =
-                null;
+            clearInterval(nextDayInterval);
+            nextDayInterval = null;
         }
 
         loadTodayQuestionAndState();
@@ -14024,7 +14003,6 @@ function updateNextDayTimer() {
 profileBtn.addEventListener(
     "click",
     async function() {
-
         await openProfile();
     }
 );
@@ -14051,10 +14029,9 @@ profileBackBtn.addEventListener(
     async function() {
 
         /*
-            Возвращаемся только в актуальное состояние.
-
-            Если 20 минут уже прошли —
-            будет закрытый экран.
+            Возвращаемся к текущему состоянию.
+            Для администратора постоянный доступ
+            будет обеспечен в логике дневника.
         */
 
         if (
@@ -14073,9 +14050,23 @@ profileBackBtn.addEventListener(
 );
 
 
+/* =========================================================
+   ADMIN ROLE
+========================================================= */
+
+/*
+    Переменная isCurrentUserAdmin должна быть
+    объявлена один раз в основном коде приложения.
+*/
+
 async function loadProfile() {
 
     if (!currentUser) {
+
+        isCurrentUserAdmin = false;
+
+        adminPanelBtn.classList.add("hidden");
+
         return;
     }
 
@@ -14084,22 +14075,24 @@ async function loadProfile() {
         const {
             data,
             error
-        } =
-            await supabaseClient
-                .from("users")
-                .select(
-                    "id, display_name, avatar_url, is_admin"
-                )
-                .eq(
-                    "id",
-                    currentUser.id
-                )
-                .maybeSingle();
+        } = await supabaseClient
+            .from("users")
+            .select(
+                "id, display_name, avatar_url, is_admin"
+            )
+            .eq("id", currentUser.id)
+            .maybeSingle();
 
         if (error) {
             throw error;
         }
 
+        /*
+            Роль берётся из таблицы users.
+        */
+
+        isCurrentUserAdmin =
+            data?.is_admin === true;
 
         const displayName =
             data?.display_name ||
@@ -14107,68 +14100,52 @@ async function loadProfile() {
             currentUser.email?.split("@")[0] ||
             "Пользователь";
 
-
-        profileName.textContent =
-            displayName;
-
+        profileName.textContent = displayName;
 
         profileEmail.textContent =
-            currentUser.email ||
-            "";
-
+            currentUser.email || "";
 
         currentAvatarUrl =
-    data?.avatar_url ||
-    null;
+            data?.avatar_url || null;
 
+        if (currentAvatarUrl) {
 
-if (currentAvatarUrl) {
-
-    profileAvatar.src =
-        currentAvatarUrl;
-
-} else {
-
-    profileAvatar.src =
-        createAvatarPlaceholder(
-            displayName
-        );
-}
-
-
-deleteAvatarMenuBtn.classList.toggle(
-    "hidden",
-    !currentAvatarUrl
-);
-
-
-        if (
-            data?.is_admin === true
-        ) {
-
-            adminPanelBtn.classList.remove(
-                "hidden"
-            );
+            profileAvatar.src = currentAvatarUrl;
 
         } else {
 
-            adminPanelBtn.classList.add(
-                "hidden"
-            );
+            profileAvatar.src =
+                createAvatarPlaceholder(displayName);
         }
 
+        deleteAvatarMenuBtn.classList.toggle(
+            "hidden",
+            !currentAvatarUrl
+        );
+
+        adminPanelBtn.classList.toggle(
+            "hidden",
+            !isCurrentUserAdmin
+        );
+
     } catch (error) {
+
+        /*
+            При ошибке не предоставляем
+            административные привилегии.
+        */
+
+        isCurrentUserAdmin = false;
 
         console.error(
             "Profile error:",
             error
         );
 
-        adminPanelBtn.classList.add(
-            "hidden"
-        );
+        adminPanelBtn.classList.add("hidden");
     }
 }
+
 
    /* =========================================================
    ADMIN PANEL
