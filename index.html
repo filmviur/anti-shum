@@ -7769,11 +7769,14 @@
 </section>
 
 
+
 <!-- MAIN APP -->
 
 <main id="appScreen" class="hidden">
 
     <div class="app-global-actions">
+
+        <!-- Уведомления -->
 
         <button
             id="enableNotificationsBtn"
@@ -7784,23 +7787,38 @@
             🔔
         </button>
 
-       <button
-    id="supportBtn"
-    class="icon-btn support-btn"
-    type="button"
-    title="Поддержка"
-    aria-label="Поддержка"
->
-    ❓
+        <!-- Объявления -->
 
-    <span
-        id="supportNotificationBadge"
-        class="support-notification-badge hidden"
-        aria-hidden="true"
-    ></span>
-</button>
+        <button
+            id="announcementsBtn"
+            class="icon-btn announcements-btn"
+            type="button"
+            title="Объявления"
+            aria-label="Объявления"
+        >
+            📢
+        </button>
+
+        <!-- Поддержка -->
+
+        <button
+            id="supportBtn"
+            class="icon-btn support-btn"
+            type="button"
+            title="Поддержка"
+            aria-label="Поддержка"
+        >
+            ❓
+
+            <span
+                id="supportNotificationBadge"
+                class="support-notification-badge hidden"
+                aria-hidden="true"
+            ></span>
+        </button>
 
     </div>
+
 
 
 <!-- QUESTION VIEW -->
