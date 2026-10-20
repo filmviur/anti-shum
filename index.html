@@ -7583,6 +7583,7 @@
 }
 
 
+
 /* =========================================================
    МОБИЛЬНАЯ АДАПТАЦИЯ ОКНА ОБЪЯВЛЕНИЙ
 ========================================================= */
@@ -7627,6 +7628,55 @@
     }
 }
 
+
+/* =========================================================
+   МОБИЛЬНАЯ АДАПТАЦИЯ — ЭТАП 1
+   НАВИГАЦИЯ АДМИН-ПАНЕЛИ
+========================================================= */
+
+@media (max-width: 650px) {
+
+    .admin-nav {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+
+        justify-content: flex-start;
+        align-items: center;
+
+        gap: 8px;
+
+        width: calc(100% + 32px);
+        max-width: none;
+
+        margin-left: -16px;
+        margin-right: -16px;
+
+        padding: 4px 16px 14px;
+
+        overflow-x: auto;
+        overflow-y: hidden;
+
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        overscroll-behavior-x: contain;
+    }
+
+    .admin-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .admin-nav-btn {
+        flex: 0 0 auto;
+
+        white-space: nowrap;
+        min-width: max-content;
+
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+}
+
 </style>
 </head>
 
@@ -7634,6 +7684,7 @@
 
 <div class="page">
     <div class="container">
+
 
 
 
