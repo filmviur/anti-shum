@@ -7679,6 +7679,7 @@
 }
 
 
+
 /* =========================================================
    МОБИЛЬНАЯ АДАПТАЦИЯ — ЭТАП 2
    ПОДДЕРЖКА В АДМИН-ПАНЕЛИ
@@ -7783,6 +7784,85 @@
     }
 }
 
+
+/* =========================================================
+   МОБИЛЬНАЯ АДАПТАЦИЯ — ЭТАП 3
+   МОДЕРАЦИЯ
+========================================================= */
+
+@media (max-width: 650px) {
+
+    /* Фильтры жалоб */
+
+    .admin-moderation-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-bottom: 16px;
+    }
+
+    .admin-moderation-filter {
+        max-width: 100%;
+        font-size: 13px;
+        padding: 9px 12px;
+    }
+
+    /* Карточки жалоб */
+
+    .admin-moderation-list {
+        min-width: 0;
+        width: 100%;
+        gap: 9px;
+    }
+
+    .admin-moderation-item {
+        min-width: 0;
+        padding: 14px 13px;
+        overflow-wrap: anywhere;
+    }
+
+    /* Подробности нарушения */
+
+    .admin-moderation-details {
+        min-width: 0;
+        margin-top: 16px;
+        padding: 16px 13px;
+        overflow-wrap: anywhere;
+    }
+
+    .admin-moderation-details-header {
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    /* Фото нарушения */
+
+    .admin-moderation-photo img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        object-fit: contain;
+    }
+
+    /* Кнопки действий */
+
+    .admin-moderation-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 9px;
+        width: 100%;
+    }
+
+    .admin-moderation-action {
+        width: 100%;
+        min-height: 44px;
+        padding: 11px 13px;
+        white-space: normal;
+        text-align: center;
+    }
+}
+
 </style>
 </head>
 
@@ -7790,6 +7870,7 @@
 
 <div class="page">
     <div class="container">
+
 
 
 
