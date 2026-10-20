@@ -13242,19 +13242,40 @@ async function loadFeed() {
         }
 
 
-               // Повторная проверка после загрузки данных.
-if (!isAdminPreview && Date.now() >= sessionEndsAt) {
-    await finishSession();
-    return;
-}
+              
+        /*
+            Администратор может просматривать ленту
+            без ограничения по времени.
+
+            Для обычного пользователя проверяем,
+            что его сессия ещё активна.
+        */
+
+        if (
+            !canViewWithoutSession &&
+            (
+                !sessionEndsAt ||
+                Date.now() >= sessionEndsAt
+            )
+        ) {
+            await finishSession();
+            return;
+        }
 
         feed.innerHTML = "";
 
         for (const answer of answers) {
 
-            if (!isAdminPreview && Date.now() >= sessionEndsAt) {
-    break;
-}
+            if (
+                !canViewWithoutSession &&
+                (
+                    !sessionEndsAt ||
+                    Date.now() >= sessionEndsAt
+                )
+            ) {
+                break;
+            }
+
 
             const user =
                 usersMap.get(
