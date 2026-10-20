@@ -8210,6 +8210,7 @@
 }
 
 
+
 /* =========================================================
    ОЧЕНЬ УЗКИЕ ЭКРАНЫ — ДО 380 PX
 ========================================================= */
@@ -8257,6 +8258,205 @@
     }
 }
 
+
+/* =========================================================
+   ИСПРАВЛЕНИЕ МОБИЛЬНОГО ПРОФИЛЯ
+   ШАПКА, ЗАГОЛОВОК И КНОПКИ
+========================================================= */
+
+@media (max-width: 650px) {
+
+    .profile-screen {
+        width: 100%;
+        max-width: 540px;
+        min-width: 0;
+        margin: 0 auto;
+    }
+
+    /* Шапка профиля в две строки */
+
+    .profile-header {
+        display: grid;
+
+        grid-template-columns:
+            minmax(0, 1fr) auto;
+
+        grid-template-areas:
+            "back actions"
+            "title title";
+
+        align-items: center;
+
+        column-gap: 10px;
+        row-gap: 20px;
+
+        width: 100%;
+        min-width: 0;
+
+        margin-bottom: 26px;
+        padding-bottom: 18px;
+
+        border-bottom:
+            1px solid rgba(201, 168, 106, 0.14);
+    }
+
+    /* Кнопка назад */
+
+    .profile-header .back-btn {
+        grid-area: back;
+        justify-self: start;
+
+        min-width: 0;
+        min-height: 40px;
+
+        padding: 8px 2px;
+
+        font-size: 16px;
+        white-space: nowrap;
+    }
+
+    /* Заголовок отдельной строкой */
+
+    .profile-header .profile-title {
+        grid-area: title;
+        justify-self: center;
+
+        display: block;
+        flex: none;
+
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+
+        margin: 0;
+        padding: 0;
+
+        text-align: center;
+
+        font-size: clamp(20px, 5.5vw, 24px);
+        line-height: 1.3;
+
+        letter-spacing: 0.08em;
+
+        white-space: normal;
+        overflow-wrap: normal;
+        word-break: normal;
+    }
+
+    /* Группа кнопок справа */
+
+    .profile-header .profile-header-actions {
+        grid-area: actions;
+        justify-self: end;
+
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+
+        align-items: center;
+        justify-content: flex-end;
+
+        width: auto;
+        min-width: 0;
+        max-width: 100%;
+
+        gap: 6px;
+    }
+
+    /* Редактирование профиля */
+
+    .profile-header .profile-edit-btn {
+        flex: 0 0 38px;
+
+        width: 38px;
+        height: 38px;
+
+        padding: 0;
+    }
+
+    /* Админ-панель */
+
+    .profile-header .profile-admin {
+        flex: 0 1 auto;
+
+        min-height: 38px;
+        padding: 7px 9px;
+
+        font-size: 12px;
+        line-height: 1.2;
+
+        white-space: normal;
+        text-align: center;
+    }
+
+    /* Выход */
+
+    .profile-header .profile-logout {
+        flex: 0 0 auto;
+
+        min-height: 38px;
+        padding: 7px 9px;
+
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    /* Кнопки настроек профиля */
+
+    .profile-actions {
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        width: 100%;
+        gap: 8px;
+    }
+
+    .profile-actions .secondary-btn {
+        min-width: 0;
+        width: 100%;
+
+        padding: 11px 9px;
+
+        text-align: center;
+
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+}
+
+
+/* =========================================================
+   ПРОФИЛЬ НА ОЧЕНЬ УЗКИХ ЭКРАНАХ
+========================================================= */
+
+@media (max-width: 380px) {
+
+    .profile-header {
+        column-gap: 6px;
+        row-gap: 16px;
+    }
+
+    .profile-header .profile-header-actions {
+        gap: 4px;
+    }
+
+    .profile-header .profile-admin {
+        padding: 6px;
+        font-size: 11px;
+    }
+
+    .profile-header .profile-logout {
+        padding: 6px;
+        font-size: 10px;
+    }
+
+    .profile-header .profile-title {
+        font-size: 21px;
+    }
+}
+
 </style>
 </head>
 
@@ -8264,6 +8464,7 @@
 
 <div class="page">
     <div class="container">
+
 
 
 
