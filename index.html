@@ -7785,6 +7785,7 @@
 }
 
 
+
 /* =========================================================
    МОБИЛЬНАЯ АДАПТАЦИЯ — ЭТАП 3
    МОДЕРАЦИЯ
@@ -7830,11 +7831,6 @@
         overflow-wrap: anywhere;
     }
 
-    .admin-moderation-details-header {
-        gap: 10px;
-        align-items: flex-start;
-    }
-
     /* Фото нарушения */
 
     .admin-moderation-photo img {
@@ -7863,6 +7859,404 @@
     }
 }
 
+
+/* =========================================================
+   МОБИЛЬНАЯ АДАПТАЦИЯ — ЭТАПЫ 4–7
+   ДНЕВНИК, ЛЕНТА, ПРОФИЛЬ И АДМИН-ПАНЕЛЬ
+========================================================= */
+
+@media (max-width: 650px) {
+
+    /* Общая ширина сайта */
+
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .page,
+    .container {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .container {
+        width: 100%;
+    }
+
+    img,
+    video {
+        max-width: 100%;
+    }
+
+    button,
+    input,
+    textarea {
+        max-width: 100%;
+    }
+
+    /* Вопрос дня */
+
+    .question-screen {
+        padding-top: 12px;
+    }
+
+    .question-label {
+        font-size: 13px;
+        letter-spacing: 0.14em;
+        margin-bottom: 14px;
+    }
+
+    .question-text {
+        max-width: 100%;
+        font-size: clamp(26px, 7vw, 36px);
+        line-height: 1.3;
+        margin-bottom: 26px;
+        overflow-wrap: anywhere;
+    }
+
+    /* Поле ответа */
+
+    .answer-box {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .answer-box .answer-textarea {
+        width: 100%;
+        min-height: 190px;
+        padding: 16px 15px 65px;
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+    .send-answer-btn {
+        right: 10px;
+        bottom: 10px;
+        min-height: 44px;
+        padding: 0 14px;
+    }
+
+    .answer-counter {
+        margin-top: 9px;
+        font-size: 12px;
+    }
+
+    /* Лента ответов */
+
+    .session-card {
+        width: 100%;
+        padding: 35px 0 30px;
+        margin-bottom: 25px;
+    }
+
+    .session-question {
+        width: 100%;
+        max-width: 100%;
+        padding: 16px 12px 25px;
+        margin-bottom: 20px;
+        font-size: clamp(25px, 7vw, 34px);
+        overflow-wrap: anywhere;
+    }
+
+    .session-question::before,
+    .session-question::after {
+        display: none;
+    }
+
+    /* Таймер */
+
+    .session-timer {
+        max-width: 100%;
+        padding: 12px 18px;
+        font-size: clamp(22px, 6vw, 30px);
+        letter-spacing: 0.04em;
+    }
+
+    .session-timer::before {
+        margin-right: 10px;
+    }
+
+    .session-timer::after {
+        margin-left: 10px;
+    }
+
+    /* Карточки ответов */
+
+    .feed {
+        width: 100%;
+        min-width: 0;
+        gap: 12px;
+    }
+
+    .answer-card {
+        width: 100%;
+        min-width: 0;
+        padding: 20px 15px 19px 20px;
+    }
+
+    .answer-author {
+        min-width: 0;
+        gap: 9px;
+    }
+
+    .answer-author-name {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .answer-text {
+        font-size: 15px;
+        line-height: 1.7;
+        overflow-wrap: anywhere;
+    }
+
+    .answer-photo {
+        width: 100%;
+        max-height: 65dvh;
+        object-fit: contain;
+    }
+
+    .reaction-btn {
+        max-width: 100%;
+        min-height: 40px;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    /* Профиль */
+
+    .profile-screen {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .profile-header {
+        min-width: 0;
+        gap: 10px;
+    }
+
+    .profile-title {
+        font-size: clamp(23px, 6vw, 30px);
+        overflow-wrap: anywhere;
+    }
+
+    .profile-header-actions {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .profile-name,
+    .profile-email {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    .profile-actions {
+        width: 100%;
+        min-width: 0;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .profile-actions .secondary-btn {
+        max-width: 100%;
+        min-height: 44px;
+        white-space: normal;
+    }
+
+    /* Модальные окна */
+
+    .modal-backdrop {
+        padding: 12px;
+    }
+
+    .modal {
+        width: 100%;
+        max-width: 100%;
+        max-height: 90vh;
+        max-height: 90dvh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .modal-title {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    .modal-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .modal-actions button {
+        min-height: 44px;
+        white-space: normal;
+    }
+
+    .avatar-crop-modal {
+        max-width: 100%;
+    }
+
+    /* Поддержка пользователей */
+
+    .support-messages {
+        min-width: 0;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .support-message {
+        max-width: 90%;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    #supportModal .modal {
+        max-width: 100%;
+        max-height: 90dvh;
+    }
+
+    #supportModal .modal-actions {
+        flex-wrap: wrap;
+        gap: 9px;
+    }
+
+    /* Остальные разделы админ-панели */
+
+    .admin-screen,
+    .admin-content,
+    .admin-section {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .admin-section-title {
+        font-size: 22px;
+        line-height: 1.3;
+        overflow-wrap: anywhere;
+    }
+
+    .admin-empty {
+        max-width: 100%;
+        padding: 20px 14px;
+        overflow-wrap: anywhere;
+    }
+
+    /* Объявления */
+
+    .admin-announcement-form,
+    .admin-announcements-history,
+    .admin-announcements-list {
+        min-width: 0;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .admin-announcement-textarea {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        font-size: 16px;
+    }
+
+    .admin-announcement-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    #adminPublishAnnouncementBtn {
+        max-width: 100%;
+        min-height: 44px;
+        white-space: normal;
+    }
+
+    .admin-announcement-item,
+    .admin-announcement-body {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    /* Фотографии */
+
+    .photo-section {
+        width: 100%;
+        min-width: 0;
+        padding: 16px 13px;
+    }
+
+    .photo-preview img {
+        max-width: 100%;
+        max-height: 60dvh;
+        object-fit: contain;
+    }
+
+    /* Поля ввода */
+
+    input:not([type="checkbox"]):not([type="radio"]),
+    textarea,
+    select {
+        min-width: 0;
+        max-width: 100%;
+        font-size: 16px;
+    }
+}
+
+
+/* =========================================================
+   ОЧЕНЬ УЗКИЕ ЭКРАНЫ — ДО 380 PX
+========================================================= */
+
+@media (max-width: 380px) {
+
+    .page {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .question-text {
+        font-size: 25px;
+    }
+
+    .session-question {
+        font-size: 24px;
+    }
+
+    .answer-card {
+        padding: 17px 12px 17px 18px;
+    }
+
+    .auth-card {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .session-timer {
+        padding: 10px 12px;
+        font-size: 22px;
+    }
+
+    .admin-screen {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .admin-nav {
+        width: calc(100% + 24px);
+        margin-left: -12px;
+        margin-right: -12px;
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+}
+
 </style>
 </head>
 
@@ -7870,6 +8264,7 @@
 
 <div class="page">
     <div class="container">
+
 
 
 
