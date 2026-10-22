@@ -5,7 +5,12 @@
 <title>Мои 365 дней в Анти-Шум</title>
 <link rel="icon" href="./icon-512.png">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=PT+Serif:wght@400;700&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+/* Activate exact clean artwork only after BOTH files have been uploaded and loaded. */
+Promise.all(["./diary-clean-left.webp","./diary-clean-right.webp"].map(src=>new Promise((resolve,reject)=>{
+ const img=new Image();img.onload=()=>resolve();img.onerror=reject;img.src=src;
+}))).then(()=>document.documentElement.classList.add("has-clean-pages")).catch(()=>{});
+</script>
 <style>
 :root{color-scheme:dark;--gold:#c6a26b;--paper:#e9dcc1;--ink:#46372a}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 20%,#28231e,#0b0c11 76%);color:#e5d5bd;font-family:"PT Serif",Georgia,serif}
@@ -412,6 +417,55 @@ opacity:.65;pointer-events:none}
 .sheet:before,.sheet.left:before,.sheet.right:before,.sheet.turn-sheet:before{display:none!important;content:none!important}
 .sheet:after,.sheet.left:after,.sheet.right:after,.sheet.turn-sheet:after{display:none!important}
 .sheet .page-ornament{display:none!important}
+
+/* Final diary composition — original illustrated parchment + live personal entries. */
+.sheet,.sheet.left,.sheet.right,.sheet.turn-sheet{
+ padding:clamp(48px,5.3vw,65px) clamp(49px,5.3vw,64px) clamp(51px,5.4vw,67px)!important;
+}
+.has-clean-pages .sheet,.has-clean-pages .sheet.left,.has-clean-pages .sheet.turn-sheet.backwards{
+ background-image:url("./diary-clean-left.webp")!important;
+ background-size:100% 100%!important;
+ background-repeat:no-repeat!important;
+}
+.has-clean-pages .sheet.right,.has-clean-pages .sheet.turn-sheet:not(.backwards){
+ background-image:url("./diary-clean-right.webp")!important;
+ background-size:100% 100%!important;
+ background-repeat:no-repeat!important;
+}
+.entry-layout{height:100%;min-height:0;padding:0 5px!important;display:flex;flex-direction:column;align-items:stretch}
+.entry-heading{align-self:flex-start;max-width:82%!important;margin:0 0 19px 7%!important;padding:6px 22px 10px!important;transform:rotate(-4deg)!important;background:#e4c59eaf!important;box-shadow:0 1px 3px #6a452023!important}
+.page-kicker{font:400 clamp(29px,3.5vw,43px)/1 "Caveat",cursive!important;white-space:nowrap}
+.page-date{font:400 clamp(17px,2.05vw,24px)/1.1 "Caveat",cursive!important;margin:6px 0 0!important;white-space:nowrap}
+.question-block{margin:5px 0 16px!important;max-width:100%!important;min-height:0!important;flex-shrink:0}
+.question-label,.answer-label{font:italic 500 clamp(17px,1.9vw,23px)/1.2 "Cormorant Garamond",Georgia,serif!important;margin-bottom:10px!important}
+.page-question{display:block!important;width:fit-content;max-width:100%!important;padding:10px 14px!important;background:#e6c79b9c!important;transform:rotate(-1deg)!important;box-shadow:none!important;font:400 clamp(20px,2.45vw,28px)/1.17 "Caveat",cursive!important;overflow-wrap:anywhere}
+.answer-block{margin-top:12px!important;min-height:0;flex:1;overflow:hidden}
+.page-answer{font:400 clamp(20px,2.45vw,28px)/1.29 "Caveat",cursive!important;color:#432b20!important;max-height:none!important;overflow-y:auto!important;background:repeating-linear-gradient(to bottom,transparent 0,transparent calc(1.29em - 1px),#8b644327 calc(1.29em - 1px),#8b644327 1.29em)!important;white-space:pre-wrap!important;overflow-wrap:anywhere!important}
+.photo-note{position:relative!important;align-self:flex-end!important;max-width:56%!important;margin:0 2% 6px 0!important;padding:7px 7px 17px!important;transform:rotate(5deg)!important;background:#f4e9d4!important;box-shadow:2px 5px 9px #50371f50!important}
+.photo-note .page-photo{display:block!important;max-height:clamp(90px,13vw,145px)!important;width:auto!important;max-width:100%!important;object-fit:contain!important}
+.entry-layout:has(.photo-note) .question-block{max-width:100%!important;min-height:0!important;margin-bottom:5px!important}
+.entry-layout:has(.photo-note) .entry-heading{max-width:80%!important;margin-left:4%!important}
+.entry-bottom-flourish{bottom:-18px!important;font-size:17px!important}
+.page-number{bottom:-27px!important;font-size:16px!important}
+.epilogue-page{height:100%;padding:12px 7px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.epilogue-text{font:italic 500 clamp(17px,1.85vw,23px)/1.39 "Cormorant Garamond",Georgia,serif!important;white-space:pre-line;color:#51321f!important}
+.epilogue-heading{font:italic 500 clamp(32px,3.8vw,46px) "Cormorant Garamond",Georgia,serif!important}
+@media(max-width:700px){
+ .sheet,.sheet.left,.sheet.right,.sheet.turn-sheet{padding:47px 25px 52px!important}
+ .entry-heading{padding:4px 8px 6px!important;margin:0 0 7px 2%!important}
+ .page-kicker{font-size:23px!important}.page-date{font-size:14px!important;margin-top:2px!important}
+ .question-block{margin:1px 0 7px!important}.question-label,.answer-label{font-size:14px!important;margin-bottom:4px!important}
+ .page-question{font-size:17px!important;padding:5px 7px!important}
+ .answer-block{margin-top:5px!important}
+ .page-answer{font-size:17px!important;line-height:1.17!important;background:none!important}
+ .photo-note{max-width:59%!important;padding:4px 4px 9px!important;margin:0 auto 5px!important;align-self:center!important}
+ .photo-note .page-photo{max-height:70px!important}
+ .entry-bottom-flourish{bottom:-9px!important;font-size:11px!important}
+ .page-number{bottom:-17px!important;font-size:12px!important}
+ .epilogue-page{padding:0 2px!important}
+ .epilogue-text{font-size:clamp(10px,2.45vw,14px)!important;line-height:1.23!important}
+ .epilogue-heading{font-size:26px!important}
+}
 </style>
 </head>
 <body>
