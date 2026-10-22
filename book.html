@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Мои 365 дней в Анти-Шум</title>
 <link rel="icon" href="./icon-512.png">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=PT+Serif:wght@400;700&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{color-scheme:dark;--gold:#c6a26b;--paper:#e9dcc1;--ink:#46372a}
@@ -45,6 +45,23 @@ a{color:#d8b77f}button{cursor:pointer;font:inherit}button:disabled{opacity:.35;c
 #loading{text-align:center;color:#d9b781}
 @media(max-width:700px){.stage{min-height:450px}.book{height:470px;min-height:0}.sheet{padding:29px 15px 22px}.page-date{font-size:21px}.page-question{font-size:19px}.page-answer{font-size:12px;line-height:1.5}.cover{padding:12px;border-width:5px}.cover-title{font-size:23px}.cover-sub{font-size:13px}.cover img{width:80px}.sheet:before{inset:7px}.page-kicker{font-size:10px}.page-number{bottom:12px}}
 @media(prefers-reduced-motion:reduce){.turn-sheet.turning{animation:none}}
+.sheet{background-image:repeating-linear-gradient(0deg,transparent 0 28px,#806b4917 29px),radial-gradient(ellipse at 20% 20%,#fff2d7,#e2cfac 90%);box-shadow:inset 0 0 48px #67401f44,0 0 0 1px #9b8157}
+.sheet.left{background-image:repeating-linear-gradient(0deg,transparent 0 28px,#806b4917 29px),linear-gradient(90deg,#e2cfac,#f3e6cb 80%,#c6ae86)}
+.sheet:before{border:2px double #9d794d80;border-radius:18px 3px 18px 3px}
+.sheet:after{content:"❦";position:absolute;bottom:24px;left:24px;color:#9a754b7a;font-size:28px;pointer-events:none}
+.page-rule{background:linear-gradient(90deg,transparent,#937044,transparent)}
+.page-rule:after{content:"❧ ✦ ❧";display:block;text-align:center;color:#8b6840;transform:translateY(-50%);font-size:16px}
+.page-answer{font:500 clamp(20px,2.5vw,27px)/1.16 "Caveat","Segoe Print",cursive;color:#4d382c;max-height:47%}
+.page-answer.writing{animation:inkAppear 1.8s steps(35,end) both}
+@keyframes inkAppear{from{clip-path:inset(0 100% 0 0);opacity:.4}to{clip-path:inset(0 0 0 0);opacity:1}}
+.photo-note{position:relative;display:table;max-width:95%;margin:4px auto 20px;padding:9px 9px 17px;background:#f6eedb;box-shadow:2px 5px 11px #543c285c;transform:rotate(-2deg)}
+.photo-note:before{content:"";position:absolute;top:-14px;left:50%;width:15px;height:36px;border:4px solid #777a75;border-bottom:0;border-radius:12px 12px 0 0;transform:rotate(12deg);z-index:2}
+.photo-note .page-photo{max-height:165px;max-width:100%;margin:0;border:0;box-shadow:none}
+.turn-sheet.backwards{left:0;transform-origin:right center;transform:rotateY(0)}
+.turn-sheet.backwards.turning{animation:pageflipBack .9s cubic-bezier(.3,.12,.25,1) both}
+@keyframes pageflipBack{from{transform:rotateY(0)}to{transform:rotateY(180deg)}}
+@media(max-width:700px){.page-answer{font-size:19px;line-height:1.1}.photo-note .page-photo{max-height:115px}}
+@media(prefers-reduced-motion:reduce){.turn-sheet.backwards.turning,.page-answer.writing{animation:none}}
 </style>
 </head>
 <body>
