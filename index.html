@@ -20820,194 +20820,25 @@ cancelAppealBtn.addEventListener("click", function() {
 });
 
     
+
 /* =========================================
    КАПСУЛА ВРЕМЕНИ — ЭКРАН
 ========================================= */
 
 (function initTimeCapsule() {
 
-    const openBtn =
-        document.getElementById("openTimeCapsuleBtn");
+    const openBtn = document.getElementById("openTimeCapsuleBtn");
 
     if (!openBtn) return;
 
-    const style = document.createElement("style");
+    const overlay = document.getElementById("timeCapsuleOverlay");
+    const backBtn = document.getElementById("capsuleBackBtn");
+    const image = document.getElementById("capsuleTreeImage");
+    const error = document.getElementById("capsuleImageError");
 
-    style.textContent = 
-        .capsule-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 10000;
-            overflow-y: auto;
-            background: #100d0b;
-            color: #e8dfd2;
-            padding: 20px 14px 45px;
-            overscroll-behavior: contain;
-        }
+    if (!overlay || !backBtn || !image || !error) return;
 
-        .capsule-container {
-            width: min(960px, 100%);
-            margin: auto;
-        }
-
-        .capsule-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .capsule-heading {
-            color: #d6b875;
-            font-family: "Cormorant Garamond", Georgia, serif;
-            font-size: clamp(23px, 5vw, 34px);
-            font-weight: 600;
-        }
-
-        .capsule-back {
-            border: 1px solid rgba(201,168,106,.35);
-            border-radius: 5px;
-            background: #302519;
-            color: #d6b875;
-            padding: 12px 15px;
-            min-height: 44px;
-        }
-
-        .capsule-art {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 384 / 344;
-            overflow: hidden;
-            border: 1px solid rgba(201,168,106,.32);
-            border-radius: 6px;
-            background: radial-gradient(
-                ellipse at center,
-                #392a20,
-                #100d0b 75%
-            );
-        }
-
-        .capsule-art img {
-            display: block;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .capsule-image-error {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 25px;
-            text-align: center;
-            line-height: 1.7;
-            color: #a99a86;
-        }
-
-        .capsule-description {
-            margin: 22px auto;
-            max-width: 650px;
-            text-align: center;
-            color: #b5a18a;
-            font-family: Georgia, serif;
-            font-size: 14px;
-            line-height: 1.8;
-        }
-
-        .capsule-status {
-            text-align: center;
-            color: #d6b875;
-            font-family: "Cormorant Garamond", Georgia, serif;
-            font-size: 24px;
-        }
-
-        @media (max-width: 600px) {
-            .capsule-overlay {
-                padding: 16px 10px 32px;
-            }
-
-            .capsule-header {
-                margin-bottom: 16px;
-            }
-
-            .capsule-art {
-                border-radius: 3px;
-            }
-        }
-    `;
-
-    document.head.appendChild(style);
-
-    const overlay = document.createElement("section");
-
-    overlay.id = "timeCapsuleOverlay";
-    overlay.className = "capsule-overlay hidden";
-    overlay.setAttribute("aria-label", "Капсула времени");
-
-    overlay.innerHTML = `
-        <div class="capsule-container">
-
-            <div class="capsule-header">
-                <button
-                    id="capsuleBackBtn"
-                    class="capsule-back"
-                    type="button"
-                >
-                    ← Назад
-                </button>
-
-                <div class="capsule-heading">
-                    Капсула времени
-                </div>
-            </div>
-
-            <div class="capsule-status">
-                Дерево октября
-            </div>
-
-            <p class="capsule-description">
-                Каждый прожитый день оставляет свой след.
-                Твои ответы постепенно оживляют картину.
-            </p>
-
-            <div class="capsule-art">
-                <img
-                    id="capsuleTreeImage"
-                    src="./capsule-assets/tree-01.png"
-                    alt="Дерево времени"
-                >
-
-                <div
-                    id="capsuleImageError"
-                    class="capsule-image-error hidden"
-                >
-                    Художественная основа ещё не загружена.
-                    Подключим её на следующем этапе.
-                </div>
-            </div>
-
-            <p class="capsule-description">
-                Скоро здесь появится история твоего дерева.
-            </p>
-
-        </div>
-    `;
-
-    document.body.appendChild(overlay);
-
-    const backBtn =
-        document.getElementById("capsuleBackBtn");
-
-    const image =
-        document.getElementById("capsuleTreeImage");
-
-    const error =
-        document.getElementById("capsuleImageError");
-
-    image.addEventListener("error", function() {
+    image.addEventListener("error", function () {
         image.classList.add("hidden");
         error.classList.remove("hidden");
     });
@@ -21017,7 +20848,7 @@ cancelAppealBtn.addEventListener("click", function() {
         document.body.style.overflow = "";
     }
 
-    openBtn.addEventListener("click", function() {
+    openBtn.addEventListener("click", function () {
         overlay.classList.remove("hidden");
         document.body.style.overflow = "hidden";
         overlay.scrollTop = 0;
@@ -21037,6 +20868,168 @@ setAuthMode("login");
 restoreSession();
 
 </script>
+
+<style>
+/* =========================================
+   КАПСУЛА ВРЕМЕНИ — СТИЛИ
+========================================= */
+
+.capsule-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    overflow-y: auto;
+    background: #100d0b;
+    color: #e8dfd2;
+    padding: 20px 14px 45px;
+    overscroll-behavior: contain;
+}
+
+.capsule-container {
+    width: min(960px, 100%);
+    margin: auto;
+}
+
+.capsule-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.capsule-heading {
+    color: #d6b875;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: clamp(23px, 5vw, 34px);
+    font-weight: 600;
+}
+
+.capsule-back {
+    border: 1px solid rgba(201,168,106,.35);
+    border-radius: 5px;
+    background: #302519;
+    color: #d6b875;
+    padding: 12px 15px;
+    min-height: 44px;
+}
+
+.capsule-art {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 384 / 344;
+    overflow: hidden;
+    border: 1px solid rgba(201,168,106,.32);
+    border-radius: 6px;
+    background: radial-gradient(
+        ellipse at center,
+        #392a20,
+        #100d0b 75%
+    );
+}
+
+.capsule-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.capsule-image-error {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 25px;
+    text-align: center;
+    line-height: 1.7;
+    color: #a99a86;
+}
+
+.capsule-description {
+    margin: 22px auto;
+    max-width: 650px;
+    text-align: center;
+    color: #b5a18a;
+    font-family: Georgia, serif;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.capsule-status {
+    text-align: center;
+    color: #d6b875;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 24px;
+}
+
+@media (max-width: 600px) {
+    .capsule-overlay {
+        padding: 16px 10px 32px;
+    }
+
+    .capsule-header {
+        margin-bottom: 16px;
+    }
+
+    .capsule-art {
+        border-radius: 3px;
+    }
+}
+</style>
+
+<section
+    id="timeCapsuleOverlay"
+    class="capsule-overlay hidden"
+    aria-label="Капсула времени"
+>
+    <div class="capsule-container">
+
+        <div class="capsule-header">
+            <button
+                id="capsuleBackBtn"
+                class="capsule-back"
+                type="button"
+            >
+                ← Назад
+            </button>
+
+            <div class="capsule-heading">
+                Капсула времени
+            </div>
+        </div>
+
+        <div class="capsule-status">
+            Дерево октября
+        </div>
+
+        <p class="capsule-description">
+            Каждый прожитый день оставляет свой след.
+            Твои ответы постепенно оживляют картину.
+        </p>
+
+        <div class="capsule-art">
+            <img
+                id="capsuleTreeImage"
+                src="./capsule-assets/tree-01.png"
+                alt="Дерево времени"
+            >
+
+            <div
+                id="capsuleImageError"
+                class="capsule-image-error hidden"
+            >
+                Художественная основа ещё не загружена.
+            </div>
+        </div>
+
+        <p class="capsule-description">
+            Скоро здесь появится история твоего дерева.
+        </p>
+
+    </div>
+</section>
 
 </body>
 </html>
