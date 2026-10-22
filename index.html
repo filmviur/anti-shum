@@ -13420,8 +13420,7 @@ function updateSendButton() {
         selectedPhotoConfirmed;
 
     sendAnswerBtn.disabled =
-        !hasText &&
-        !hasPhoto;
+        answerSubmitting || (!hasText && !hasPhoto);
 }
 
 
@@ -13697,187 +13696,165 @@ sendAnswerBtn.addEventListener(
 );
 
 
-async function submitAnswer() {
-
-    if (!currentUser) {
-        return;
+/* ANSWER DELIVERY MOTION */
+let answerSubmitting = false;
+function createAnswerDelivery(text, hasPhoto, photoSrc) {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const started = performance.now();
+    const overlay = document.createElement("div");
+    overlay.className = "answer-delivery";
+    overlay.innerHTML = '<div class="delivery-page"><div class="delivery-ornament" aria-hidden="true">❦</div><div class="delivery-preview" aria-hidden="true"></div><div class="delivery-seal" aria-hidden="true"><span class="delivery-pen">✎</span><svg class="delivery-check" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21"/><path d="M14 24l7 7 14-15"/></svg></div><div role="status" aria-live="polite" aria-atomic="true"><div class="delivery-title"></div><div class="delivery-hint"></div></div></div>';
+    const page = overlay.querySelector(".delivery-page");
+    const title = overlay.querySelector(".delivery-title");
+    const hint = overlay.querySelector(".delivery-hint");
+    const preview = overlay.querySelector(".delivery-preview");
+    if (hasPhoto && photoSrc) {
+        const image = document.createElement("img");
+        image.src = photoSrc;
+        image.alt = "";
+        image.decoding = "async";
+        preview.appendChild(image);
     }
-
-   if (!currentQuestionId) {
-    return;
-}
-
-// Проверяем единое время записи по Киеву.
-const sessionEnd = getTodaySessionEnd();
-
-const sessionStart =
-    sessionEnd - 20 * 60 * 1000;
-
-const currentTime = Date.now();
-
-if (
-    currentTime < sessionStart ||
-    currentTime >= sessionEnd
-) {
-    showNotice(
-        "Дневник открыт только с 20:00 до 20:20 по Киеву."
-    );
-
-    return;
-}
-
-const text =
-    answerInput.value.trim();
-    const hasPhoto =
-        selectedPhotoFile &&
-        selectedPhotoConfirmed;
-
-    if (!text && !hasPhoto) {
-        return;
+    if (text) {
+        const quote = document.createElement("blockquote");
+        quote.textContent = text;
+        preview.appendChild(quote);
     }
-
-   if (text.length > MAX_ANSWER_LENGTH) {
-
-    showNotice(
-        `Максимум ${MAX_ANSWER_LENGTH} символов.`
-    );
-
-    return;
-}
-
-sendAnswerBtn.disabled =
-    true;
-
-try {
-
-        /*
-            Повторно проверяем, нет ли уже ответа.
-            Это защищает от двойного клика/двух вкладок.
-        */
-
-        const existingAnswer =
-            await getOwnAnswerForQuestion(
-                currentQuestionId
-            );
-
-        if (existingAnswer) {
-
-            currentAnswer =
-                existingAnswer;
-
-            const endAt = getTodaySessionEnd();
-
-            if (Date.now() < endAt) {
-
-                sessionEndsAt =
-                    endAt;
-
-                await openFeed();
-
-            } else {
-
-                await finishSession();
+    const previousOverflow = document.body.style.overflow;
+    const content = document.querySelector(".page");
+    const wasInert = content?.inert;
+    if (content) content.inert = true;
+    document.body.style.overflow = "hidden";
+    const wait = ms => reduced.matches ? Promise.resolve() : new Promise(resolve => setTimeout(resolve, ms));
+    async function animate(element, frames, duration) {
+        if (reduced.matches || !element.animate) return;
+        try {
+            const animation = element.animate(frames, { duration, easing: "cubic-bezier(.22,.72,.22,1)", fill: "forwards" });
+            await animation.finished.catch(() => {});
+        } catch (_) { /* Animation support must never interrupt saving. */ }
+    }
+    function setStep(message, detail) { title.textContent = message; hint.textContent = detail; }
+    setStep(hasPhoto ? "Готовим твою запись…" : "Сохраняем твою мысль…", "Бережно переносим её на страницу дневника");
+    document.body.appendChild(overlay);
+    // Visual feedback never decides whether a record was saved.
+    animate(overlay, [{ opacity: 0 }, { opacity: 1 }], 450).catch(() => {});
+    animate(page, [{ opacity: 0, transform: "translateY(15px) rotate(-1deg)" }, { opacity: 1, transform: "none" }], 650).catch(() => {});
+    let closed = false;
+    return {
+        setStep,
+        async saved(alreadySaved = false) {
+            if (alreadySaved) { preview.replaceChildren(); preview.hidden = true; }
+            await wait(Math.max(0, 550 - (performance.now() - started)));
+            setStep(alreadySaved ? "Твоя запись уже в дневнике" : hasPhoto && text ? "Запись сохранена" : hasPhoto ? "Фотография сохранена" : "Твоя мысль сохранена", "Открываем ленту ответов…");
+            overlay.classList.add("is-saved");
+            await wait(1200);
+        },
+        async revealFeed() {
+            if (!feedView.classList.contains("hidden")) {
+                feedView.querySelectorAll(".answer-card").forEach((card, i) => card.style.setProperty("--arrival-order", Math.min(i, 6)));
+                feedView.classList.add("feed-arriving");
+                setTimeout(() => feedView.classList.remove("feed-arriving"), 1500);
             }
+            await Promise.all([
+                animate(page, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-14px) scale(.98)" }], 650),
+                animate(overlay, [{ opacity: 1 }, { opacity: 0 }], 850)
+            ]);
+            this.close();
+            if (!feedView.classList.contains("hidden")) {
+                feedView.tabIndex = -1;
+                feedView.focus({ preventScroll: true });
+            }
+        },
+        close() {
+            if (closed) return;
+            closed = true;
+            (overlay.getAnimations?.({ subtree: true }) || []).forEach(animation => animation.cancel());
+            overlay.remove();
+            document.body.style.overflow = previousOverflow;
+            if (content) content.inert = wasInert;
+        }
+    };
+}
+/* ANSWER DELIVERY MOTION END */
 
+async function submitAnswer() {
+    if (answerSubmitting || !currentUser || !currentQuestionId) return;
+    const sessionEnd = getTodaySessionEnd();
+    const now = Date.now();
+    if (now < sessionEnd - 20 * 60 * 1000 || now >= sessionEnd) {
+        showNotice("Дневник открыт только с 20:00 до 20:20 по Киеву.");
+        return;
+    }
+    const text = answerInput.value.trim();
+    const hasPhoto = !!(selectedPhotoFile && selectedPhotoConfirmed);
+    if (!text && !hasPhoto) return;
+    if (text.length > MAX_ANSWER_LENGTH) {
+        showNotice(`Максимум ${MAX_ANSWER_LENGTH} символов.`);
+        return;
+    }
+    answerSubmitting = true;
+    const controls = [sendAnswerBtn, cameraBtn, galleryBtn, galleryInput, retakePhotoBtn, confirmPhotoBtn];
+    const previousControls = controls.map(element => [element, element.disabled]);
+    const previousReadOnly = answerInput.readOnly;
+    const previousLabel = sendAnswerBtn.textContent;
+    const previousBusy = questionView.getAttribute("aria-busy");
+    controls.forEach(element => { element.disabled = true; });
+    answerInput.readOnly = true;
+    answerInput.blur();
+    questionView.setAttribute("aria-busy", "true");
+    sendAnswerBtn.textContent = hasPhoto ? "Сохраняем запись…" : "Сохраняем мысль…";
+    let delivery = null;
+    let saved = false;
+    try {
+        delivery = createAnswerDelivery(text, hasPhoto, selectedPhotoPreviewUrl);
+        const existingAnswer = await getOwnAnswerForQuestion(currentQuestionId);
+        if (existingAnswer) {
+            currentAnswer = existingAnswer;
+            saved = true;
+            sessionEndsAt = getTodaySessionEnd();
+            await delivery.saved(true);
+            if (Date.now() < sessionEndsAt) await openFeed();
+            else await finishSession();
+            await delivery.revealFeed();
             return;
         }
-
-
-        let photoPath =
-            null;
-
-
-        /*
-            Фото загружаем только после
-            окончательного нажатия "Отправить".
-        */
-
+        let photoPath = null;
         if (hasPhoto) {
-
-            photoPath =
-                await uploadAnswerPhoto(
-                    selectedPhotoFile
-                );
+            delivery.setStep("Прикрепляем фотографию…", "После загрузки сохраним запись в дневнике");
+            photoPath = await uploadAnswerPhoto(selectedPhotoFile);
+            delivery.setStep("Сохраняем твою запись…", "Фотография загружена. Добавляем запись на страницу");
         }
-
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .from("answers")
-                .insert({
-                    question_id:
-                        currentQuestionId,
-
-                    user_id:
-                        currentUser.id,
-
-                    answer_text:
-                        text,
-
-                    photo_url:
-                        photoPath,
-
-                    is_anonymous:
-                        false,
-
-                    reports_count:
-                        0,
-
-                    is_hidden:
-                        false
-                })
-                .select("*")
-                .single();
-
+        const { data, error } = await supabaseClient.from("answers").insert({
+            question_id: currentQuestionId,
+            user_id: currentUser.id,
+            answer_text: text,
+            photo_url: photoPath,
+            is_anonymous: false,
+            reports_count: 0,
+            is_hidden: false
+        }).select("*").single();
         if (error) {
-
-            /*
-                Если запись не создалась,
-                загруженное фото лучше удалить.
-            */
-
-            if (photoPath) {
-                await deleteAnswerPhoto(
-                    photoPath
-                );
-            }
-
+            if (photoPath) await deleteAnswerPhoto(photoPath);
             throw error;
         }
-
-
-        currentAnswer =
-            data;
-
-
-        /*
-    Время закрытия общее для всех:
-    20:20 по киевскому времени.
-*/
-
-sessionEndsAt = getTodaySessionEnd();
-
-
+        currentAnswer = data;
+        saved = true;
+        sessionEndsAt = getTodaySessionEnd();
+        await delivery.saved();
         await openFeed();
-
+        await delivery.revealFeed();
     } catch (error) {
-
-        console.error(
-            "Submit answer error:",
-            error
-        );
-
-       showNotice(
-    "Не удалось сохранить ответ.\n\n" +
-    (
-        error?.message ||
-        "Попробуй ещё раз."
-    )
-);
-
+        console.error("Submit answer error:", error);
+        delivery?.close();
+        showNotice((saved ? "Ответ сохранён, но не удалось открыть ленту.\n\n" : "Не удалось сохранить ответ. Твой ответ остался на месте.\n\n") + (error?.message || "Попробуй ещё раз."));
+    } finally {
+        delivery?.close();
+        answerSubmitting = false;
+        previousControls.forEach(([element, disabled]) => { element.disabled = disabled; });
+        answerInput.readOnly = previousReadOnly;
+        sendAnswerBtn.textContent = previousLabel;
+        if (previousBusy === null) questionView.removeAttribute("aria-busy");
+        else questionView.setAttribute("aria-busy", previousBusy);
         updateSendButton();
     }
 }
@@ -21557,6 +21534,46 @@ restoreSession();
 
 
 
+<style id="answer-delivery-style">
+.answer-delivery{
+ position:fixed;inset-inline:0;top:var(--visible-viewport-top,0px);
+ height:100vh;height:var(--visible-viewport-height,100dvh);z-index:20000;
+ display:flex;align-items:center;justify-content:center;overflow-y:auto;overscroll-behavior:contain;
+ padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+ background:rgba(13,10,8,.88);color:#563b25;
+}
+.delivery-page{
+ width:min(380px,100%);max-height:100%;overflow-y:auto;flex-shrink:0;
+ padding:30px 26px 27px;text-align:center;border:1px solid #a6814f;border-radius:4px 11px 11px 4px;
+ background:linear-gradient(110deg,#cbb18a,#ecddbf 12%,#e7d4b1 88%,#c4a57a);
+ box-shadow:inset 0 0 0 6px #dac39e,inset 0 0 0 7px #a9885766,0 22px 55px #0007;
+}
+.delivery-ornament{font:26px Georgia,serif;color:#92703d;line-height:1;margin-bottom:14px}
+.delivery-preview{max-width:100%;margin:0 0 18px;transform-origin:center bottom;transition:transform 950ms cubic-bezier(.3,.1,.2,1),opacity 950ms ease}
+.delivery-preview img{display:block;width:auto;max-width:70%;max-height:130px;object-fit:contain;margin:0 auto 14px;padding:6px 6px 15px;background:#f4ead6;box-shadow:1px 4px 9px #5a3b2744;transform:rotate(-3deg)}
+.delivery-preview blockquote{margin:0;font:italic 16px/1.5 Georgia,serif;white-space:pre-wrap;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;color:#705036}
+.delivery-seal{position:relative;width:48px;height:48px;margin:0 auto 14px;color:#8c6838}
+.delivery-pen{position:absolute;inset:0;display:grid;place-items:center;font:34px Georgia,serif;animation:deliveryWriting 2400ms ease-in-out infinite}
+.delivery-check{width:48px;height:48px;opacity:0}
+.delivery-check circle{fill:none;stroke:currentColor;stroke-width:1;opacity:.65}
+.delivery-check path{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:35;stroke-dashoffset:35}
+.delivery-title{font:600 clamp(23px,5vw,29px)/1.2 "Cormorant Garamond",Georgia,serif;color:#604020;margin-bottom:9px;overflow-wrap:anywhere}
+.delivery-hint{font:14px/1.6 Georgia,serif;color:#806345;overflow-wrap:anywhere}
+.answer-delivery.is-saved .delivery-preview{transform:translateY(-4px) scale(.96);opacity:.8}
+.is-saved .delivery-pen{opacity:0;animation:none;transition:opacity 350ms ease}
+.is-saved .delivery-check{opacity:1;transition:opacity 500ms ease}
+.is-saved .delivery-check path{animation:deliveryCheckDraw 750ms ease 150ms forwards}
+@keyframes deliveryWriting{0%,100%{transform:translateX(-3px) rotate(-8deg)}50%{transform:translateX(4px) rotate(6deg)}}
+@keyframes deliveryCheckDraw{to{stroke-dashoffset:0}}
+@keyframes deliveryFeedArrival{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+#feedView.feed-arriving .answer-card{animation:deliveryFeedArrival 850ms cubic-bezier(.22,.72,.22,1) both;animation-delay:calc(var(--arrival-order,0) * 70ms)}
+@media(max-height:480px){.delivery-page{padding:20px}.delivery-ornament{display:none}.delivery-preview img{max-height:65px;margin-bottom:8px}.delivery-preview blockquote{-webkit-line-clamp:2}.delivery-preview{margin-bottom:12px}.delivery-seal{margin-bottom:8px}}
+@media(prefers-reduced-motion:reduce){
+ .delivery-preview,.delivery-pen,.delivery-check{animation:none!important;transition:none!important;transform:none!important}
+ .is-saved .delivery-check path{animation:none;stroke-dashoffset:0}
+ #feedView.feed-arriving .answer-card{animation:none}
+}
+</style>
 <style id="mobile-usability">
 /* Phone and tablet usability; retain the journal's existing artwork and palette. */
 .profile-name,.profile-email,.answer-author-name{min-width:0;overflow-wrap:anywhere}
