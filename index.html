@@ -20934,14 +20934,14 @@ restoreSession();
     transform: translate(-50%, -50%) rotate(var(--leaf-rotation)) scale(.05);
     transform-origin: 50% 90%;
     opacity: 0;
-    filter: drop-shadow(0 0 3px rgba(255, 176, 58, .5));
+    filter: brightness(var(--leaf-brightness, 1)) drop-shadow(0 0 2px rgba(255, 176, 58, .35));
     transition: opacity 850ms ease var(--leaf-delay),
                 transform 1150ms cubic-bezier(.2, 1.35, .4, 1) var(--leaf-delay);
 }
 
 .capsule-growth-leaf.is-grown {
     opacity: 1;
-    transform: translate(-50%, -50%) rotate(var(--leaf-rotation)) scale(1);
+    transform: translate(-50%, -50%) rotate(var(--leaf-rotation)) scale(var(--leaf-scale, 1));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -21074,14 +21074,20 @@ restoreSession();
     art.appendChild(leavesLayer);
 
     // Anchors selected along visible branches of tree-01.png (percent of image).
+    // Branch-tip coordinates (x, y, angle, size, brightness).
+    // Deliberately varied so leaves don't look like identical stamps.
     const leafPositions = [
-        [64,25,-35],[39,29,35],[72,31,-35],[27,32,25],[54,17,-30],
-        [77,20,35],[32,20,-20],[60,38,30],[21,26,-30],[46,10,20],
-        [69,15,-35],[35,39,40],[82,32,-20],[51,32,20],[25,44,-35],
-        [74,42,35],[44,22,-25],[58,8,30],[17,36,-30],[67,48,25],
-        [36,11,-35],[80,13,35],[29,15,-25],[57,28,25],[46,40,-35],
-        [73,9,30],[20,18,-25],[62,19,35],[42,35,-30],[84,24,25],
-        [53,45,-30]
+        [64,25,-30,.85,1.08],[39,29,27,.68,.92],[72,31,-43,.78,1.06],
+        [27,32,32,.64,.85],[54,17,-17,.88,1.14],[77,20,48,.71,.96],
+        [32,20,-37,.67,.91],[60,38,22,.8,1.04],[21,26,-24,.72,.94],
+        [46,10,38,.61,.89],[69,15,-49,.77,1.08],[35,39,17,.7,.9],
+        [82,32,-33,.63,.95],[51,32,41,.76,1.03],[25,44,-42,.69,.87],
+        [74,42,26,.74,1.05],[44,22,-19,.82,.98],[58,8,35,.62,1.12],
+        [17,36,-32,.66,.92],[67,48,21,.75,1.03],[36,11,-41,.65,.9],
+        [80,13,49,.73,1.08],[29,15,-25,.7,.95],[57,28,16,.84,1.02],
+        [46,40,-36,.68,.94],[73,9,29,.63,1.09],[20,18,-43,.69,.91],
+        [62,19,46,.81,1.04],[42,35,-22,.72,.93],[84,24,24,.66,1.08],
+        [53,45,-37,.78,.97]
     ];
     const leaves = leafPositions.map(function (position, index) {
         const leaf = document.createElement("span");
@@ -21089,9 +21095,10 @@ restoreSession();
         leaf.style.left = position[0] + "%";
         leaf.style.top = position[1] + "%";
         leaf.style.setProperty("--leaf-rotation", position[2] + "deg");
+        leaf.style.setProperty("--leaf-scale", String(position[3]));
+        leaf.style.setProperty("--leaf-brightness", String(position[4]));
         leaf.style.setProperty("--leaf-delay", (index % 5 * 90) + "ms");
-        // Sample the glowing leaf painted into the original first-stage artwork.
-        // Reusing its texture avoids synthetic, sticker-like vector leaves.
+        // Same authentic painted texture, with subtle per-leaf variation.
         leaf.style.backgroundImage = 'url("./capsule-assets/tree-01.png")';
         leavesLayer.appendChild(leaf);
         return leaf;
