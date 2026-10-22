@@ -290,6 +290,66 @@ opacity:.65;pointer-events:none}
  .epilogue-mark{font-size:15px}
  .page-number{bottom:25px!important}
 }
+
+/* Exact uploaded inner-page illustrations, not reconstructed scrollwork. */
+.sheet,.sheet.left,.sheet.right,.sheet.turn-sheet{
+ background-color:#e9c89d!important;
+ background-image:url("./diary-inner-left.webp")!important;
+ background-size:100% 100%!important;
+ background-position:center!important;
+ background-repeat:no-repeat!important;
+ padding:clamp(44px,5.4vw,66px) clamp(42px,5.7vw,65px) clamp(48px,6vw,70px)!important;
+}
+.sheet.right,.sheet.turn-sheet:not(.backwards){background-image:url("./diary-inner-right.webp")!important}
+.sheet.turn-sheet.backwards{background-image:url("./diary-inner-left.webp")!important}
+.sheet:before,.sheet:after,.sheet .page-ornament{display:none!important}
+.sheet.left{box-shadow:inset -20px 0 23px #4a260c22!important}
+.sheet.right{box-shadow:inset 18px 0 23px #4a260c22!important}
+.sheet>div:not(.page-ornament){z-index:1}
+.entry-layout{height:100%;min-height:0;display:flex;flex-direction:column;position:relative;padding:0 3px}
+.entry-heading{width:fit-content;max-width:70%;margin:5px auto 8px 7%;padding:5px 17px 9px;background:#e6c79ab8;transform:rotate(-5deg);box-shadow:0 1px 3px #80553024;flex-shrink:0}
+.page-kicker{font:500 clamp(26px,3.8vw,43px)/1 "Caveat",cursive!important;color:#432518;text-transform:none!important;letter-spacing:0!important}
+.page-date{font:500 clamp(17px,2.2vw,25px)/1.1 "Caveat",cursive!important;margin:4px 0 0!important;color:#5b3b26;text-align:left!important}
+.question-block{margin:8px 0 9px;max-width:95%;flex-shrink:0}
+.question-label,.answer-label{font:italic 500 clamp(17px,2.2vw,24px)/1.2 "Cormorant Garamond",Georgia,serif;color:#57331f;margin-bottom:7px}
+.page-question{display:table;max-width:100%;background:#e8c899ab;padding:7px 13px 9px;transform:rotate(-1.6deg);font:500 clamp(20px,2.65vw,29px)/1.15 "Caveat",cursive!important;margin:0!important;color:#4b2b1d;box-shadow:0 1px 3px #6e442220}
+.answer-block{min-height:0;display:flex;flex:1;flex-direction:column;margin-top:9px;overflow:hidden}
+.answer-label{flex-shrink:0;margin-bottom:7px}
+.page-answer{flex:1;min-height:0;max-height:none!important;overflow:auto!important;padding:2px 6px 4px;font:500 clamp(20px,2.5vw,28px)/1.33 "Caveat",cursive!important;color:#4c3024;background:repeating-linear-gradient(to bottom,transparent 0,transparent calc(1.33em - 1px),#926b4926 calc(1.33em - 1px),#926b4926 1.33em)}
+.photo-note{position:relative;align-self:flex-end;flex-shrink:0;max-width:48%;margin:-90px 0 8px 10px!important;padding:8px 8px 20px!important;background:#f5e9d2!important;transform:rotate(5deg);box-shadow:2px 5px 12px #4427146e!important;z-index:2}
+.photo-note .page-photo{max-height:clamp(90px,14vw,150px)!important;max-width:100%;object-fit:cover}
+.photo-note:before{left:auto;right:5px;top:-14px;transform:rotate(17deg)}
+.entry-layout:has(.photo-note) .question-block{max-width:52%;min-height:95px}
+.entry-layout:has(.photo-note) .entry-heading{margin-left:1%;max-width:53%}
+.entry-bottom-flourish{position:absolute!important;bottom:-12px;left:0;right:0;text-align:center;color:#4d2d1d;font:18px "Cormorant Garamond",serif;pointer-events:none}
+.page-number{bottom:-19px!important;color:#3b271a;font-size:16px!important}
+.epilogue-page{height:100%;padding:clamp(8px,1.5vw,18px) 8px!important;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;overflow:hidden}
+.epilogue-heading{font:italic 600 clamp(29px,4vw,48px)/1 "Cormorant Garamond",serif!important;margin:6px 0 15px!important}
+.epilogue-text{font:italic 500 clamp(16px,2.05vw,23px)/1.32 "Cormorant Garamond",Georgia,serif!important;white-space:pre-line;max-width:100%;color:#513523}
+.epilogue-mark{font-size:24px!important}
+.epilogue-flourish{color:#3c2618!important}
+.epilogue-sign{font:italic 500 clamp(17px,1.9vw,23px) "Cormorant Garamond",serif!important;margin-top:8px!important}
+.epilogue-engraving{display:none!important}
+@media(max-width:700px){
+ .sheet,.sheet.left,.sheet.right,.sheet.turn-sheet{padding:48px 23px 50px!important}
+ .entry-heading{padding:3px 7px 5px;margin:0 auto 4px 0}
+ .page-kicker{font-size:24px!important}.page-date{font-size:15px!important}
+ .question-block{margin:5px 0}.question-label,.answer-label{font-size:15px;margin-bottom:3px}
+ .page-question{font-size:18px!important;padding:5px 7px}
+ .answer-block{margin-top:5px}
+ .page-answer{font-size:17px!important;line-height:1.17!important;background-size:auto 1.17em}
+ .photo-note{max-width:48%;padding:4px 4px 9px!important;margin:-65px 0 5px 6px!important}
+ .photo-note .page-photo{max-height:78px!important}
+ .entry-layout:has(.photo-note) .question-block{min-height:65px}
+ .entry-bottom-flourish{font-size:12px;bottom:-8px}
+ .page-number{bottom:-16px!important;font-size:12px!important}
+ .epilogue-page{padding:0 2px!important}
+ .epilogue-heading{font-size:26px!important;margin:3px 0 8px!important}
+ .epilogue-text{font-size:clamp(10px,2.5vw,14px)!important;line-height:1.22!important}
+ .epilogue-flourish{width:85px!important;margin:0 auto 3px!important}
+ .epilogue-flourish.bottom{width:72px!important;margin:3px auto 0!important}
+ .epilogue-sign{font-size:12px!important}
+}
 </style>
 </head>
 <body>
@@ -333,16 +393,23 @@ const pad=n=>String(n).padStart(2,"0");
 const key=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const text=(tag,cls,value)=>{const el=document.createElement(tag);el.className=cls;el.textContent=value;return el};
 function buildPage(day,number){
- const page=document.createElement("div");
- page.append(text("div","page-kicker","День "+number+" из 365"),text("div","page-date",day.date.getDate()+" "+MONTHS[day.date.getMonth()]+" "+day.date.getFullYear()),text("div","page-rule",""));
+ const page=document.createElement("div");page.className="entry-layout";
+ const heading=document.createElement("div");heading.className="entry-heading";
+ heading.append(text("div","page-kicker","День "+number),text("div","page-date",day.date.getDate()+" "+MONTHS[day.date.getMonth()]+" "+day.date.getFullYear()));
+ page.append(heading);
  if(day.answer){
-  page.append(text("div","page-question",day.question||"Вопрос дня"));
+  const q=document.createElement("div");q.className="question-block";
+  q.append(text("div","question-label","Вопрос дня:"),text("div","page-question",day.question||"Вопрос дня"));
+  page.append(q);
   if(day.photo){
-   const note=document.createElement("div");note.className="photo-note";const img=document.createElement("img");img.className="page-photo";img.alt="Фотоответ";img.src=day.photo;note.append(img);page.append(note);
+   const note=document.createElement("div");note.className="photo-note";
+   const img=document.createElement("img");img.className="page-photo";img.alt="Фотоответ";img.src=day.photo;note.append(img);page.append(note);
   }
-  const written=text("div","page-answer",day.answer.answer_text||"");if(newWriting.has(number))written.dataset.fresh="1";page.append(written);
+  const answer=document.createElement("div");answer.className="answer-block";
+  answer.append(text("div","answer-label","Мой ответ:"));
+  const written=text("div","page-answer",day.answer.answer_text||"");if(newWriting.has(number))written.dataset.fresh="1";answer.append(written);page.append(answer);
  }else page.append(text("div","page-empty","Эта страница ждёт твоих мыслей…"));
- page.append(text("div","page-number",String(number)));
+ page.append(text("div","entry-bottom-flourish","❧ ─── ✥ ─── ❧"),text("div","page-number",String(number)));
  return page;
 }
 function fill(el,day,number){
