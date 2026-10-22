@@ -21137,16 +21137,16 @@ restoreSession();
         const count = Math.max(0, Math.min(31, answerCount));
         const version = ++imageVersion;
 
-        // Keep each painting intact; only advance to the next complete
-        // painting at a milestone. Daily lights provide 31 distinct steps.
-        const milestones = [1, 12, 20, 25, 29, 31];
+        // Keep the nearly bare original through day 19: tree-07 already has a
+        // mature canopy. Avoid overlay leaves on the already leafy stages.
+        const milestones = [1, 20, 24, 27, 29, 31];
         const stageIndex = milestones.reduce(function (chosen, day, index) {
             return count >= day ? index : chosen;
         }, 0);
         const stage = stages[stageIndex];
 
         leaves.forEach(function (leaf, index) {
-            leaf.classList.toggle("is-grown", index < count);
+            leaf.classList.toggle("is-grown", index < Math.floor(count / 3) && count < 20);
         });
 
         if (displayedCount === count) return;
