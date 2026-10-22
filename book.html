@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Мои 365 дней в Анти-Шум</title>
+<meta name="diary-layout-version" content="typography-v3-20261022">
 <link rel="icon" href="./icon-512.png">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=PT+Serif:wght@400;700&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -550,6 +551,28 @@ opacity:.65;pointer-events:none}
  .epilogue-page{padding:0 6px!important}
  .epilogue-heading{font-size:20px!important}
  .epilogue-text{font-size:10px!important;line-height:1.12!important}
+}
+
+/* Typography v3: fixed, visibly smaller fonts; protect the ornate inner frame. */
+.book .sheet .epilogue-page{padding:4px 17px 12px!important;max-height:100%!important;overflow:hidden!important}
+.book .sheet .epilogue-heading{font-size:25px!important;line-height:1!important;margin:0 0 9px!important}
+.book .sheet .epilogue-text{font-size:14px!important;line-height:1.18!important;letter-spacing:0!important;max-width:100%!important;max-height:calc(100% - 70px)!important;overflow:auto!important}
+.book .sheet .epilogue-mark{display:none!important}
+.book .sheet .epilogue-sign{font-size:12px!important;margin:5px 0 0!important}
+.book .sheet .entry-layout{padding:2px 10px 8px!important}
+.book .sheet .page-kicker{font-size:27px!important}
+.book .sheet .page-date{font-size:16px!important}
+.book .sheet .question-label,.book .sheet .answer-label{font-size:16px!important}
+.book .sheet .page-question{font-size:19px!important;line-height:1.12!important}
+.book .sheet .page-answer{font-size:19px!important;line-height:1.17!important}
+.book .sheet .photo-note .page-photo{max-height:85px!important}
+@media(max-width:700px){
+ .book .sheet .epilogue-heading{font-size:20px!important}
+ .book .sheet .epilogue-text{font-size:11px!important;line-height:1.12!important}
+ .book .sheet .page-kicker{font-size:20px!important}
+ .book .sheet .page-date{font-size:12px!important}
+ .book .sheet .page-question,.book .sheet .page-answer{font-size:14px!important}
+ .book .sheet .question-label,.book .sheet .answer-label{font-size:12px!important}
 }
 </style>
 </head>
