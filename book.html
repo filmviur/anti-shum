@@ -593,7 +593,58 @@ opacity:.65;pointer-events:none}
  .book .sheet .page-question,.book .sheet .page-answer{font-size:16px!important}
 }
 </style>
-</head>
+<style id="diary-motion-system">
+/* Quiet journal motion. All effects use opacity/transform; visibility remains controlled by existing application logic. */
+:root{--journal-ease:cubic-bezier(.22,.72,.22,1);--journal-duration:520ms}
+@keyframes journalViewEnter{from{opacity:0;transform:perspective(1200px) translateY(8px) rotateY(-1.5deg)}to{opacity:1;transform:perspective(1200px) translateY(0) rotateY(0)}}
+@keyframes journalModalEnter{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes journalBackdropEnter{from{opacity:0}to{opacity:1}}
+@keyframes journalOpenLeft{from{transform:perspective(900px) rotateY(0deg);opacity:1}to{transform:perspective(900px) rotateY(-84deg);opacity:0}}
+@keyframes journalOpenRight{from{transform:perspective(900px) rotateY(0deg);opacity:1}to{transform:perspective(900px) rotateY(84deg);opacity:0}}
+@keyframes journalCloseLeft{from{transform:perspective(900px) rotateY(-84deg);opacity:0}to{transform:perspective(900px) rotateY(0deg);opacity:1}}
+@keyframes journalCloseRight{from{transform:perspective(900px) rotateY(84deg);opacity:0}to{transform:perspective(900px) rotateY(0deg);opacity:1}}
+#authScreen:not(.hidden),#blockedScreen:not(.hidden),#questionView:not(.hidden),#feedView:not(.hidden),#profileView:not(.hidden),#adminView:not(.hidden),#closedView:not(.hidden){
+ animation:journalViewEnter var(--journal-duration) var(--journal-ease) both;
+}
+.modal-backdrop:not(.hidden),#timeCapsuleOverlay:not(.hidden){
+ animation:journalBackdropEnter 380ms ease-out both;
+}
+.modal-backdrop:not(.hidden) > .modal,
+#timeCapsuleOverlay:not(.hidden) .capsule-container{
+ animation:journalModalEnter 480ms var(--journal-ease) both;
+}
+.admin-screen .admin-panel:not(.hidden),.admin-screen .admin-section:not(.hidden),
+.auth-panel:not(.hidden),.profile-section:not(.hidden){
+ animation:journalViewEnter 400ms var(--journal-ease) both;
+}
+button,a,.auth-tab,.admin-nav-btn,.back-btn,.secondary-btn{
+ transition:background-color 320ms ease,border-color 320ms ease,color 320ms ease,box-shadow 320ms ease,opacity 320ms ease,transform 340ms var(--journal-ease);
+}
+button:not(:disabled):active,.auth-tab:active,.admin-nav-btn:active{transform:scale(.975)}
+@media(hover:hover) and (pointer:fine){
+ button:not(:disabled):hover,.secondary-btn:hover{filter:brightness(1.075)}
+}
+input,textarea,select{transition:border-color 300ms ease,box-shadow 300ms ease,background-color 300ms ease}
+input:focus,textarea:focus,select:focus{transition-duration:240ms}
+.journal-curtain{position:fixed;inset:0;z-index:999999;display:flex;pointer-events:none;overflow:hidden;isolation:isolate}
+.journal-curtain-half{width:50%;height:100%;position:relative;background:linear-gradient(115deg,#24160e,#442a18 48%,#1b110c);border:2px solid #79532c;box-shadow:inset 0 0 0 9px #25160e,inset 0 0 0 11px #ac8248,inset 0 0 38px #0008;backface-visibility:hidden}
+.journal-curtain-half::before{content:"❦";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#c49b60;font:clamp(35px,8vw,80px) Georgia,serif;opacity:.75}
+.journal-curtain-half:first-child{transform-origin:left center}
+.journal-curtain-half:last-child{transform-origin:right center}
+.journal-curtain.is-opening .journal-curtain-half:first-child{animation:journalOpenLeft 850ms var(--journal-ease) both}
+.journal-curtain.is-opening .journal-curtain-half:last-child{animation:journalOpenRight 850ms var(--journal-ease) both}
+.journal-curtain.is-closing .journal-curtain-half:first-child{animation:journalCloseLeft 460ms ease-in-out both}
+.journal-curtain.is-closing .journal-curtain-half:last-child{animation:journalCloseRight 460ms ease-in-out both}
+@media(prefers-reduced-motion:reduce){
+ #authScreen:not(.hidden),#blockedScreen:not(.hidden),#questionView:not(.hidden),#feedView:not(.hidden),#profileView:not(.hidden),#adminView:not(.hidden),#closedView:not(.hidden),
+ .modal-backdrop:not(.hidden),.modal-backdrop:not(.hidden)>.modal,#timeCapsuleOverlay:not(.hidden),#timeCapsuleOverlay:not(.hidden) .capsule-container,
+ .admin-screen .admin-panel:not(.hidden),.admin-screen .admin-section:not(.hidden),.auth-panel:not(.hidden),.profile-section:not(.hidden){
+ animation:none!important;filter:none!important;transform:none!important
+ }
+ button,a,input,textarea,select{transition:none!important}
+ .journal-curtain{display:none!important}
+}
+</style></head>
 <body>
 <header><div><h1>Мои 365 дней в Анти-Шум</h1><p class="subtitle" id="progress">Книга воспоминаний · загрузка…</p></div><div class="actions"><a href="./index.html">← Вернуться в Анти-Шум</a><button id="printBtn" disabled>Подготовить PDF для печати</button></div></header>
 <div id="loading">Собираем страницы твоей книги…</div>
@@ -837,4 +888,54 @@ try{
 }catch(err){$("loading").textContent=err.message||"Не удалось загрузить книгу";console.error("Book loading error:",err);}
 })();
 </script>
-</body></html>
+<script id="diary-motion-controller">
+(function () {
+ "use strict";
+ const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+ const curtain = document.createElement("div");
+ curtain.className = "journal-curtain";
+ curtain.setAttribute("aria-hidden", "true");
+ curtain.innerHTML = '<div class="journal-curtain-half"></div><div class="journal-curtain-half"></div>';
+ let timer;
+ let navigating = false;
+ window.openJournal = function () {
+  clearTimeout(timer);
+  if (reduced.matches) { curtain.remove(); return; }
+  if (!curtain.isConnected) document.body.appendChild(curtain);
+  curtain.className = "journal-curtain";
+  requestAnimationFrame(function () {
+   curtain.classList.add("is-opening");
+   timer = setTimeout(function () { curtain.remove(); }, 900);
+  });
+ };
+ window.closeJournal = function () {
+  clearTimeout(timer);
+  if (reduced.matches) return Promise.resolve();
+  if (!curtain.isConnected) document.body.appendChild(curtain);
+  curtain.className = "journal-curtain is-closing";
+  return new Promise(function (resolve) { setTimeout(resolve, 480); });
+ };
+ window.openJournal();
+ document.addEventListener("click", function (event) {
+  const link = event.target instanceof Element ? event.target.closest("a[href]") : null;
+  if (!link || event.defaultPrevented || event.button !== 0 ||
+      event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  if (link.hasAttribute("download") || (link.target && link.target !== "_self")) return;
+  let url;
+  try { url = new URL(link.href, location.href); } catch (_) { return; }
+  if (url.origin !== location.origin ||
+      (url.pathname === location.pathname && url.search === location.search) ||
+      !/\.html$|\/$/.test(url.pathname)) return;
+  event.preventDefault();
+  if (navigating) return;
+  navigating = true;
+  window.closeJournal().then(function () { location.assign(url.href); });
+ });
+ window.addEventListener("pageshow", function (event) {
+  if (event.persisted) { navigating = false; window.openJournal(); }
+ });
+ reduced.addEventListener("change", function () {
+  if (reduced.matches) { clearTimeout(timer); curtain.remove(); }
+ });
+})();
+</script></body></html>
