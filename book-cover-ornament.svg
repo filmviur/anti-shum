@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 860">
+<defs><g id="leaf"><path d="M0 0C-31 -6 -45 -31 -38 -50C-12 -49 -2 -22 0 0M0 0C32 -7 45 -30 37 -50C13 -48 2 -22 0 0" fill="none" stroke="#d8a752" stroke-width="3"/><path d="M0 0L-36 -47M0 0L35 -47" stroke="#e8c67b" stroke-width="1.6"/></g><g id="flourish" fill="none" stroke="#e3b867" stroke-width="3"><path d="M0 0C22 -30 56 -31 70 -11C89 22 38 38 38 6C38 -12 65 -7 58 5M0 0C-22 -30 -56 -31 -70 -11C-89 22 -38 38 -38 6C-38 -12 -65 -7 -58 5"/><path d="M0 -3C20 -60 53 -60 53 -39C52 -24 29 -31 36 -44M0 -3C-20 -60 -53 -60 -53 -39C-52 -24 -29 -31 -36 -44"/></g></defs>
+<rect x="18" y="18" width="564" height="824" rx="9" fill="none" stroke="#e4b96b" stroke-width="5"/>
+<rect x="29" y="29" width="542" height="802" rx="6" fill="none" stroke="#b8853c" stroke-width="2"/>
+<rect x="48" y="48" width="504" height="764" rx="28" fill="none" stroke="#e1b45d" stroke-width="3"/>
+<rect x="59" y="59" width="482" height="742" rx="22" fill="none" stroke="#c18c45" stroke-width="1.5"/>
+<rect x="82" y="92" width="436" height="675" rx="175" fill="none" stroke="#e4bd72" stroke-width="4"/>
+<rect x="92" y="102" width="416" height="655" rx="170" fill="none" stroke="#b9863f" stroke-width="1.5"/>
+<g stroke="#e3b766" fill="none" stroke-width="3">
+<path d="M54 250Q32 160 125 122C174 105 190 165 156 173C128 179 130 145 153 148M546 250Q568 160 475 122C426 105 410 165 444 173C472 179 470 145 447 148"/>
+<path d="M54 610Q32 700 125 738C174 755 190 695 156 687C128 681 130 715 153 712M546 610Q568 700 475 738C426 755 410 695 444 687C472 681 470 715 447 712"/>
+<path d="M65 230C110 230 129 283 87 312C43 344 54 389 93 403C134 418 126 460 84 478C40 497 47 551 70 584"/>
+<path d="M535 230C490 230 471 283 513 312C557 344 546 389 507 403C466 418 474 460 516 478C560 497 553 551 530 584"/>
+</g>
+<g fill="#e8c47a"><circle cx="75" cy="75" r="7"/><circle cx="525" cy="75" r="7"/><circle cx="75" cy="785" r="7"/><circle cx="525" cy="785" r="7"/><path d="M300 50l8 15 16 8-16 8-8 15-8-15-16-8 16-8zM300 764l8 15 16 8-16 8-8-15-16-8z"/></g>
+<use href="#flourish" x="300" y="137"/><use href="#flourish" x="300" y="737" transform="rotate(180 300 737)"/>
+<use href="#leaf" x="96" y="287" transform="rotate(-45 96 287)"/><use href="#leaf" x="504" y="287" transform="rotate(45 504 287)"/>
+<use href="#leaf" x="96" y="600" transform="rotate(-135 96 600)"/><use href="#leaf" x="504" y="600" transform="rotate(135 504 600)"/>
+</svg>
