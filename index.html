@@ -5,7 +5,7 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
     >
 
     <title>Анти-Шум</title>
@@ -10226,10 +10226,10 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 
     </div>
 
+    </div>
 </section>
 
-
-</section>
+</main>
 
 <!-- CAMERA MODAL -->
 <div
@@ -14715,6 +14715,8 @@ async function createSignedPhoto(path) {
 
         image.className =
             "answer-photo";
+        image.loading = "lazy";
+        image.decoding = "async";
 
         image.src =
             data.signedUrl;
@@ -21473,6 +21475,71 @@ restoreSession();
 
 
 
+<style id="mobile-usability">
+/* Phone and tablet usability; retain the journal's existing artwork and palette. */
+.profile-name,.profile-email,.answer-author-name{min-width:0;overflow-wrap:anywhere}
+.answer-author{min-width:0}
+@supports(height:100dvh){body,.page{min-height:100dvh}}
+#closedView{
+ width:100%;height:100vh;height:100dvh;min-height:0;
+ flex-direction:column;justify-content:flex-start;
+ padding-top:max(88px,calc(env(safe-area-inset-top) + 72px));
+ padding-bottom:max(24px,env(safe-area-inset-bottom));
+}
+#closedView .closed-card{flex-shrink:0;margin-block:auto}
+.modal-backdrop{
+ top:var(--visible-viewport-top,0px);bottom:auto;
+ height:100vh;height:var(--visible-viewport-height,100dvh);
+ overflow-y:auto;overscroll-behavior:contain;
+ padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
+}
+.modal-backdrop .modal{
+ flex-shrink:0;
+ max-height:calc(100vh - 24px);
+ max-height:calc(var(--visible-viewport-height,100dvh) - max(12px,env(safe-area-inset-top)) - max(12px,env(safe-area-inset-bottom)))!important;
+}
+@media(max-width:900px),(pointer:coarse){
+ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),textarea,select{font-size:16px!important;scroll-margin-block:24px}
+ button,a.secondary-btn{min-height:44px;min-width:44px;touch-action:manipulation}
+ .reaction-btn,.admin-moderation-filter,.avatar-zoom-range{min-height:44px}
+ .profile-header .profile-edit-btn{flex-basis:44px;width:44px;height:44px}
+ .profile-header .profile-admin,.profile-header .profile-logout,.profile-header .back-btn{min-height:44px}
+ .capsule-month-nav button{width:44px;height:44px;flex-shrink:0}
+ .capsule-day-grid{grid-template-columns:repeat(auto-fit,minmax(44px,1fr))}
+ #appScreen .app-global-actions{position:relative;top:auto;right:auto;justify-content:flex-end;margin-bottom:14px}
+ .icon-btn{width:44px;height:44px}
+ .page{padding-top:max(16px,env(safe-area-inset-top));padding-right:max(12px,env(safe-area-inset-right));padding-bottom:max(30px,env(safe-area-inset-bottom));padding-left:max(12px,env(safe-area-inset-left))}
+ .capsule-overlay{padding-top:max(16px,env(safe-area-inset-top));padding-right:max(10px,env(safe-area-inset-right));padding-bottom:max(32px,env(safe-area-inset-bottom));padding-left:max(10px,env(safe-area-inset-left))}
+ .auth-screen,.blocked-screen{min-height:calc(100svh - 46px)}
+ .profile-header-actions{min-width:0;flex-wrap:wrap}
+}
+@media(max-width:380px){
+ .capsule-day-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+ .profile-header .profile-header-actions{flex-wrap:wrap}
+}
+</style>
+<script id="mobile-viewport">
+(function () {
+    // Safari's visual viewport shrinks when the keyboard opens, independently
+    // of the layout viewport. Keep modal controls within that visible area.
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    let frame;
+    function update() {
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(function () {
+            // Do not counteract the user's pinch zoom.
+            if (Math.abs(viewport.scale - 1) > 0.01) return;
+            document.documentElement.style.setProperty("--visible-viewport-height", viewport.height + "px");
+            document.documentElement.style.setProperty("--visible-viewport-top", viewport.offsetTop + "px");
+        });
+    }
+    viewport.addEventListener("resize", update, { passive: true });
+    viewport.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("pageshow", update);
+    update();
+})();
+</script>
 <script id="diary-motion-controller">
 (function () {
  "use strict";
@@ -21526,3 +21593,4 @@ restoreSession();
 </script>
 </body>
 </html>
+
