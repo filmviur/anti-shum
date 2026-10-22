@@ -478,6 +478,50 @@ opacity:.65;pointer-events:none}
  background-repeat:no-repeat!important;
 }
 .sheet:before,.sheet:after{display:none!important}
+
+/* Keep every live entry inside the ornamental frame, on both pages. */
+.sheet,.sheet.left,.sheet.right,.sheet.turn-sheet{
+ padding:clamp(65px,7.5vw,83px) clamp(65px,7.3vw,82px) clamp(82px,8.8vw,100px)!important;
+}
+.sheet .entry-layout,.sheet .epilogue-page{
+ width:100%!important;height:100%!important;max-height:100%!important;
+ min-height:0!important;min-width:0!important;overflow:hidden!important;
+}
+.entry-layout{padding:0!important}
+.entry-heading{margin:0 auto 12px!important;max-width:96%!important;padding:4px 14px 7px!important}
+.page-kicker{font-size:clamp(25px,2.8vw,34px)!important}
+.page-date{font-size:clamp(15px,1.8vw,20px)!important}
+.question-block{margin:2px 0 9px!important;max-width:100%!important}
+.question-label,.answer-label{font-size:clamp(16px,1.7vw,20px)!important;margin-bottom:5px!important}
+.page-question{font-size:clamp(18px,2vw,23px)!important;line-height:1.1!important;padding:5px 9px!important;max-height:130px;overflow-y:auto}
+.answer-block{margin:4px 0 0!important;min-height:0!important;overflow:hidden!important}
+.page-answer{font-size:clamp(18px,2vw,23px)!important;line-height:1.16!important;min-height:0!important;overflow-y:auto!important}
+.photo-note{align-self:center!important;max-width:60%!important;margin:2px auto 7px!important;padding:5px 5px 12px!important}
+.photo-note .page-photo{max-height:105px!important}
+.entry-bottom-flourish{display:none!important}
+.page-number{bottom:2px!important;font-size:13px!important}
+.epilogue-page{padding:0 3px!important;gap:0!important;justify-content:center!important}
+.epilogue-heading{font-size:clamp(26px,3vw,36px)!important;margin:2px 0 8px!important}
+.epilogue-text{font-size:clamp(14px,1.65vw,18px)!important;line-height:1.18!important;overflow-y:auto!important;min-height:0!important;max-height:100%!important}
+.epilogue-mark{font-size:16px!important}
+.epilogue-flourish{width:95px!important;margin:0 auto 3px!important;flex-shrink:0}
+.epilogue-flourish.bottom{width:85px!important;margin:3px auto 0!important}
+.epilogue-sign{font-size:14px!important;margin:5px 0 0!important;flex-shrink:0}
+@media(max-width:700px){
+ .sheet,.sheet.left,.sheet.right,.sheet.turn-sheet{padding:62px 29px 69px!important}
+ .entry-heading{margin-bottom:5px!important;padding:3px 6px!important}
+ .page-kicker{font-size:20px!important}.page-date{font-size:13px!important}
+ .question-block{margin-bottom:4px!important}
+ .question-label,.answer-label{font-size:13px!important;margin-bottom:3px!important}
+ .page-question{font-size:15px!important;max-height:90px;padding:4px 5px!important}
+ .page-answer{font-size:15px!important;line-height:1.12!important}
+ .photo-note{max-width:65%!important;margin:0 auto 4px!important}
+ .photo-note .page-photo{max-height:65px!important}
+ .epilogue-heading{font-size:22px!important;margin-bottom:5px!important}
+ .epilogue-text{font-size:clamp(10px,2vw,12px)!important;line-height:1.12!important}
+ .epilogue-flourish{width:65px!important}
+ .epilogue-sign{font-size:10px!important}
+}
 </style>
 </head>
 <body>
