@@ -5,12 +5,7 @@
 <title>Мои 365 дней в Анти-Шум</title>
 <link rel="icon" href="./icon-512.png">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=PT+Serif:wght@400;700&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-/* Activate exact clean artwork only after BOTH files have been uploaded and loaded. */
-Promise.all(["./diary-clean-left.webp","./diary-clean-right.webp"].map(src=>new Promise((resolve,reject)=>{
- const img=new Image();img.onload=()=>resolve();img.onerror=reject;img.src=src;
-}))).then(()=>document.documentElement.classList.add("has-clean-pages")).catch(()=>{});
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{color-scheme:dark;--gold:#c6a26b;--paper:#e9dcc1;--ink:#46372a}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 20%,#28231e,#0b0c11 76%);color:#e5d5bd;font-family:"PT Serif",Georgia,serif}
@@ -466,6 +461,23 @@ opacity:.65;pointer-events:none}
  .epilogue-text{font-size:clamp(10px,2.45vw,14px)!important;line-height:1.23!important}
  .epilogue-heading{font-size:26px!important}
 }
+
+/* Uploaded original illustrated pages: force exact artwork, no substitute drawing. */
+.sheet,.sheet.left,.sheet.turn-sheet.backwards{
+ background-image:url("./diary-clean-left.webp")!important;
+ background-color:#eed3a9!important;
+ background-size:100% 100%!important;
+ background-position:center!important;
+ background-repeat:no-repeat!important;
+}
+.sheet.right,.sheet.turn-sheet:not(.backwards){
+ background-image:url("./diary-clean-right.webp")!important;
+ background-color:#eed3a9!important;
+ background-size:100% 100%!important;
+ background-position:center!important;
+ background-repeat:no-repeat!important;
+}
+.sheet:before,.sheet:after{display:none!important}
 </style>
 </head>
 <body>
