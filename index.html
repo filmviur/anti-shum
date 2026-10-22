@@ -5,7 +5,7 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
     >
 
     <title>Анти-Шум</title>
@@ -8461,27 +8461,23 @@
 
 <style id="diary-motion-system">
 /* Quiet journal motion. All effects use opacity/transform; visibility remains controlled by existing application logic. */
-:root{--journal-ease:cubic-bezier(.22,.72,.22,1);--journal-duration:520ms}
-@keyframes journalViewEnter{from{opacity:0;transform:translateY(9px);filter:blur(2px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+:root{--journal-ease:cubic-bezier(.22,.72,.22,1);--journal-duration:850ms}
+@keyframes journalViewEnter{from{opacity:0;transform:perspective(1200px) translateY(8px) rotateY(-1.5deg)}to{opacity:1;transform:perspective(1200px) translateY(0) rotateY(0)}}
 @keyframes journalModalEnter{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes journalBackdropEnter{from{opacity:0}to{opacity:1}}
-@keyframes journalOpenLeft{from{transform:perspective(900px) rotateY(0deg);opacity:1}to{transform:perspective(900px) rotateY(-84deg);opacity:0}}
-@keyframes journalOpenRight{from{transform:perspective(900px) rotateY(0deg);opacity:1}to{transform:perspective(900px) rotateY(84deg);opacity:0}}
-@keyframes journalCloseLeft{from{transform:perspective(900px) rotateY(-84deg);opacity:0}to{transform:perspective(900px) rotateY(0deg);opacity:1}}
-@keyframes journalCloseRight{from{transform:perspective(900px) rotateY(84deg);opacity:0}to{transform:perspective(900px) rotateY(0deg);opacity:1}}
 #authScreen:not(.hidden),#blockedScreen:not(.hidden),#questionView:not(.hidden),#feedView:not(.hidden),#profileView:not(.hidden),#adminView:not(.hidden),#closedView:not(.hidden){
  animation:journalViewEnter var(--journal-duration) var(--journal-ease) both;
 }
 .modal-backdrop:not(.hidden),#timeCapsuleOverlay:not(.hidden){
- animation:journalBackdropEnter 380ms ease-out both;
+ animation:journalBackdropEnter 600ms ease-out both;
 }
 .modal-backdrop:not(.hidden) > .modal,
 #timeCapsuleOverlay:not(.hidden) .capsule-container{
- animation:journalModalEnter 480ms var(--journal-ease) both;
+ animation:journalModalEnter 700ms var(--journal-ease) both;
 }
 .admin-screen .admin-panel:not(.hidden),.admin-screen .admin-section:not(.hidden),
 .auth-panel:not(.hidden),.profile-section:not(.hidden){
- animation:journalViewEnter 400ms var(--journal-ease) both;
+ animation:journalViewEnter 650ms var(--journal-ease) both;
 }
 button,a,.auth-tab,.admin-nav-btn,.back-btn,.secondary-btn{
  transition:background-color 320ms ease,border-color 320ms ease,color 320ms ease,box-shadow 320ms ease,opacity 320ms ease,transform 340ms var(--journal-ease);
@@ -8492,15 +8488,80 @@ button:not(:disabled):active,.auth-tab:active,.admin-nav-btn:active{transform:sc
 }
 input,textarea,select{transition:border-color 300ms ease,box-shadow 300ms ease,background-color 300ms ease}
 input:focus,textarea:focus,select:focus{transition-duration:240ms}
-.journal-curtain{position:fixed;inset:0;z-index:999999;display:flex;pointer-events:none;overflow:hidden;isolation:isolate}
-.journal-curtain-half{width:50%;height:100%;position:relative;background:linear-gradient(115deg,#24160e,#442a18 48%,#1b110c);border:2px solid #79532c;box-shadow:inset 0 0 0 9px #25160e,inset 0 0 0 11px #ac8248,inset 0 0 38px #0008;backface-visibility:hidden}
-.journal-curtain-half::before{content:"❦";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#c49b60;font:clamp(35px,8vw,80px) Georgia,serif;opacity:.75}
-.journal-curtain-half:first-child{transform-origin:left center}
-.journal-curtain-half:last-child{transform-origin:right center}
-.journal-curtain.is-opening .journal-curtain-half:first-child{animation:journalOpenLeft 850ms var(--journal-ease) both}
-.journal-curtain.is-opening .journal-curtain-half:last-child{animation:journalOpenRight 850ms var(--journal-ease) both}
-.journal-curtain.is-closing .journal-curtain-half:first-child{animation:journalCloseLeft 460ms ease-in-out both}
-.journal-curtain.is-closing .journal-curtain-half:last-child{animation:journalCloseRight 460ms ease-in-out both}
+/* A quiet leather journal: settle, open at the spine, then reveal the site. */
+.journal-curtain{
+ --intro-hold:850ms;--intro-turn:2050ms;--intro-reveal:3000ms;--intro-fade:850ms;
+ position:fixed;inset:0;z-index:999999;display:grid;place-items:center;
+ overflow:hidden;isolation:isolate;perspective:1600px;
+ background:radial-gradient(ellipse at 50% 44%,#302217 0%,#17110d 45%,#0d0b09 85%);
+ color:#d6b875;
+}
+.journal-book{
+ position:relative;width:min(310px,66vw,46svh);aspect-ratio:719/995;
+ perspective:1400px;transform-style:preserve-3d;
+ box-shadow:0 22px 60px #0007;
+}
+.journal-paper,.journal-cover,.journal-cover-front,.journal-cover-back{position:absolute;inset:0;border-radius:4px 12px 12px 4px}
+.journal-paper{
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+ padding:14%;text-align:center;color:#765335;
+ background:linear-gradient(90deg,#bba17b,#e5d1ab 7%,#ecddbf 65%,#d8c19a);
+ box-shadow:inset 0 0 0 5px #b59a70,inset 0 0 0 8px #dfcba5,3px 3px 0 #947653;
+}
+.journal-paper::before{content:"";position:absolute;inset:18px;border:1px solid #99794b66;pointer-events:none}
+.journal-paper-mark{font:32px Georgia,serif;opacity:.75}
+.journal-paper-title{font:600 clamp(19px,4vw,29px)/1.2 "Cormorant Garamond",Georgia,serif;letter-spacing:.12em}
+.journal-paper-note{font:italic 15px/1.6 Georgia,serif;color:#816444}
+.journal-cover{transform-origin:left center;transform-style:preserve-3d}
+.journal-cover-front,.journal-cover-back{backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.journal-cover-front{
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+ padding:17%;text-align:center;
+ background:linear-gradient(100deg,#20140e,#50331f 10%,#322014 48%,#3c281b 88%,#21160f);
+ border:1px solid #755132;
+ box-shadow:inset 5px 0 9px #100a08aa,inset 0 0 0 4px #392317,inset 0 0 0 6px #926a37;
+}
+.journal-cover-front::before{
+ content:"";position:absolute;inset:10px;
+ background:url("./book-cover-ornament.svg") center/100% 100% no-repeat;opacity:.72;pointer-events:none;
+}
+.journal-cover-back{
+ transform:rotateY(180deg);background:linear-gradient(90deg,#63432a,#38271b);
+ border:5px double #8b693f;box-shadow:inset 0 0 30px #1e130d88;
+}
+.journal-cover-flourish{font:clamp(28px,6vw,43px) Georgia,serif;color:#b68c4e;line-height:1}
+.journal-cover-title{font:600 clamp(22px,5vw,34px)/1.22 "Cormorant Garamond",Georgia,serif;letter-spacing:.1em;color:#d9b779;text-shadow:0 1px 2px #140d09}
+.journal-cover-rule{width:48%;height:1px;background:linear-gradient(90deg,transparent,#ae844a,transparent)}
+.journal-cover-note{font:italic 14px/1.6 Georgia,serif;color:#af9165}
+.journal-caption{position:absolute;top:calc(50% + min(230px,51vw,34svh));left:20px;right:20px;text-align:center;font:italic 14px/1.6 Georgia,serif;color:#a58a66;letter-spacing:.025em}
+.journal-skip{position:absolute;bottom:max(22px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);min-height:44px;padding:10px 18px;border:0;background:transparent;color:#9d876a;font:13px Georgia,serif;cursor:pointer}
+.journal-skip:focus-visible{outline:1px solid #c9a86a;outline-offset:3px}
+.journal-skip:not(:disabled):active{transform:translateX(-50%)}
+@keyframes journalBookSettle{from{opacity:0;transform:translateY(10px) rotateZ(-1deg)}to{opacity:1;transform:translateY(0) rotateZ(0)}}
+@keyframes journalCoverUnfold{0%{transform:rotateY(0deg)}100%{transform:rotateY(-152deg)}}
+@keyframes journalCoverFold{from{transform:rotateY(-152deg)}to{transform:rotateY(0deg)}}
+@keyframes journalSceneReveal{0%{opacity:1;visibility:visible}100%{opacity:0;visibility:hidden}}
+@keyframes journalSceneGather{from{opacity:0}to{opacity:1}}
+@keyframes journalWordsAppear{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes journalBookBalance{from{transform:translateX(0)}to{transform:translateX(42%)}}
+@keyframes journalBookRecenter{from{transform:translateX(42%)}to{transform:translateX(0)}}
+.journal-curtain.is-opening{animation:journalSceneReveal var(--intro-fade) ease-in-out var(--intro-reveal) both}
+.is-opening .journal-book{animation:journalBookSettle 700ms cubic-bezier(.25,.55,.3,1) both}
+.is-opening .journal-cover{animation:journalCoverUnfold var(--intro-turn) cubic-bezier(.4,.05,.2,1) var(--intro-hold) both}
+.is-opening .journal-paper>span{animation:journalWordsAppear 1000ms ease 1500ms both}
+.is-opening .journal-caption{animation:journalWordsAppear 900ms ease 350ms both}
+.journal-curtain.is-returning{--intro-hold:150ms;--intro-turn:1050ms;--intro-reveal:1200ms;--intro-fade:650ms}
+.is-returning .journal-book{animation-duration:450ms}
+.is-returning .journal-paper>span{animation-delay:450ms;animation-duration:650ms}
+.journal-curtain.is-closing{animation:journalSceneGather 650ms ease both}
+.is-closing .journal-cover{animation:journalCoverFold 1200ms cubic-bezier(.4,.05,.2,1) 150ms both}
+.is-closing .journal-skip{display:none}
+@media(min-width:701px){
+ .is-opening .journal-book{animation:journalBookSettle 700ms cubic-bezier(.25,.55,.3,1) both,journalBookBalance var(--intro-turn) cubic-bezier(.4,.05,.2,1) var(--intro-hold) forwards}
+ .is-closing .journal-book{animation:journalBookRecenter 1200ms cubic-bezier(.4,.05,.2,1) 150ms both}
+}
+@media(max-height:450px){.journal-caption{display:none}.journal-cover-front{gap:10px}.journal-cover-title{font-size:22px}.journal-cover-flourish{font-size:25px}.journal-cover-note{font-size:12px}.journal-paper{gap:10px}.journal-paper-note{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.journal-curtain{display:none!important}}
 @media(prefers-reduced-motion:reduce){
  #authScreen:not(.hidden),#blockedScreen:not(.hidden),#questionView:not(.hidden),#feedView:not(.hidden),#profileView:not(.hidden),#adminView:not(.hidden),#closedView:not(.hidden),
  .modal-backdrop:not(.hidden),.modal-backdrop:not(.hidden)>.modal,#timeCapsuleOverlay:not(.hidden),#timeCapsuleOverlay:not(.hidden) .capsule-container,
@@ -8511,9 +8572,61 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
  .journal-curtain{display:none!important}
 }
 </style>
+
+<script id="journal-window-lifecycle">
+(function () {
+    "use strict";
+    const pending = new WeakMap();
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    window.showJournalWindow = function (element) {
+        const animation = pending.get(element);
+        if (animation) { pending.delete(element); animation.cancel(); }
+        element.classList.remove("hidden");
+    };
+    window.hideJournalWindow = function (element) {
+        if (element.classList.contains("hidden") || pending.has(element)) return;
+        if (reduced.matches || !element.animate) {
+            element.classList.add("hidden");
+            return;
+        }
+        const animation = element.animate(
+            [{ opacity: 1 }, { opacity: 0 }],
+            { duration: 360, easing: "ease-in", fill: "forwards" }
+        );
+        pending.set(element, animation);
+        animation.finished.then(function () {
+            if (pending.get(element) !== animation) return;
+            pending.delete(element);
+            element.classList.add("hidden");
+            animation.cancel();
+        }).catch(function () {});
+    };
+})();
+</script>
 </head>
 
 <body>
+<div id="journalIntro" class="journal-curtain is-opening">
+ <div class="journal-book" aria-hidden="true">
+  <div class="journal-paper">
+   <span class="journal-paper-mark">❦</span>
+   <span class="journal-paper-title">АНТИ-ШУМ</span>
+   <span class="journal-paper-note">20 минут<br>наедине с собой</span>
+  </div>
+  <div class="journal-cover">
+   <div class="journal-cover-front">
+    <span class="journal-cover-flourish">❦</span>
+    <span class="journal-cover-title">АНТИ-ШУМ</span>
+    <span class="journal-cover-rule"></span>
+    <span class="journal-cover-note">Личный дневник</span>
+   </div>
+   <div class="journal-cover-back"></div>
+  </div>
+ </div>
+ <div class="journal-caption" aria-hidden="true">Оставь шум за обложкой</div>
+ <button class="journal-skip" type="button">Пропустить вступление</button>
+</div>
+
 
 <div class="page">
     <div class="container">
@@ -10195,10 +10308,10 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 
     </div>
 
+    </div>
 </section>
 
-
-</section>
+</main>
 
 <!-- CAMERA MODAL -->
 <div
@@ -11696,17 +11809,13 @@ function showNotice(
     noticeText.textContent =
         String(message || "");
 
-    noticeModal.classList.remove(
-        "hidden"
-    );
+    showJournalWindow(noticeModal);
 }
 
 
 function closeNotice() {
 
-    noticeModal.classList.add(
-        "hidden"
-    );
+    hideJournalWindow(noticeModal);
 }
 
 
@@ -13311,8 +13420,7 @@ function updateSendButton() {
         selectedPhotoConfirmed;
 
     sendAnswerBtn.disabled =
-        !hasText &&
-        !hasPhoto;
+        answerSubmitting || (!hasText && !hasPhoto);
 }
 
 
@@ -13383,9 +13491,7 @@ try {
         cameraVideo.srcObject =
             cameraStream;
 
-        cameraModal.classList.remove(
-            "hidden"
-        );
+        showJournalWindow(cameraModal);
 
     } catch (error) {
 
@@ -13480,9 +13586,7 @@ function closeCamera() {
     cameraVideo.srcObject =
         null;
 
-    cameraModal.classList.add(
-        "hidden"
-    );
+    hideJournalWindow(cameraModal);
 }
 
 
@@ -13592,187 +13696,165 @@ sendAnswerBtn.addEventListener(
 );
 
 
-async function submitAnswer() {
-
-    if (!currentUser) {
-        return;
+/* ANSWER DELIVERY MOTION */
+let answerSubmitting = false;
+function createAnswerDelivery(text, hasPhoto, photoSrc) {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const started = performance.now();
+    const overlay = document.createElement("div");
+    overlay.className = "answer-delivery";
+    overlay.innerHTML = '<div class="delivery-page"><div class="delivery-ornament" aria-hidden="true">❦</div><div class="delivery-preview" aria-hidden="true"></div><div class="delivery-seal" aria-hidden="true"><span class="delivery-pen">✎</span><svg class="delivery-check" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21"/><path d="M14 24l7 7 14-15"/></svg></div><div role="status" aria-live="polite" aria-atomic="true"><div class="delivery-title"></div><div class="delivery-hint"></div></div></div>';
+    const page = overlay.querySelector(".delivery-page");
+    const title = overlay.querySelector(".delivery-title");
+    const hint = overlay.querySelector(".delivery-hint");
+    const preview = overlay.querySelector(".delivery-preview");
+    if (hasPhoto && photoSrc) {
+        const image = document.createElement("img");
+        image.src = photoSrc;
+        image.alt = "";
+        image.decoding = "async";
+        preview.appendChild(image);
     }
-
-   if (!currentQuestionId) {
-    return;
-}
-
-// Проверяем единое время записи по Киеву.
-const sessionEnd = getTodaySessionEnd();
-
-const sessionStart =
-    sessionEnd - 20 * 60 * 1000;
-
-const currentTime = Date.now();
-
-if (
-    currentTime < sessionStart ||
-    currentTime >= sessionEnd
-) {
-    showNotice(
-        "Дневник открыт только с 20:00 до 20:20 по Киеву."
-    );
-
-    return;
-}
-
-const text =
-    answerInput.value.trim();
-    const hasPhoto =
-        selectedPhotoFile &&
-        selectedPhotoConfirmed;
-
-    if (!text && !hasPhoto) {
-        return;
+    if (text) {
+        const quote = document.createElement("blockquote");
+        quote.textContent = text;
+        preview.appendChild(quote);
     }
-
-   if (text.length > MAX_ANSWER_LENGTH) {
-
-    showNotice(
-        `Максимум ${MAX_ANSWER_LENGTH} символов.`
-    );
-
-    return;
-}
-
-sendAnswerBtn.disabled =
-    true;
-
-try {
-
-        /*
-            Повторно проверяем, нет ли уже ответа.
-            Это защищает от двойного клика/двух вкладок.
-        */
-
-        const existingAnswer =
-            await getOwnAnswerForQuestion(
-                currentQuestionId
-            );
-
-        if (existingAnswer) {
-
-            currentAnswer =
-                existingAnswer;
-
-            const endAt = getTodaySessionEnd();
-
-            if (Date.now() < endAt) {
-
-                sessionEndsAt =
-                    endAt;
-
-                await openFeed();
-
-            } else {
-
-                await finishSession();
+    const previousOverflow = document.body.style.overflow;
+    const content = document.querySelector(".page");
+    const wasInert = content?.inert;
+    if (content) content.inert = true;
+    document.body.style.overflow = "hidden";
+    const wait = ms => reduced.matches ? Promise.resolve() : new Promise(resolve => setTimeout(resolve, ms));
+    async function animate(element, frames, duration) {
+        if (reduced.matches || !element.animate) return;
+        try {
+            const animation = element.animate(frames, { duration, easing: "cubic-bezier(.22,.72,.22,1)", fill: "forwards" });
+            await animation.finished.catch(() => {});
+        } catch (_) { /* Animation support must never interrupt saving. */ }
+    }
+    function setStep(message, detail) { title.textContent = message; hint.textContent = detail; }
+    setStep(hasPhoto ? "Готовим твою запись…" : "Сохраняем твою мысль…", "Бережно переносим её на страницу дневника");
+    document.body.appendChild(overlay);
+    // Visual feedback never decides whether a record was saved.
+    animate(overlay, [{ opacity: 0 }, { opacity: 1 }], 450).catch(() => {});
+    animate(page, [{ opacity: 0, transform: "translateY(15px) rotate(-1deg)" }, { opacity: 1, transform: "none" }], 650).catch(() => {});
+    let closed = false;
+    return {
+        setStep,
+        async saved(alreadySaved = false) {
+            if (alreadySaved) { preview.replaceChildren(); preview.hidden = true; }
+            await wait(Math.max(0, 550 - (performance.now() - started)));
+            setStep(alreadySaved ? "Твоя запись уже в дневнике" : hasPhoto && text ? "Запись сохранена" : hasPhoto ? "Фотография сохранена" : "Твоя мысль сохранена", "Открываем ленту ответов…");
+            overlay.classList.add("is-saved");
+            await wait(1200);
+        },
+        async revealFeed() {
+            if (!feedView.classList.contains("hidden")) {
+                feedView.querySelectorAll(".answer-card").forEach((card, i) => card.style.setProperty("--arrival-order", Math.min(i, 6)));
+                feedView.classList.add("feed-arriving");
+                setTimeout(() => feedView.classList.remove("feed-arriving"), 1500);
             }
+            await Promise.all([
+                animate(page, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-14px) scale(.98)" }], 650),
+                animate(overlay, [{ opacity: 1 }, { opacity: 0 }], 850)
+            ]);
+            this.close();
+            if (!feedView.classList.contains("hidden")) {
+                feedView.tabIndex = -1;
+                feedView.focus({ preventScroll: true });
+            }
+        },
+        close() {
+            if (closed) return;
+            closed = true;
+            (overlay.getAnimations?.({ subtree: true }) || []).forEach(animation => animation.cancel());
+            overlay.remove();
+            document.body.style.overflow = previousOverflow;
+            if (content) content.inert = wasInert;
+        }
+    };
+}
+/* ANSWER DELIVERY MOTION END */
 
+async function submitAnswer() {
+    if (answerSubmitting || !currentUser || !currentQuestionId) return;
+    const sessionEnd = getTodaySessionEnd();
+    const now = Date.now();
+    if (now < sessionEnd - 20 * 60 * 1000 || now >= sessionEnd) {
+        showNotice("Дневник открыт только с 20:00 до 20:20 по Киеву.");
+        return;
+    }
+    const text = answerInput.value.trim();
+    const hasPhoto = !!(selectedPhotoFile && selectedPhotoConfirmed);
+    if (!text && !hasPhoto) return;
+    if (text.length > MAX_ANSWER_LENGTH) {
+        showNotice(`Максимум ${MAX_ANSWER_LENGTH} символов.`);
+        return;
+    }
+    answerSubmitting = true;
+    const controls = [sendAnswerBtn, cameraBtn, galleryBtn, galleryInput, retakePhotoBtn, confirmPhotoBtn];
+    const previousControls = controls.map(element => [element, element.disabled]);
+    const previousReadOnly = answerInput.readOnly;
+    const previousLabel = sendAnswerBtn.textContent;
+    const previousBusy = questionView.getAttribute("aria-busy");
+    controls.forEach(element => { element.disabled = true; });
+    answerInput.readOnly = true;
+    answerInput.blur();
+    questionView.setAttribute("aria-busy", "true");
+    sendAnswerBtn.textContent = hasPhoto ? "Сохраняем запись…" : "Сохраняем мысль…";
+    let delivery = null;
+    let saved = false;
+    try {
+        delivery = createAnswerDelivery(text, hasPhoto, selectedPhotoPreviewUrl);
+        const existingAnswer = await getOwnAnswerForQuestion(currentQuestionId);
+        if (existingAnswer) {
+            currentAnswer = existingAnswer;
+            saved = true;
+            sessionEndsAt = getTodaySessionEnd();
+            await delivery.saved(true);
+            if (Date.now() < sessionEndsAt) await openFeed();
+            else await finishSession();
+            await delivery.revealFeed();
             return;
         }
-
-
-        let photoPath =
-            null;
-
-
-        /*
-            Фото загружаем только после
-            окончательного нажатия "Отправить".
-        */
-
+        let photoPath = null;
         if (hasPhoto) {
-
-            photoPath =
-                await uploadAnswerPhoto(
-                    selectedPhotoFile
-                );
+            delivery.setStep("Прикрепляем фотографию…", "После загрузки сохраним запись в дневнике");
+            photoPath = await uploadAnswerPhoto(selectedPhotoFile);
+            delivery.setStep("Сохраняем твою запись…", "Фотография загружена. Добавляем запись на страницу");
         }
-
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .from("answers")
-                .insert({
-                    question_id:
-                        currentQuestionId,
-
-                    user_id:
-                        currentUser.id,
-
-                    answer_text:
-                        text,
-
-                    photo_url:
-                        photoPath,
-
-                    is_anonymous:
-                        false,
-
-                    reports_count:
-                        0,
-
-                    is_hidden:
-                        false
-                })
-                .select("*")
-                .single();
-
+        const { data, error } = await supabaseClient.from("answers").insert({
+            question_id: currentQuestionId,
+            user_id: currentUser.id,
+            answer_text: text,
+            photo_url: photoPath,
+            is_anonymous: false,
+            reports_count: 0,
+            is_hidden: false
+        }).select("*").single();
         if (error) {
-
-            /*
-                Если запись не создалась,
-                загруженное фото лучше удалить.
-            */
-
-            if (photoPath) {
-                await deleteAnswerPhoto(
-                    photoPath
-                );
-            }
-
+            if (photoPath) await deleteAnswerPhoto(photoPath);
             throw error;
         }
-
-
-        currentAnswer =
-            data;
-
-
-        /*
-    Время закрытия общее для всех:
-    20:20 по киевскому времени.
-*/
-
-sessionEndsAt = getTodaySessionEnd();
-
-
+        currentAnswer = data;
+        saved = true;
+        sessionEndsAt = getTodaySessionEnd();
+        await delivery.saved();
         await openFeed();
-
+        await delivery.revealFeed();
     } catch (error) {
-
-        console.error(
-            "Submit answer error:",
-            error
-        );
-
-       showNotice(
-    "Не удалось сохранить ответ.\n\n" +
-    (
-        error?.message ||
-        "Попробуй ещё раз."
-    )
-);
-
+        console.error("Submit answer error:", error);
+        delivery?.close();
+        showNotice((saved ? "Ответ сохранён, но не удалось открыть ленту.\n\n" : "Не удалось сохранить ответ. Твой ответ остался на месте.\n\n") + (error?.message || "Попробуй ещё раз."));
+    } finally {
+        delivery?.close();
+        answerSubmitting = false;
+        previousControls.forEach(([element, disabled]) => { element.disabled = disabled; });
+        answerInput.readOnly = previousReadOnly;
+        sendAnswerBtn.textContent = previousLabel;
+        if (previousBusy === null) questionView.removeAttribute("aria-busy");
+        else questionView.setAttribute("aria-busy", previousBusy);
         updateSendButton();
     }
 }
@@ -14692,6 +14774,8 @@ async function createSignedPhoto(path) {
 
         image.className =
             "answer-photo";
+        image.loading = "lazy";
+        image.decoding = "async";
 
         image.src =
             data.signedUrl;
@@ -16423,9 +16507,7 @@ avatarInput.addEventListener(
                 updateAvatarCrop();
 
 
-                avatarCropModal.classList.remove(
-                    "hidden"
-                );
+                showJournalWindow(avatarCropModal);
             };
 
 
@@ -16669,9 +16751,7 @@ cancelAvatarCropBtn.addEventListener(
 
 function closeAvatarCrop() {
 
-    avatarCropModal.classList.add(
-        "hidden"
-    );
+    hideJournalWindow(avatarCropModal);
 
     avatarSelectedFile =
         null;
@@ -17024,9 +17104,7 @@ confirmDeleteAvatarBtn.addEventListener(
                 null;
 
 
-            deleteAvatarModal.classList.add(
-                "hidden"
-            );
+            hideJournalWindow(deleteAvatarModal);
 
 
             await loadProfile();
@@ -17072,9 +17150,7 @@ editProfileBtn.addEventListener(
             !currentAvatarUrl
         );
 
-        editProfileModal.classList.remove(
-            "hidden"
-        );
+        showJournalWindow(editProfileModal);
     }
 );
 
@@ -17082,9 +17158,7 @@ closeEditProfileBtn.addEventListener(
     "click",
     function() {
 
-        editProfileModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(editProfileModal);
     }
 );
 
@@ -17097,9 +17171,7 @@ editProfileModal.addEventListener(
             event.target ===
             editProfileModal
         ) {
-            editProfileModal.classList.add(
-                "hidden"
-            );
+            hideJournalWindow(editProfileModal);
         }
     }
 );
@@ -17109,9 +17181,7 @@ editAvatarMenuBtn.addEventListener(
     "click",
     function() {
 
-        editProfileModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(editProfileModal);
 
         changeAvatarBtn.click();
     }
@@ -17121,13 +17191,9 @@ deleteAvatarMenuBtn.addEventListener(
     "click",
     function() {
 
-        editProfileModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(editProfileModal);
 
-        deleteAvatarModal.classList.remove(
-            "hidden"
-        );
+        showJournalWindow(deleteAvatarModal);
     }
 );
 
@@ -17136,9 +17202,7 @@ cancelDeleteAvatarBtn.addEventListener(
     "click",
     function() {
 
-        deleteAvatarModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(deleteAvatarModal);
     }
 );
 
@@ -17152,9 +17216,7 @@ deleteAvatarModal.addEventListener(
             deleteAvatarModal
         ) {
 
-            deleteAvatarModal.classList.add(
-                "hidden"
-            );
+            hideJournalWindow(deleteAvatarModal);
         }
     }
 );
@@ -17163,9 +17225,7 @@ editNameMenuBtn.addEventListener(
     "click",
     function() {
 
-        editProfileModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(editProfileModal);
 
         changeNameBtn.click();
     }
@@ -17176,9 +17236,7 @@ editEmailMenuBtn.addEventListener(
     "click",
     function() {
 
-        editProfileModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(editProfileModal);
 
         changeEmailBtn.click();
     }
@@ -17189,9 +17247,7 @@ editPasswordMenuBtn.addEventListener(
     "click",
     function() {
 
-        editProfileModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(editProfileModal);
 
         changePasswordBtn.click();
     }
@@ -17208,9 +17264,7 @@ changeNameBtn.addEventListener(
         newNameInput.value =
             profileName.textContent;
 
-        nameModal.classList.remove(
-            "hidden"
-        );
+        showJournalWindow(nameModal);
     }
 );
 
@@ -17219,9 +17273,7 @@ cancelNameBtn.addEventListener(
     "click",
     function() {
 
-        nameModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(nameModal);
     }
 );
 
@@ -17270,9 +17322,7 @@ saveNameBtn.addEventListener(
             });
 
 
-            nameModal.classList.add(
-                "hidden"
-            );
+            hideJournalWindow(nameModal);
 
             await loadProfile();
 
@@ -17303,9 +17353,7 @@ changeEmailBtn.addEventListener(
         newEmailInput.value =
             currentUser?.email || "";
 
-        emailModal.classList.remove(
-            "hidden"
-        );
+        showJournalWindow(emailModal);
 
         setTimeout(
             function() {
@@ -17322,9 +17370,7 @@ cancelEmailBtn.addEventListener(
     "click",
     function() {
 
-        emailModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(emailModal);
 
         newEmailInput.value = "";
     }
@@ -17401,9 +17447,7 @@ saveEmailBtn.addEventListener(
             }
 
 
-            emailModal.classList.add(
-                "hidden"
-            );
+            hideJournalWindow(emailModal);
 
             newEmailInput.value = "";
 
@@ -17469,9 +17513,7 @@ changePasswordBtn.addEventListener(
         newPasswordInput.value = "";
         confirmPasswordInput.value = "";
 
-        passwordModal.classList.remove(
-            "hidden"
-        );
+        showJournalWindow(passwordModal);
 
         setTimeout(
             function() {
@@ -17487,9 +17529,7 @@ cancelPasswordBtn.addEventListener(
     "click",
     function() {
 
-        passwordModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(passwordModal);
 
         newPasswordInput.value = "";
         confirmPasswordInput.value = "";
@@ -17580,9 +17620,7 @@ savePasswordBtn.addEventListener(
             }
 
 
-            passwordModal.classList.add(
-                "hidden"
-            );
+            hideJournalWindow(passwordModal);
 
             newPasswordInput.value = "";
             confirmPasswordInput.value = "";
@@ -17650,9 +17688,7 @@ logoutBtn.addEventListener(
     "click",
     function() {
 
-        logoutModal.classList.remove(
-            "hidden"
-        );
+        showJournalWindow(logoutModal);
     }
 );
 
@@ -17661,9 +17697,7 @@ cancelLogoutBtn.addEventListener(
     "click",
     function() {
 
-        logoutModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(logoutModal);
     }
 );
 
@@ -17682,6 +17716,7 @@ confirmLogoutBtn.addEventListener(
 
             clearTimers();
 
+            await window.closeJournal();
 
             const {
                 error
@@ -17694,12 +17729,12 @@ confirmLogoutBtn.addEventListener(
             }
 
 
-            logoutModal.classList.add(
-                "hidden"
-            );
+            hideJournalWindow(logoutModal);
+            window.openJournal();
 
         } catch (error) {
 
+            window.openJournal();
             console.error(
                 "Logout error:",
                 error
@@ -17730,9 +17765,7 @@ function openReport(answerId) {
     currentReportAnswerId =
         answerId;
 
-    reportModal.classList.remove(
-        "hidden"
-    );
+    showJournalWindow(reportModal);
 }
 
 
@@ -17743,9 +17776,7 @@ closeReportBtn.addEventListener(
         currentReportAnswerId =
             null;
 
-        reportModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(reportModal);
     }
 );
 
@@ -17791,9 +17822,7 @@ document
                             throw error;
                         }
 
-                        reportModal.classList.add(
-                            "hidden"
-                        );
+                        hideJournalWindow(reportModal);
 
                         showNotice(
                             "Жалоба отправлена."
@@ -19808,7 +19837,7 @@ supportBtn.addEventListener(
     "click",
     async function() {
 
-        supportModal.classList.remove("hidden");
+        showJournalWindow(supportModal);
 
         await loadSupportMessages();
 
@@ -19886,7 +19915,7 @@ if (guestSupportBtn) {
 
                 if (!isGuestSession(session)) {
 
-                   supportModal.classList.remove("hidden");
+                   showJournalWindow(supportModal);
 
 await loadSupportMessages();
 startSupportRealtime();
@@ -19941,7 +19970,7 @@ return;
 
                 
               // Открываем существующее окно поддержки.
-              supportModal.classList.remove("hidden");
+              showJournalWindow(supportModal);
 
               await loadSupportMessages();
               startSupportRealtime();
@@ -19988,7 +20017,7 @@ const sendSupportBtn =
 */
 
 closeSupportBtn.addEventListener("click", function() {
-    supportModal.classList.add("hidden");
+    hideJournalWindow(supportModal);
 });
 
 
@@ -20279,7 +20308,7 @@ async function openAnnouncementsModal() {
         return;
     }
 
-    announcementsModal.classList.remove("hidden");
+    showJournalWindow(announcementsModal);
 
     userAnnouncementsList.textContent =
         "Загрузка объявлений...";
@@ -20413,7 +20442,7 @@ if (closeAnnouncementsBtn && announcementsModal) {
         "click",
         function() {
 
-            announcementsModal.classList.add("hidden");
+            hideJournalWindow(announcementsModal);
 
         }
     );
@@ -21489,12 +21518,12 @@ restoreSession();
 
     function closeCapsule() {
         requestNumber++;
-        overlay.classList.add("hidden");
+        hideJournalWindow(overlay);
         document.body.style.overflow = "";
     }
 
     openBtn.addEventListener("click", function () {
-        overlay.classList.remove("hidden");
+        showJournalWindow(overlay);
         document.body.style.overflow = "hidden";
         overlay.scrollTop = 0;
         updateTree();
@@ -21504,37 +21533,206 @@ restoreSession();
 </script>
 
 
+
+<style id="answer-delivery-style">
+.answer-delivery{
+ position:fixed;inset-inline:0;top:var(--visible-viewport-top,0px);
+ height:100vh;height:var(--visible-viewport-height,100dvh);z-index:20000;
+ display:flex;align-items:center;justify-content:center;overflow-y:auto;overscroll-behavior:contain;
+ padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+ background:rgba(13,10,8,.88);color:#563b25;
+}
+.delivery-page{
+ width:min(380px,100%);max-height:100%;overflow-y:auto;flex-shrink:0;
+ padding:30px 26px 27px;text-align:center;border:1px solid #a6814f;border-radius:4px 11px 11px 4px;
+ background:linear-gradient(110deg,#cbb18a,#ecddbf 12%,#e7d4b1 88%,#c4a57a);
+ box-shadow:inset 0 0 0 6px #dac39e,inset 0 0 0 7px #a9885766,0 22px 55px #0007;
+}
+.delivery-ornament{font:26px Georgia,serif;color:#92703d;line-height:1;margin-bottom:14px}
+.delivery-preview{max-width:100%;margin:0 0 18px;transform-origin:center bottom;transition:transform 950ms cubic-bezier(.3,.1,.2,1),opacity 950ms ease}
+.delivery-preview img{display:block;width:auto;max-width:70%;max-height:130px;object-fit:contain;margin:0 auto 14px;padding:6px 6px 15px;background:#f4ead6;box-shadow:1px 4px 9px #5a3b2744;transform:rotate(-3deg)}
+.delivery-preview blockquote{margin:0;font:italic 16px/1.5 Georgia,serif;white-space:pre-wrap;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;color:#705036}
+.delivery-seal{position:relative;width:48px;height:48px;margin:0 auto 14px;color:#8c6838}
+.delivery-pen{position:absolute;inset:0;display:grid;place-items:center;font:34px Georgia,serif;animation:deliveryWriting 2400ms ease-in-out infinite}
+.delivery-check{width:48px;height:48px;opacity:0}
+.delivery-check circle{fill:none;stroke:currentColor;stroke-width:1;opacity:.65}
+.delivery-check path{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:35;stroke-dashoffset:35}
+.delivery-title{font:600 clamp(23px,5vw,29px)/1.2 "Cormorant Garamond",Georgia,serif;color:#604020;margin-bottom:9px;overflow-wrap:anywhere}
+.delivery-hint{font:14px/1.6 Georgia,serif;color:#806345;overflow-wrap:anywhere}
+.answer-delivery.is-saved .delivery-preview{transform:translateY(-4px) scale(.96);opacity:.8}
+.is-saved .delivery-pen{opacity:0;animation:none;transition:opacity 350ms ease}
+.is-saved .delivery-check{opacity:1;transition:opacity 500ms ease}
+.is-saved .delivery-check path{animation:deliveryCheckDraw 750ms ease 150ms forwards}
+@keyframes deliveryWriting{0%,100%{transform:translateX(-3px) rotate(-8deg)}50%{transform:translateX(4px) rotate(6deg)}}
+@keyframes deliveryCheckDraw{to{stroke-dashoffset:0}}
+@keyframes deliveryFeedArrival{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+#feedView.feed-arriving .answer-card{animation:deliveryFeedArrival 850ms cubic-bezier(.22,.72,.22,1) both;animation-delay:calc(var(--arrival-order,0) * 70ms)}
+@media(max-height:480px){.delivery-page{padding:20px}.delivery-ornament{display:none}.delivery-preview img{max-height:65px;margin-bottom:8px}.delivery-preview blockquote{-webkit-line-clamp:2}.delivery-preview{margin-bottom:12px}.delivery-seal{margin-bottom:8px}}
+@media(prefers-reduced-motion:reduce){
+ .delivery-preview,.delivery-pen,.delivery-check{animation:none!important;transition:none!important;transform:none!important}
+ .is-saved .delivery-check path{animation:none;stroke-dashoffset:0}
+ #feedView.feed-arriving .answer-card{animation:none}
+}
+</style>
+<style id="mobile-usability">
+/* Phone and tablet usability; retain the journal's existing artwork and palette. */
+.profile-name,.profile-email,.answer-author-name{min-width:0;overflow-wrap:anywhere}
+.answer-author{min-width:0}
+@supports(height:100dvh){body,.page{min-height:100dvh}}
+#closedView{
+ width:100%;height:100vh;height:100dvh;min-height:0;
+ flex-direction:column;justify-content:flex-start;
+ padding-top:max(88px,calc(env(safe-area-inset-top) + 72px));
+ padding-bottom:max(24px,env(safe-area-inset-bottom));
+}
+#closedView .closed-card{flex-shrink:0;margin-block:auto}
+.modal-backdrop{
+ top:var(--visible-viewport-top,0px);bottom:auto;
+ height:100vh;height:var(--visible-viewport-height,100dvh);
+ overflow-y:auto;overscroll-behavior:contain;
+ padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
+}
+.modal-backdrop .modal{
+ flex-shrink:0;
+ max-height:calc(100vh - 24px);
+ max-height:calc(var(--visible-viewport-height,100dvh) - max(12px,env(safe-area-inset-top)) - max(12px,env(safe-area-inset-bottom)))!important;
+}
+@media(max-width:900px),(pointer:coarse){
+ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),textarea,select{font-size:16px!important;scroll-margin-block:24px}
+ button,a.secondary-btn{min-height:44px;min-width:44px;touch-action:manipulation}
+ .reaction-btn,.admin-moderation-filter,.avatar-zoom-range{min-height:44px}
+ .profile-header .profile-edit-btn{flex-basis:44px;width:44px;height:44px}
+ .profile-header .profile-admin,.profile-header .profile-logout,.profile-header .back-btn{min-height:44px}
+ .capsule-month-nav button{width:44px;height:44px;flex-shrink:0}
+ .capsule-day-grid{grid-template-columns:repeat(auto-fit,minmax(44px,1fr))}
+ #appScreen .app-global-actions{position:relative;top:auto;right:auto;justify-content:flex-end;margin-bottom:14px}
+ .icon-btn{width:44px;height:44px}
+ .page{padding-top:max(16px,env(safe-area-inset-top));padding-right:max(12px,env(safe-area-inset-right));padding-bottom:max(30px,env(safe-area-inset-bottom));padding-left:max(12px,env(safe-area-inset-left))}
+ .capsule-overlay{padding-top:max(16px,env(safe-area-inset-top));padding-right:max(10px,env(safe-area-inset-right));padding-bottom:max(32px,env(safe-area-inset-bottom));padding-left:max(10px,env(safe-area-inset-left))}
+ .auth-screen,.blocked-screen{min-height:calc(100svh - 46px)}
+ .profile-header-actions{min-width:0;flex-wrap:wrap}
+}
+@media(max-width:380px){
+ .capsule-day-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+ .profile-header .profile-header-actions{flex-wrap:wrap}
+}
+</style>
+<script id="mobile-viewport">
+(function () {
+    // Safari's visual viewport shrinks when the keyboard opens, independently
+    // of the layout viewport. Keep modal controls within that visible area.
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    let frame;
+    function update() {
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(function () {
+            // Do not counteract the user's pinch zoom.
+            if (Math.abs(viewport.scale - 1) > 0.01) return;
+            document.documentElement.style.setProperty("--visible-viewport-height", viewport.height + "px");
+            document.documentElement.style.setProperty("--visible-viewport-top", viewport.offsetTop + "px");
+        });
+    }
+    viewport.addEventListener("resize", update, { passive: true });
+    viewport.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("pageshow", update);
+    update();
+})();
+</script>
 <script id="diary-motion-controller">
-(function(){
+(function () {
  "use strict";
- if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
- const curtain=document.createElement("div");
- curtain.className="journal-curtain";
- curtain.setAttribute("aria-hidden","true");
- curtain.innerHTML='<div class="journal-curtain-half"></div><div class="journal-curtain-half"></div>';
- document.body.appendChild(curtain);
- // Start immediately, never block the site's controls or data loading.
- requestAnimationFrame(()=>{curtain.classList.add("is-opening")});
- setTimeout(()=>{if(curtain.isConnected&&!curtain.classList.contains("is-closing"))curtain.remove()},1150);
- // A browser tab/app termination cannot be intercepted reliably.
- // Only animate genuine internal link navigation; do not delay external links or downloads.
- document.addEventListener("click",function(event){
-  const link=event.target.closest("a[href]");
-  if(!link||event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
-  if(link.hasAttribute("download")||link.target==="_blank")return;
+ const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+ const scene = document.getElementById("journalIntro");
+ if (!scene) return;
+ const navigationKey = "antiShumJournalNavigation";
+ const skip = scene.querySelector(".journal-skip");
+ let fallback, closingTimer, closeResolve;
+ let navigating = false, played = false;
+ const suspended = new Map();
+ function releaseContent() {
+  suspended.forEach(function (wasInert, element) { element.inert = wasInert; });
+  suspended.clear();
+ }
+ function suspendContent() {
+  for (const element of document.body.children) {
+   if (element === scene || /^(SCRIPT|STYLE|LINK)$/.test(element.tagName)) continue;
+   if (!suspended.has(element)) suspended.set(element, element.inert);
+   element.inert = true;
+  }
+ }
+ function finishOpening() {
+  clearTimeout(fallback);
+  const hadFocus = scene.contains(document.activeElement);
+  scene.remove();
+  releaseContent();
+  if (hadFocus) document.querySelector("#emailInput, header a, button:not(:disabled)")?.focus({ preventScroll: true });
+ }
+ function settleClosing() {
+  clearTimeout(closingTimer);
+  if (closeResolve) { const resolve = closeResolve; closeResolve = null; resolve(); }
+ }
+ window.openJournal = function (options) {
+  settleClosing();
+  clearTimeout(fallback);
+  if (reduced.matches) { finishOpening(); played = true; return; }
+  const returning = played || options?.returning;
+  if (!scene.isConnected) document.body.appendChild(scene);
+  // The initial scene is already in the first HTML paint. Do not restart it.
+  if (played || returning) {
+   scene.className = "journal-curtain";
+   void scene.offsetWidth;
+   scene.className = "journal-curtain is-opening" + (returning ? " is-returning" : "");
+  }
+  suspendContent();
+  played = true;
+  fallback = setTimeout(finishOpening, returning ? 2100 : 4200);
+ };
+ window.closeJournal = function () {
+  if (closeResolve) return new Promise(function (resolve) {
+   const previous = closeResolve;
+   closeResolve = function () { previous(); resolve(); };
+  });
+  clearTimeout(fallback);
+  if (reduced.matches) { finishOpening(); return Promise.resolve(); }
+  if (!scene.isConnected) document.body.appendChild(scene);
+  scene.className = "journal-curtain is-closing";
+  suspendContent();
+  return new Promise(function (resolve) { closeResolve = resolve; closingTimer = setTimeout(settleClosing, 1450); });
+ };
+ scene.addEventListener("animationend", function (event) {
+  if (event.target === scene && event.animationName === "journalSceneReveal" && scene.classList.contains("is-opening")) finishOpening();
+ });
+ skip.addEventListener("click", finishOpening);
+ let internalArrival = false;
+ try {
+  internalArrival = Date.now() - Number(sessionStorage.getItem(navigationKey) || 0) < 10000;
+  sessionStorage.removeItem(navigationKey);
+ } catch (_) {}
+ window.openJournal({ returning: internalArrival });
+ document.addEventListener("click", function (event) {
+  const link = event.target instanceof Element ? event.target.closest("a[href]") : null;
+  if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  if (link.hasAttribute("download") || (link.target && link.target !== "_self")) return;
   let url;
-  try{url=new URL(link.href,location.href)}catch(_){return}
-  if(url.origin!==location.origin||url.pathname===location.pathname&&url.search===location.search)return;
-  if(!/\.html$|\/$/.test(url.pathname))return;
+  try { url = new URL(link.href, location.href); } catch (_) { return; }
+  if (url.origin !== location.origin || (url.pathname === location.pathname && url.search === location.search) || !/\.html$|\/$/.test(url.pathname)) return;
   event.preventDefault();
-  if(!curtain.isConnected)document.body.appendChild(curtain);
-  curtain.className="journal-curtain is-closing";
-  setTimeout(()=>{location.assign(url.href)},480);
- },true);
- window.addEventListener("pageshow",function(e){
-  if(e.persisted){curtain.remove()}
+  if (navigating) return;
+  navigating = true;
+  window.closeJournal().then(function () {
+   try { sessionStorage.setItem(navigationKey, String(Date.now())); } catch (_) {}
+   location.assign(url.href);
+  });
+ });
+ window.addEventListener("pageshow", function (event) {
+  if (event.persisted) { navigating = false; window.openJournal({ returning: true }); }
+ });
+ reduced.addEventListener("change", function () {
+  if (reduced.matches) { finishOpening(); settleClosing(); }
  });
 })();
 </script>
 </body>
 </html>
+
