@@ -8462,7 +8462,7 @@
 <style id="diary-motion-system">
 /* Quiet journal motion. All effects use opacity/transform; visibility remains controlled by existing application logic. */
 :root{--journal-ease:cubic-bezier(.22,.72,.22,1);--journal-duration:520ms}
-@keyframes journalViewEnter{from{opacity:0;transform:translateY(9px);filter:blur(2px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+@keyframes journalViewEnter{from{opacity:0;transform:perspective(1200px) translateY(8px) rotateY(-1.5deg)}to{opacity:1;transform:perspective(1200px) translateY(0) rotateY(0)}}
 @keyframes journalModalEnter{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes journalBackdropEnter{from{opacity:0}to{opacity:1}}
 @keyframes journalOpenLeft{from{transform:perspective(900px) rotateY(0deg);opacity:1}to{transform:perspective(900px) rotateY(-84deg);opacity:0}}
@@ -8511,6 +8511,37 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
  .journal-curtain{display:none!important}
 }
 </style>
+
+<script id="journal-window-lifecycle">
+(function () {
+    "use strict";
+    const pending = new WeakMap();
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    window.showJournalWindow = function (element) {
+        const animation = pending.get(element);
+        if (animation) { pending.delete(element); animation.cancel(); }
+        element.classList.remove("hidden");
+    };
+    window.hideJournalWindow = function (element) {
+        if (element.classList.contains("hidden") || pending.has(element)) return;
+        if (reduced.matches || !element.animate) {
+            element.classList.add("hidden");
+            return;
+        }
+        const animation = element.animate(
+            [{ opacity: 1 }, { opacity: 0 }],
+            { duration: 220, easing: "ease-in", fill: "forwards" }
+        );
+        pending.set(element, animation);
+        animation.finished.then(function () {
+            if (pending.get(element) !== animation) return;
+            pending.delete(element);
+            element.classList.add("hidden");
+            animation.cancel();
+        }).catch(function () {});
+    };
+})();
+</script>
 </head>
 
 <body>
@@ -11696,17 +11727,13 @@ function showNotice(
     noticeText.textContent =
         String(message || "");
 
-    noticeModal.classList.remove(
-        "hidden"
-    );
+    showJournalWindow(noticeModal);
 }
 
 
 function closeNotice() {
 
-    noticeModal.classList.add(
-        "hidden"
-    );
+    hideJournalWindow(noticeModal);
 }
 
 
@@ -13383,9 +13410,7 @@ try {
         cameraVideo.srcObject =
             cameraStream;
 
-        cameraModal.classList.remove(
-            "hidden"
-        );
+        showJournalWindow(cameraModal);
 
     } catch (error) {
 
@@ -13480,9 +13505,7 @@ function closeCamera() {
     cameraVideo.srcObject =
         null;
 
-    cameraModal.classList.add(
-        "hidden"
-    );
+    hideJournalWindow(cameraModal);
 }
 
 
@@ -16423,9 +16446,7 @@ avatarInput.addEventListener(
                 updateAvatarCrop();
 
 
-                avatarCropModal.classList.remove(
-                    "hidden"
-                );
+                showJournalWindow(avatarCropModal);
             };
 
 
@@ -16669,9 +16690,7 @@ cancelAvatarCropBtn.addEventListener(
 
 function closeAvatarCrop() {
 
-    avatarCropModal.classList.add(
-        "hidden"
-    );
+    hideJournalWindow(avatarCropModal);
 
     avatarSelectedFile =
         null;
@@ -17024,9 +17043,7 @@ confirmDeleteAvatarBtn.addEventListener(
                 null;
 
 
-            deleteAvatarModal.classList.add(
-                "hidden"
-            );
+            hideJournalWindow(deleteAvatarModal);
 
 
             await loadProfile();
@@ -17072,9 +17089,7 @@ editProfileBtn.addEventListener(
             !currentAvatarUrl
         );
 
-        editProfileModal.classList.remove(
-            "hidden"
-        );
+        showJournalWindow(editProfileModal);
     }
 );
 
@@ -17082,9 +17097,7 @@ closeEditProfileBtn.addEventListener(
     "click",
     function() {
 
-        editProfileModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(editProfileModal);
     }
 );
 
@@ -17097,9 +17110,7 @@ editProfileModal.addEventListener(
             event.target ===
             editProfileModal
         ) {
-            editProfileModal.classList.add(
-                "hidden"
-            );
+            hideJournalWindow(editProfileModal);
         }
     }
 );
@@ -17109,9 +17120,7 @@ editAvatarMenuBtn.addEventListener(
     "click",
     function() {
 
-        editProfileModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(editProfileModal);
 
         changeAvatarBtn.click();
     }
@@ -17121,13 +17130,9 @@ deleteAvatarMenuBtn.addEventListener(
     "click",
     function() {
 
-        editProfileModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(editProfileModal);
 
-        deleteAvatarModal.classList.remove(
-            "hidden"
-        );
+        showJournalWindow(deleteAvatarModal);
     }
 );
 
@@ -17136,9 +17141,7 @@ cancelDeleteAvatarBtn.addEventListener(
     "click",
     function() {
 
-        deleteAvatarModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(deleteAvatarModal);
     }
 );
 
@@ -17152,9 +17155,7 @@ deleteAvatarModal.addEventListener(
             deleteAvatarModal
         ) {
 
-            deleteAvatarModal.classList.add(
-                "hidden"
-            );
+            hideJournalWindow(deleteAvatarModal);
         }
     }
 );
@@ -17163,9 +17164,7 @@ editNameMenuBtn.addEventListener(
     "click",
     function() {
 
-        editProfileModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(editProfileModal);
 
         changeNameBtn.click();
     }
@@ -17176,9 +17175,7 @@ editEmailMenuBtn.addEventListener(
     "click",
     function() {
 
-        editProfileModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(editProfileModal);
 
         changeEmailBtn.click();
     }
@@ -17189,9 +17186,7 @@ editPasswordMenuBtn.addEventListener(
     "click",
     function() {
 
-        editProfileModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(editProfileModal);
 
         changePasswordBtn.click();
     }
@@ -17208,9 +17203,7 @@ changeNameBtn.addEventListener(
         newNameInput.value =
             profileName.textContent;
 
-        nameModal.classList.remove(
-            "hidden"
-        );
+        showJournalWindow(nameModal);
     }
 );
 
@@ -17219,9 +17212,7 @@ cancelNameBtn.addEventListener(
     "click",
     function() {
 
-        nameModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(nameModal);
     }
 );
 
@@ -17270,9 +17261,7 @@ saveNameBtn.addEventListener(
             });
 
 
-            nameModal.classList.add(
-                "hidden"
-            );
+            hideJournalWindow(nameModal);
 
             await loadProfile();
 
@@ -17303,9 +17292,7 @@ changeEmailBtn.addEventListener(
         newEmailInput.value =
             currentUser?.email || "";
 
-        emailModal.classList.remove(
-            "hidden"
-        );
+        showJournalWindow(emailModal);
 
         setTimeout(
             function() {
@@ -17322,9 +17309,7 @@ cancelEmailBtn.addEventListener(
     "click",
     function() {
 
-        emailModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(emailModal);
 
         newEmailInput.value = "";
     }
@@ -17401,9 +17386,7 @@ saveEmailBtn.addEventListener(
             }
 
 
-            emailModal.classList.add(
-                "hidden"
-            );
+            hideJournalWindow(emailModal);
 
             newEmailInput.value = "";
 
@@ -17469,9 +17452,7 @@ changePasswordBtn.addEventListener(
         newPasswordInput.value = "";
         confirmPasswordInput.value = "";
 
-        passwordModal.classList.remove(
-            "hidden"
-        );
+        showJournalWindow(passwordModal);
 
         setTimeout(
             function() {
@@ -17487,9 +17468,7 @@ cancelPasswordBtn.addEventListener(
     "click",
     function() {
 
-        passwordModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(passwordModal);
 
         newPasswordInput.value = "";
         confirmPasswordInput.value = "";
@@ -17580,9 +17559,7 @@ savePasswordBtn.addEventListener(
             }
 
 
-            passwordModal.classList.add(
-                "hidden"
-            );
+            hideJournalWindow(passwordModal);
 
             newPasswordInput.value = "";
             confirmPasswordInput.value = "";
@@ -17650,9 +17627,7 @@ logoutBtn.addEventListener(
     "click",
     function() {
 
-        logoutModal.classList.remove(
-            "hidden"
-        );
+        showJournalWindow(logoutModal);
     }
 );
 
@@ -17661,9 +17636,7 @@ cancelLogoutBtn.addEventListener(
     "click",
     function() {
 
-        logoutModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(logoutModal);
     }
 );
 
@@ -17682,6 +17655,7 @@ confirmLogoutBtn.addEventListener(
 
             clearTimers();
 
+            await window.closeJournal();
 
             const {
                 error
@@ -17694,12 +17668,12 @@ confirmLogoutBtn.addEventListener(
             }
 
 
-            logoutModal.classList.add(
-                "hidden"
-            );
+            hideJournalWindow(logoutModal);
+            window.openJournal();
 
         } catch (error) {
 
+            window.openJournal();
             console.error(
                 "Logout error:",
                 error
@@ -17730,9 +17704,7 @@ function openReport(answerId) {
     currentReportAnswerId =
         answerId;
 
-    reportModal.classList.remove(
-        "hidden"
-    );
+    showJournalWindow(reportModal);
 }
 
 
@@ -17743,9 +17715,7 @@ closeReportBtn.addEventListener(
         currentReportAnswerId =
             null;
 
-        reportModal.classList.add(
-            "hidden"
-        );
+        hideJournalWindow(reportModal);
     }
 );
 
@@ -17791,9 +17761,7 @@ document
                             throw error;
                         }
 
-                        reportModal.classList.add(
-                            "hidden"
-                        );
+                        hideJournalWindow(reportModal);
 
                         showNotice(
                             "Жалоба отправлена."
@@ -19808,7 +19776,7 @@ supportBtn.addEventListener(
     "click",
     async function() {
 
-        supportModal.classList.remove("hidden");
+        showJournalWindow(supportModal);
 
         await loadSupportMessages();
 
@@ -19886,7 +19854,7 @@ if (guestSupportBtn) {
 
                 if (!isGuestSession(session)) {
 
-                   supportModal.classList.remove("hidden");
+                   showJournalWindow(supportModal);
 
 await loadSupportMessages();
 startSupportRealtime();
@@ -19941,7 +19909,7 @@ return;
 
                 
               // Открываем существующее окно поддержки.
-              supportModal.classList.remove("hidden");
+              showJournalWindow(supportModal);
 
               await loadSupportMessages();
               startSupportRealtime();
@@ -19988,7 +19956,7 @@ const sendSupportBtn =
 */
 
 closeSupportBtn.addEventListener("click", function() {
-    supportModal.classList.add("hidden");
+    hideJournalWindow(supportModal);
 });
 
 
@@ -20279,7 +20247,7 @@ async function openAnnouncementsModal() {
         return;
     }
 
-    announcementsModal.classList.remove("hidden");
+    showJournalWindow(announcementsModal);
 
     userAnnouncementsList.textContent =
         "Загрузка объявлений...";
@@ -20413,7 +20381,7 @@ if (closeAnnouncementsBtn && announcementsModal) {
         "click",
         function() {
 
-            announcementsModal.classList.add("hidden");
+            hideJournalWindow(announcementsModal);
 
         }
     );
@@ -21489,12 +21457,12 @@ restoreSession();
 
     function closeCapsule() {
         requestNumber++;
-        overlay.classList.add("hidden");
+        hideJournalWindow(overlay);
         document.body.style.overflow = "";
     }
 
     openBtn.addEventListener("click", function () {
-        overlay.classList.remove("hidden");
+        showJournalWindow(overlay);
         document.body.style.overflow = "hidden";
         overlay.scrollTop = 0;
         updateTree();
@@ -21504,35 +21472,55 @@ restoreSession();
 </script>
 
 
+
 <script id="diary-motion-controller">
-(function(){
+(function () {
  "use strict";
- if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
- const curtain=document.createElement("div");
- curtain.className="journal-curtain";
- curtain.setAttribute("aria-hidden","true");
- curtain.innerHTML='<div class="journal-curtain-half"></div><div class="journal-curtain-half"></div>';
- document.body.appendChild(curtain);
- // Start immediately, never block the site's controls or data loading.
- requestAnimationFrame(()=>{curtain.classList.add("is-opening")});
- setTimeout(()=>{if(curtain.isConnected&&!curtain.classList.contains("is-closing"))curtain.remove()},1150);
- // A browser tab/app termination cannot be intercepted reliably.
- // Only animate genuine internal link navigation; do not delay external links or downloads.
- document.addEventListener("click",function(event){
-  const link=event.target.closest("a[href]");
-  if(!link||event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
-  if(link.hasAttribute("download")||link.target==="_blank")return;
+ const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+ const curtain = document.createElement("div");
+ curtain.className = "journal-curtain";
+ curtain.setAttribute("aria-hidden", "true");
+ curtain.innerHTML = '<div class="journal-curtain-half"></div><div class="journal-curtain-half"></div>';
+ let timer;
+ let navigating = false;
+ window.openJournal = function () {
+  clearTimeout(timer);
+  if (reduced.matches) { curtain.remove(); return; }
+  if (!curtain.isConnected) document.body.appendChild(curtain);
+  curtain.className = "journal-curtain";
+  requestAnimationFrame(function () {
+   curtain.classList.add("is-opening");
+   timer = setTimeout(function () { curtain.remove(); }, 900);
+  });
+ };
+ window.closeJournal = function () {
+  clearTimeout(timer);
+  if (reduced.matches) return Promise.resolve();
+  if (!curtain.isConnected) document.body.appendChild(curtain);
+  curtain.className = "journal-curtain is-closing";
+  return new Promise(function (resolve) { setTimeout(resolve, 480); });
+ };
+ window.openJournal();
+ document.addEventListener("click", function (event) {
+  const link = event.target instanceof Element ? event.target.closest("a[href]") : null;
+  if (!link || event.defaultPrevented || event.button !== 0 ||
+      event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  if (link.hasAttribute("download") || (link.target && link.target !== "_self")) return;
   let url;
-  try{url=new URL(link.href,location.href)}catch(_){return}
-  if(url.origin!==location.origin||url.pathname===location.pathname&&url.search===location.search)return;
-  if(!/\.html$|\/$/.test(url.pathname))return;
+  try { url = new URL(link.href, location.href); } catch (_) { return; }
+  if (url.origin !== location.origin ||
+      (url.pathname === location.pathname && url.search === location.search) ||
+      !/\.html$|\/$/.test(url.pathname)) return;
   event.preventDefault();
-  if(!curtain.isConnected)document.body.appendChild(curtain);
-  curtain.className="journal-curtain is-closing";
-  setTimeout(()=>{location.assign(url.href)},480);
- },true);
- window.addEventListener("pageshow",function(e){
-  if(e.persisted){curtain.remove()}
+  if (navigating) return;
+  navigating = true;
+  window.closeJournal().then(function () { location.assign(url.href); });
+ });
+ window.addEventListener("pageshow", function (event) {
+  if (event.persisted) { navigating = false; window.openJournal(); }
+ });
+ reduced.addEventListener("change", function () {
+  if (reduced.matches) { clearTimeout(timer); curtain.remove(); }
  });
 })();
 </script>
