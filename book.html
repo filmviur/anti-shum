@@ -522,6 +522,35 @@ opacity:.65;pointer-events:none}
  .epilogue-flourish{width:65px!important}
  .epilogue-sign{font-size:10px!important}
 }
+
+/* Fine-tune typography to keep text clear of the illustrated floral frame. */
+.sheet,.sheet.left,.sheet.right,.sheet.turn-sheet{
+ padding:clamp(70px,8vw,90px) clamp(72px,8vw,91px) clamp(91px,10vw,110px)!important;
+}
+.entry-heading{margin:0 auto 9px!important;padding:3px 12px 5px!important}
+.page-kicker{font-size:clamp(23px,2.55vw,30px)!important}
+.page-date{font-size:clamp(14px,1.65vw,18px)!important}
+.question-label,.answer-label{font-size:clamp(15px,1.55vw,18px)!important}
+.page-question{font-size:clamp(17px,1.8vw,21px)!important;line-height:1.09!important}
+.page-answer{font-size:clamp(17px,1.85vw,21px)!important;line-height:1.16!important}
+.photo-note .page-photo{max-height:94px!important}
+.epilogue-page{padding:2px 12px!important;justify-content:center!important}
+.epilogue-heading{font-size:clamp(24px,2.6vw,30px)!important;margin:0 0 9px!important;flex-shrink:0}
+.epilogue-text{font-size:clamp(13px,1.42vw,16px)!important;line-height:1.21!important;flex:0 1 auto!important;overflow-y:auto!important;max-height:75%!important}
+.epilogue-mark{font-size:14px!important}
+.epilogue-flourish{width:80px!important}
+.epilogue-sign{font-size:12px!important}
+@media(max-width:700px){
+ .sheet,.sheet.left,.sheet.right,.sheet.turn-sheet{padding:65px 32px 74px!important}
+ .page-kicker{font-size:19px!important}.page-date{font-size:12px!important}
+ .question-label,.answer-label{font-size:12px!important}
+ .page-question{font-size:14px!important}
+ .page-answer{font-size:14px!important}
+ .photo-note .page-photo{max-height:59px!important}
+ .epilogue-page{padding:0 6px!important}
+ .epilogue-heading{font-size:20px!important}
+ .epilogue-text{font-size:10px!important;line-height:1.12!important}
+}
 </style>
 </head>
 <body>
