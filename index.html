@@ -20915,6 +20915,41 @@ restoreSession();
     transition: opacity 1100ms ease-in-out;
 }
 
+.capsule-growth-lights {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.capsule-growth-light {
+    position: absolute;
+    width: clamp(3px, .7vw, 8px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #fff0a5;
+    box-shadow: 0 0 7px 3px rgba(255, 183, 65, .65),
+                0 0 19px 9px rgba(255, 137, 42, .22);
+    opacity: 0;
+    transform: scale(.2);
+    transition: opacity 1000ms ease, transform 1200ms ease;
+}
+
+.capsule-growth-light.is-awake {
+    opacity: var(--capsule-glow, .3);
+    transform: scale(1);
+    animation: capsuleLightBreath 4s ease-in-out infinite alternate;
+}
+
+@keyframes capsuleLightBreath {
+    from { filter: brightness(.75); }
+    to { filter: brightness(1.4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .capsule-growth-light { transition: none; animation: none !important; }
+}
+
 .capsule-image-error {
     position: absolute;
     inset: 0;
@@ -21032,6 +21067,30 @@ restoreSession();
     image.insertAdjacentElement("afterend", topImage);
 
     image.onerror = function () { error.classList.remove("hidden"); };
+    // Tiny lights appear one by one as new days are answered.
+    // They sit above one complete image; landscapes are never blended.
+    const art = image.closest(".capsule-art");
+    const lightsLayer = document.createElement("div");
+    lightsLayer.className = "capsule-growth-lights";
+    lightsLayer.setAttribute("aria-hidden", "true");
+    art.appendChild(lightsLayer);
+    const lightPositions = [
+        [46,29],[58,37],[34,41],[68,28],[23,33],[51,18],[77,40],
+        [41,47],[62,51],[30,23],[71,18],[19,48],[54,43],[38,15],
+        [83,32],[26,56],[65,12],[48,55],[75,52],[15,27],[57,10],
+        [33,34],[69,46],[44,8],[80,21],[22,18],[60,27],[37,57],
+        [52,50],[72,34],[47,35]
+    ];
+    const lights = lightPositions.map(function (position, index) {
+        const light = document.createElement("span");
+        light.className = "capsule-growth-light";
+        light.style.left = position[0] + "%";
+        light.style.top = position[1] + "%";
+        light.style.animationDelay = (index % 7 * -0.43) + "s";
+        lightsLayer.appendChild(light);
+        return light;
+    });
+
     let requestNumber = 0;
     let imageVersion = 0;
     let displayedCount = -1;
@@ -21055,15 +21114,22 @@ restoreSession();
 
     async function showProgress(answerCount) {
         const count = Math.max(0, Math.min(31, answerCount));
-        if (displayedCount === count) return;
         const version = ++imageVersion;
 
-        // Show one fully opaque painting. Persistent blending of two
-        // different landscapes created ghost branches and an unfinished look.
-        const stage = stages.reduce(function (chosen, day) {
-            return count >= day ? day : chosen;
-        }, 1);
+        // Keep each painting intact; only advance to the next complete
+        // painting at a milestone. Daily lights provide 31 distinct steps.
+        const milestones = [1, 12, 20, 25, 29, 31];
+        const stageIndex = milestones.reduce(function (chosen, day, index) {
+            return count >= day ? index : chosen;
+        }, 0);
+        const stage = stages[stageIndex];
 
+        lights.forEach(function (light, index) {
+            light.classList.toggle("is-awake", index < count);
+        });
+        art.style.setProperty("--capsule-glow", (0.14 + count / 31 * 0.32).toFixed(3));
+
+        if (displayedCount === count) return;
         try {
             const source = await preloadStage(stage);
             if (version !== imageVersion || overlay.classList.contains("hidden")) return;
