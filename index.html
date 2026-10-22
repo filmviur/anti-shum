@@ -20927,9 +20927,7 @@ restoreSession();
     width: clamp(19px, 2.7%, 30px);
     aspect-ratio: 40 / 56;
     background-repeat: no-repeat;
-    /* Original golden leaf is near x=64%, y=22% in tree-01. */
-    background-size: 1950% 1450%;
-    background-position: 63.8% 22.4%;
+    /* Transparent silhouette clips the original painted leaf texture. */
     clip-path: polygon(49% 0%, 66% 9%, 82% 24%, 89% 43%, 82% 64%, 65% 84%, 50% 96%, 36% 81%, 17% 61%, 13% 40%, 25% 19%);
     transform: translate(-50%, -50%) rotate(var(--leaf-rotation)) scale(.05);
     transform-origin: 50% 90%;
@@ -21089,8 +21087,17 @@ restoreSession();
         [62,19,46,.81,1.04],[42,35,-22,.72,.93],[84,24,24,.66,1.08],
         [53,45,-37,.78,.97]
     ];
+    // Crops from four different leaves painted in the original stage images.
+    // A CSS leaf-shaped clipping path makes the surrounding pixels transparent.
+    const leafSamples = [
+        {file: "tree-01.png", x: 63.8, y: 22.4, zoom: 19.5},
+        {file: "tree-07.png", x: 34.2, y: 28.0, zoom: 23},
+        {file: "tree-07.png", x: 55.5, y: 20.5, zoom: 22},
+        {file: "tree-07.png", x: 71.5, y: 37.5, zoom: 23}
+    ];
     const leaves = leafPositions.map(function (position, index) {
         const leaf = document.createElement("span");
+        const sample = leafSamples[index % leafSamples.length];
         leaf.className = "capsule-growth-leaf";
         leaf.style.left = position[0] + "%";
         leaf.style.top = position[1] + "%";
@@ -21098,8 +21105,9 @@ restoreSession();
         leaf.style.setProperty("--leaf-scale", String(position[3]));
         leaf.style.setProperty("--leaf-brightness", String(position[4]));
         leaf.style.setProperty("--leaf-delay", (index % 5 * 90) + "ms");
-        // Same authentic painted texture, with subtle per-leaf variation.
-        leaf.style.backgroundImage = 'url("./capsule-assets/tree-01.png")';
+        leaf.style.backgroundImage = 'url("./capsule-assets/' + sample.file + '")';
+        leaf.style.backgroundSize = (sample.zoom * 100) + "% " + (sample.zoom * 100) + "%";
+        leaf.style.backgroundPosition = sample.x + "% " + sample.y + "%";
         leavesLayer.appendChild(leaf);
         return leaf;
     });
