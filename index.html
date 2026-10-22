@@ -21032,6 +21032,7 @@ restoreSession();
     image.insertAdjacentElement("afterend", topImage);
 
     image.onerror = function () { error.classList.remove("hidden"); };
+    let requestNumber = 0;
     let imageVersion = 0;
     let displayedCount = -1;
     const imageCache = new Map();
