@@ -20881,6 +20881,24 @@ restoreSession();
     min-height: 44px;
 }
 
+.capsule-main-layout { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(300px,.85fr); gap:22px; align-items:start; }
+.capsule-tree-column { min-width:0; }
+.capsule-archive { border:1px solid rgba(201,168,106,.22); border-radius:16px; padding:22px; background:linear-gradient(140deg,#211914,#110e0c); }
+.capsule-archive h3 { font:600 29px "Cormorant Garamond",Georgia,serif; color:#d6b875; margin:0 0 8px; }
+.capsule-archive-intro { color:#bfb09d; font-size:14px; line-height:1.5; margin:0 0 18px; }
+.capsule-month-nav { display:flex; justify-content:space-between; align-items:center; color:#e4bd75; margin-bottom:16px; font-size:18px; }
+.capsule-month-nav button { color:#e4bd75; background:#302519; border:1px solid rgba(201,168,106,.35); border-radius:8px; width:35px; height:35px; cursor:pointer; }
+.capsule-month-nav button:disabled { opacity:.25; cursor:default; }
+.capsule-day-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; }
+.capsule-day { min-height:54px; padding:6px 2px; border-radius:8px; background:#191513; border:1px solid #39302a; color:#8d827a; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; font-size:12px; }
+.capsule-day.has-answer { color:#e6b567; cursor:pointer; border-color:#73532c; }
+.capsule-day.is-selected { background:#49301b; border-color:#e9a23d; box-shadow:0 0 0 1px rgba(233,162,61,.4); }
+.capsule-day:disabled { cursor:default; }
+.capsule-answer-detail { margin-top:20px; padding:18px; min-height:115px; border:1px solid rgba(201,168,106,.25); border-radius:12px; color:#d9c9b5; line-height:1.55; overflow-wrap:anywhere; white-space:pre-wrap; }
+.capsule-answer-detail h4 { margin:0 0 9px; color:#e5bf7c; font-size:21px; }
+.capsule-answer-detail .capsule-question { color:#e5bd86; font-weight:600; margin:10px 0; }
+.capsule-answer-detail img { max-width:100%; max-height:360px; object-fit:contain; border-radius:8px; margin-top:12px; }
+@media(max-width:750px) { .capsule-main-layout { grid-template-columns:1fr; } .capsule-archive { padding:15px; } .capsule-day-grid { gap:5px; } }
 .capsule-art {
     position: relative;
     width: 100%;
@@ -21021,6 +21039,8 @@ restoreSession();
             Твои ответы постепенно оживляют картину.
         </p>
 
+        <div class="capsule-main-layout">
+          <div class="capsule-tree-column">
         <div class="capsule-art">
             <img
                 id="capsuleTreeImage"
@@ -21039,6 +21059,19 @@ restoreSession();
         <p class="capsule-description">
             Дерево растёт вместе с твоими ответами.
         </p>
+          </div>
+          <aside class="capsule-archive" aria-label="Архив ответов">
+            <h3>Архив ответов</h3>
+            <p class="capsule-archive-intro">Перечитай свои мысли и вспомни каждый день этого пути.</p>
+            <div class="capsule-month-nav">
+              <button type="button" id="capsulePrevMonth" aria-label="Предыдущий месяц">‹</button>
+              <span id="capsuleMonthTitle">Октябрь 2026</span>
+              <button type="button" id="capsuleNextMonth" aria-label="Следующий месяц">›</button>
+            </div>
+            <div id="capsuleDayGrid" class="capsule-day-grid" aria-label="Дни месяца"></div>
+            <div id="capsuleAnswerDetail" class="capsule-answer-detail" aria-live="polite">Выбери день, чтобы прочитать ответ.</div>
+          </aside>
+        </div>
 
     </div>
 </section>
@@ -21115,6 +21148,84 @@ restoreSession();
         return leaf;
     });
 
+    const dayGrid = document.getElementById("capsuleDayGrid");
+    const detail = document.getElementById("capsuleAnswerDetail");
+    const monthTitle = document.getElementById("capsuleMonthTitle");
+    const prevMonth = document.getElementById("capsulePrevMonth");
+    const nextMonth = document.getElementById("capsuleNextMonth");
+    let archiveMonths = [];
+    let selectedMonth = 0;
+    let archiveAnswers = new Map();
+    const monthNames = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+    function monthKey(date) { return date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2,"0"); }
+    function renderArchive() {
+        const key = archiveMonths[selectedMonth];
+        if (!key) return;
+        const [year, month] = key.split("-").map(Number);
+        const days = new Date(year,month,0).getDate();
+        monthTitle.textContent = monthNames[month-1] + " " + year;
+        prevMonth.disabled = selectedMonth === 0;
+        nextMonth.disabled = selectedMonth === archiveMonths.length-1;
+        dayGrid.replaceChildren();
+        for(let day=1;day<=days;day++) {
+            const answer = archiveAnswers.get(key + "-" + day);
+            const btn = document.createElement("button");
+            btn.type="button"; btn.className="capsule-day"+(answer?" has-answer":"");
+            btn.disabled=!answer;
+            const label=document.createElement("span"); label.textContent="День "+day;
+            const sign=document.createElement("span"); sign.textContent=answer?"✓":"–";
+            btn.append(label,sign);
+            if(answer) btn.addEventListener("click",()=>selectArchiveAnswer(btn,answer,day));
+            dayGrid.appendChild(btn);
+        }
+        detail.textContent="Выбери заполненный день, чтобы прочитать свой ответ.";
+        const first=dayGrid.querySelector(".has-answer");
+        if(first) first.click();
+    }
+    async function selectArchiveAnswer(btn, answer, day) {
+        dayGrid.querySelectorAll(".is-selected").forEach(el=>el.classList.remove("is-selected"));
+        btn.classList.add("is-selected");
+        detail.replaceChildren();
+        const heading=document.createElement("h4"); heading.textContent="День "+day;
+        detail.appendChild(heading);
+        const question=document.createElement("div");question.className="capsule-question";
+        question.textContent=answer.questionText || "Вопрос дня";
+        detail.appendChild(question);
+        const body=document.createElement("div");body.textContent=answer.answer_text || "Ответ с фотографией";
+        detail.appendChild(body);
+        if(answer.photo_url && typeof createSignedPhoto === "function") {
+            try {
+                const photo=await createSignedPhoto(answer.photo_url);
+                if(photo && btn.classList.contains("is-selected")) detail.appendChild(photo);
+            } catch(e) { console.warn("Capsule photo unavailable",e); }
+        }
+    }
+    prevMonth.addEventListener("click",()=>{if(selectedMonth>0){selectedMonth--;renderArchive();}});
+    nextMonth.addEventListener("click",()=>{if(selectedMonth<archiveMonths.length-1){selectedMonth++;renderArchive();}});
+    async function loadCapsuleArchive(questions, answers) {
+        const questionById=new Map(questions.map(q=>[String(q.id),q]));
+        archiveAnswers=new Map();
+        const now=new Date();
+        const currentKey=monthKey(now);
+        const keys=new Set(["2026-10",currentKey]);
+        for(const answer of answers) {
+            const question=questionById.get(String(answer.question_id));
+            const created=new Date(answer.created_at);
+            if(Number.isNaN(created.getTime())) continue;
+            let key=monthKey(created);
+            let day=created.getDate();
+            // The original 31-day project stores its intended day in questions.day.
+            if(question && Number.isInteger(Number(question.day)) && key==="2026-10") {
+                day=Number(question.day);
+            }
+            if(day<1||day>new Date(Number(key.slice(0,4)),Number(key.slice(5)),0).getDate()) continue;
+            keys.add(key);
+            archiveAnswers.set(key+"-"+day,{...answer,questionText:question?.question||question?.text||question?.question_text||""});
+        }
+        archiveMonths=[...keys].sort();
+        selectedMonth=Math.max(0,archiveMonths.indexOf(currentKey));
+        renderArchive();
+    }
     let requestNumber = 0;
     let imageVersion = 0;
     let displayedCount = -1;
@@ -21183,7 +21294,7 @@ restoreSession();
         try {
             const questionsResult = await supabaseClient
                 .from("questions")
-                .select("id, day")
+                .select("*")
                 .gte("day", 1)
                 .lte("day", 31);
 
@@ -21191,23 +21302,25 @@ restoreSession();
             const questions = questionsResult.data || [];
             const daysById = new Map(questions.map(q => [String(q.id), Number(q.day)]));
             let answeredDays = new Set();
+            let allAnswers = [];
 
             if (questions.length) {
                 const answerResult = await supabaseClient
                     .from("answers")
-                    .select("question_id")
-                    .eq("user_id", currentUser.id)
-                    .in("question_id", questions.map(q => q.id));
+                    .select("question_id, answer_text, photo_url, created_at")
+                    .eq("user_id", currentUser.id);
 
                 if (answerResult.error) throw answerResult.error;
+                allAnswers = answerResult.data || [];
                 answeredDays = new Set(
-                    (answerResult.data || [])
+                    allAnswers
                         .map(a => daysById.get(String(a.question_id)))
                         .filter(day => Number.isInteger(day) && day >= 1 && day <= 31)
                 );
             }
 
             if (request !== requestNumber || overlay.classList.contains("hidden")) return;
+            await loadCapsuleArchive(questions, allAnswers);
             const count = answeredDays.size;
             // Progress is smoothly interpolated across all 31 answers.
             status.textContent = "Твоё дерево · " + count + " из 31 дней с ответами";
