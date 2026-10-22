@@ -238,6 +238,58 @@ opacity:.65;pointer-events:none}
 .cover:not(.back-visible) .cover-back{opacity:0}
 .book-spine{background:linear-gradient(90deg,#261206a8,#5a341999),url("./diary-spine.webp") center/100% 100% no-repeat}
 @media(max-width:700px){.cover{border:0!important}}
+
+/* Illustrated antique parchment pages: engraved botanical border on every spread. */
+.sheet,.sheet.left,.sheet.right{
+ background-color:#ecd6aa!important;
+ background-image:
+  url("./diary-page-frame.svg"),
+  radial-gradient(ellipse at 37% 25%,#fff2d6 0%,#f1dbb5 57%,#dfbd8b 100%)!important;
+ background-size:100% 100%,100% 100%!important;
+ background-position:center!important;
+ background-repeat:no-repeat!important;
+ padding:clamp(60px,8.5vw,91px) clamp(45px,6.7vw,72px) clamp(65px,8vw,85px)!important;
+ box-shadow:inset 0 0 37px #70472045,0 0 0 1px #9c784c!important;
+}
+.sheet.left{box-shadow:inset -20px 0 26px #6b472733,inset 0 0 37px #70472045!important}
+.sheet.right{box-shadow:inset 18px 0 24px #6b47272c,inset 0 0 37px #70472045!important}
+.sheet:before,.sheet:after{display:none!important}
+.sheet .page-ornament{display:none!important}
+.sheet>div:not(.page-ornament){position:relative;z-index:1}
+.page-kicker{font:500 clamp(16px,2vw,24px)/1.1 "Caveat",cursive!important;color:#6e482c;letter-spacing:0;text-transform:none}
+.page-date{font:500 clamp(18px,2.5vw,29px)/1.1 "Caveat",cursive!important;margin:4px 0 12px!important;color:#593721}
+.page-rule{height:1px!important;margin-bottom:16px!important;background:linear-gradient(90deg,transparent,#7b543c66,transparent)!important}
+.page-rule:after{content:"❦";color:#62432d;font-size:15px}
+.page-question{font:500 clamp(19px,2.5vw,28px)/1.18 "Caveat",cursive!important;color:#42281d;margin-bottom:15px!important}
+.page-answer{font:500 clamp(20px,2.35vw,27px)/1.24 "Caveat",cursive!important;color:#452d21;max-height:49%;overflow:auto}
+.page-number{bottom:clamp(27px,4.4vw,43px)!important;color:#482e1f;font:18px "Cormorant Garamond",serif!important}
+.page-empty{font:italic 22px/1.3 "Cormorant Garamond",serif;color:#896d50}
+.photo-note{max-width:88%;padding:8px 8px 14px;background:#f4e8d0;box-shadow:3px 5px 10px #543b285e}
+.photo-note .page-photo{max-height:135px}
+.epilogue-page{height:100%;padding:0 3px!important;display:flex;justify-content:center;gap:0;color:#432819}
+.epilogue-engraving{display:none!important}
+.epilogue-mark{font-size:21px;margin:0!important}
+.epilogue-heading{font:italic 600 clamp(30px,3.8vw,47px)/1 "Cormorant Garamond",serif!important;margin:5px 0 13px!important;color:#482a1d}
+.epilogue-text{font:italic 500 clamp(14px,1.85vw,21px)/1.42 "Cormorant Garamond",Georgia,serif!important;color:#482e20;max-width:100%;white-space:pre-line}
+.epilogue-sign{font:italic 500 clamp(15px,1.7vw,20px) "Cormorant Garamond",serif!important;color:#56341e;margin-top:12px!important}
+.epilogue-flourish{width:min(175px,75%);margin:0 auto 7px!important;color:#5e3a22}
+.epilogue-flourish.bottom{width:min(140px,62%);margin:10px auto 0!important}
+@media(max-width:700px){
+ .sheet,.sheet.left,.sheet.right{padding:64px 27px 65px!important}
+ .page-kicker{font-size:15px!important}.page-date{font-size:18px!important;margin-bottom:8px!important}
+ .page-rule{margin-bottom:9px!important}
+ .page-question{font-size:18px!important;margin-bottom:9px!important}
+ .page-answer{font-size:17px!important;line-height:1.1!important;max-height:42%}
+ .photo-note{padding:5px 5px 8px;max-width:95%;margin-bottom:10px}
+ .photo-note .page-photo{max-height:88px}
+ .epilogue-heading{font-size:28px!important;margin:2px 0 6px!important}
+ .epilogue-text{font-size:clamp(10px,2.4vw,14px)!important;line-height:1.2!important}
+ .epilogue-sign{font-size:12px!important;margin-top:5px!important}
+ .epilogue-flourish{width:90px;margin:0 auto 3px!important}
+ .epilogue-flourish.bottom{width:70px;margin:4px auto 0!important}
+ .epilogue-mark{font-size:15px}
+ .page-number{bottom:25px!important}
+}
 </style>
 </head>
 <body>
