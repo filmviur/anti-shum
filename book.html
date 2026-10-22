@@ -350,6 +350,56 @@ opacity:.65;pointer-events:none}
  .epilogue-flourish.bottom{width:72px!important;margin:3px auto 0!important}
  .epilogue-sign{font-size:12px!important}
 }
+
+/* Repair: uploaded illustrations contain example lettering and a sample photograph.
+   A solid parchment writing surface masks those baked-in samples while retaining
+   the original inked ornamental borders on all four edges. */
+.sheet,.sheet.left,.sheet.right,.sheet.turn-sheet{isolation:isolate}
+.sheet:before{
+ content:""!important;display:block!important;position:absolute!important;
+ inset:10.5% 11.5% 10.5% 11.5%!important;z-index:0!important;
+ border:0!important;border-radius:0!important;pointer-events:none!important;
+ background:
+ radial-gradient(ellipse at 26% 22%,#fae8c8 0%,#f6dfb8 53%,#efd4a9 100%)!important;
+ box-shadow:0 0 18px 14px #f3dcb4!important;
+ opacity:1!important;
+}
+.sheet.right:before{inset:10.5% 11% 10.5% 10%!important}
+.sheet>div:not(.page-ornament){z-index:1}
+.entry-layout{padding:0 7px!important;gap:0!important}
+.entry-heading{max-width:76%!important;margin:1px auto 12px!important;padding:5px 21px 7px!important;transform:rotate(-3deg)!important;background:#e4c49a!important;box-shadow:0 2px 4px #7753331c!important}
+.page-kicker{font-size:clamp(25px,3.1vw,36px)!important;line-height:1!important;font-weight:500!important}
+.page-date{font-size:clamp(16px,1.9vw,22px)!important;margin-top:2px!important}
+.question-block{margin:4px 0 13px!important;max-width:100%!important;min-height:0!important}
+.question-label,.answer-label{font-size:clamp(17px,1.9vw,22px)!important;margin-bottom:7px!important}
+.page-question{font-size:clamp(19px,2.15vw,24px)!important;line-height:1.17!important;max-width:100%!important;transform:rotate(-.5deg)!important;padding:7px 11px!important;background:#e8c99f!important}
+.answer-block{margin-top:6px!important;min-height:0!important;flex:1!important;overflow:hidden!important}
+.page-answer{font-size:clamp(19px,2.15vw,24px)!important;line-height:1.23!important;background:none!important;overflow-y:auto!important;max-height:100%!important;padding:0 3px!important}
+.entry-layout:has(.photo-note) .entry-heading{margin:0 auto 10px!important;max-width:76%!important}
+.entry-layout:has(.photo-note) .question-block{max-width:100%!important;min-height:0!important;margin-bottom:7px!important}
+.entry-layout:has(.photo-note) .page-question{max-width:100%!important}
+.photo-note{position:relative!important;align-self:center!important;max-width:53%!important;width:max-content!important;margin:0 auto 7px!important;padding:6px 6px 15px!important;transform:rotate(3deg)!important;z-index:2!important;flex-shrink:0!important}
+.photo-note .page-photo{display:block!important;width:auto!important;height:auto!important;max-height:clamp(80px,12vw,132px)!important;object-fit:contain!important}
+.photo-note:before{right:5px!important;left:auto!important}
+.entry-bottom-flourish{bottom:-10px!important;font-size:15px!important;opacity:.75}
+.page-number{bottom:-23px!important}
+.epilogue-page{position:relative;z-index:1;padding:5px 13px!important}
+.epilogue-text{line-height:1.38!important}
+@media(max-width:700px){
+ .sheet:before{inset:11% 10% 11% 10%!important;box-shadow:0 0 9px 7px #f3dcb4!important}
+ .sheet,.sheet.left,.sheet.right,.sheet.turn-sheet{padding:47px 25px 48px!important}
+ .entry-heading{padding:3px 7px 5px!important;margin:0 auto 6px!important}
+ .page-kicker{font-size:22px!important}.page-date{font-size:14px!important}
+ .question-block{margin:2px 0 5px!important}.question-label,.answer-label{font-size:14px!important;margin-bottom:2px!important}
+ .page-question{font-size:16px!important;line-height:1.08!important;padding:4px 5px!important}
+ .answer-block{margin-top:3px!important}
+ .page-answer{font-size:16px!important;line-height:1.1!important}
+ .photo-note{max-width:62%!important;padding:3px 3px 8px!important;margin:0 auto 4px!important}
+ .photo-note .page-photo{max-height:65px!important}
+ .entry-bottom-flourish{font-size:11px!important;bottom:-7px!important}
+ .page-number{bottom:-16px!important}
+ .epilogue-page{padding:0 4px!important}
+}
 </style>
 </head>
 <body>
