@@ -79,6 +79,34 @@ a{color:#d8b77f}button{cursor:pointer;font:inherit}button:disabled{opacity:.35;c
 .cover:after{content:"";position:absolute;inset:9px;border:1px solid #c39b5d99;border-radius:3px 10px 10px 3px;pointer-events:none}
 .book.opening .cover{box-shadow:inset 0 0 0 3px #ba8e4d,inset 0 0 0 13px #342014,18px 8px 28px #0008}
 @media(prefers-reduced-motion:reduce){.book,.cover,.book .sheet.left,.book .sheet.right{transition:none!important}}
+
+/* Engraved floral frame, inspired by antique bookplates. */
+.sheet{isolation:isolate}
+.sheet:before{inset:13px;border:0;border-radius:0;background:
+linear-gradient(#8e653d,#8e653d) left 25px top 9px / calc(100% - 50px) 1px no-repeat,
+linear-gradient(#8e653d,#8e653d) left 25px bottom 9px / calc(100% - 50px) 1px no-repeat,
+linear-gradient(#8e653d,#8e653d) left 9px top 25px / 1px calc(100% - 50px) no-repeat,
+linear-gradient(#8e653d,#8e653d) right 9px top 25px / 1px calc(100% - 50px) no-repeat;
+opacity:.65;pointer-events:none}
+.sheet:after{content:"❦  ❧  ❦";position:absolute;bottom:16px;left:50%;transform:translateX(-50%);font:24px "Cormorant Garamond",serif;color:#906638a6;white-space:nowrap;pointer-events:none}
+.page-ornament{position:absolute;inset:0;pointer-events:none;z-index:0;color:#8c6339}
+.page-ornament .corner{position:absolute;font:35px/1 "Cormorant Garamond",Georgia,serif;opacity:.72;text-shadow:1px 1px 0 #fff7}
+.page-ornament .tl{left:16px;top:15px;transform:rotate(-45deg)}
+.page-ornament .tr{right:16px;top:15px;transform:rotate(45deg)}
+.page-ornament .bl{left:16px;bottom:16px;transform:rotate(-135deg)}
+.page-ornament .br{right:16px;bottom:16px;transform:rotate(135deg)}
+.page-ornament .vine{position:absolute;top:70px;bottom:66px;width:17px;opacity:.42;background:repeating-linear-gradient(160deg,transparent 0 22px,#906a3d 23px,transparent 24px 46px);border-left:1px solid #9e7546}
+.page-ornament .vine.left-vine{left:19px}.page-ornament .vine.right-vine{right:19px;transform:scaleX(-1)}
+.page-ornament .vine:after{content:"❧\A❧\A❧\A❧\A❧\A❧";white-space:pre;position:absolute;top:0;left:-6px;font:24px/65px Georgia,serif;color:#92683c}
+.sheet>div:not(.page-ornament){position:relative;z-index:1}
+.sheet.page-arriving>div:not(.page-ornament){animation:pageContentArrive .72s cubic-bezier(.2,.7,.2,1) both}
+.sheet.page-arriving .page-date{animation-delay:.07s}
+.sheet.page-arriving .page-question{animation-delay:.16s}
+.sheet.page-arriving .page-photo,.sheet.page-arriving .photo-note{animation-delay:.22s}
+.sheet.page-arriving .page-answer{animation-delay:.28s}
+@keyframes pageContentArrive{from{opacity:0;transform:translateY(12px);filter:blur(3px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+@media(max-width:700px){.page-ornament .corner{font-size:23px}.page-ornament .vine{display:none}.sheet:after{font-size:18px;bottom:9px}}
+@media(prefers-reduced-motion:reduce){.sheet.page-arriving>div:not(.page-ornament){animation:none}}
 </style>
 </head>
 <body>
@@ -115,7 +143,19 @@ function buildPage(day,number){
  page.append(text("div","page-number",String(number)));
  return page;
 }
-function fill(el,day,number){el.replaceChildren(...buildPage(day,number).childNodes);}
+function fill(el,day,number){
+ const contents=buildPage(day,number);
+ const ornament=document.createElement("div");ornament.className="page-ornament";ornament.setAttribute("aria-hidden","true");
+ for(const pos of ["tl","tr","bl","br"]){const corner=document.createElement("span");corner.className="corner "+pos;corner.textContent="❦";ornament.append(corner);}
+ for(const pos of ["left-vine","right-vine"]){const vine=document.createElement("span");vine.className="vine "+pos;ornament.append(vine);}
+ el.replaceChildren(ornament,...contents.childNodes);
+}
+function arrivePages(){
+ for(const page of [left,right]){
+  page.classList.remove("page-arriving");void page.offsetWidth;page.classList.add("page-arriving");
+ }
+ setTimeout(()=>{left.classList.remove("page-arriving");right.classList.remove("page-arriving");},900);
+}
 function penSound(){
  try{
   const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;
@@ -172,7 +212,7 @@ function move(delta){
    book.classList.remove("cover-mode");book.classList.add("opening");
   }));
   next.disabled=true;prev.disabled=true;
-  setTimeout(()=>{index=0;turning=false;show();},1320);
+  setTimeout(()=>{index=0;turning=false;show();arrivePages();},1320);
   return;
  }
  if(index===0&&target===-1&&!reduced){
@@ -192,7 +232,7 @@ function move(delta){
  const day=days[Math.min(364,n)];
  if(day)fly.append(...buildPage(day,Math.min(365,n+1)).childNodes);
  book.append(fly);requestAnimationFrame(()=>requestAnimationFrame(()=>fly.classList.add("turning")));
- setTimeout(()=>{fly.remove();index=target;turning=false;show();},930);
+ setTimeout(()=>{fly.remove();index=target;turning=false;show();arrivePages();},930);
 }
 prev.onclick=()=>move(-1);next.onclick=()=>move(1);
 function canExport(){const end=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate()+365);return Date.now()>=end.getTime();}
