@@ -21075,7 +21075,7 @@ restoreSession();
     // Branch-tip coordinates (x, y, angle, size, brightness).
     // Deliberately varied so leaves don't look like identical stamps.
     const leafPositions = [
-        [64,25,-30,.85,1.08],[39,29,27,.68,.92],[72,31,-43,.78,1.06],
+        [76,23,34,.73,1.02],[27,27,-38,.65,.92],[83,29,24,.70,.98],
         [27,32,32,.64,.85],[54,17,-17,.88,1.14],[77,20,48,.71,.96],
         [32,20,-37,.67,.91],[60,38,22,.8,1.04],[21,26,-24,.72,.94],
         [46,10,38,.61,.89],[69,15,-49,.77,1.08],[35,39,17,.7,.9],
@@ -21087,8 +21087,8 @@ restoreSession();
         [62,19,46,.81,1.04],[42,35,-22,.72,.93],[84,24,24,.66,1.08],
         [53,45,-37,.78,.97]
     ];
-    // Crops from four different leaves painted in the original stage images.
-    // A CSS leaf-shaped clipping path makes the surrounding pixels transparent.
+    // Use the actual glowing leaf from the first-stage image; unverified
+    // later-stage crops included background fragments.
     const leafSamples = [
         {file: "tree-01.png", x: 63.8, y: 22.4, zoom: 19.5},
         {file: "tree-07.png", x: 34.2, y: 28.0, zoom: 23},
@@ -21097,7 +21097,9 @@ restoreSession();
     ];
     const leaves = leafPositions.map(function (position, index) {
         const leaf = document.createElement("span");
-        const sample = leafSamples[index % leafSamples.length];
+        // During the bare-tree stage use the verified golden leaf from
+        // tree-01; the other sample locations contain sky or branches.
+        const sample = leafSamples[0];
         leaf.className = "capsule-growth-leaf";
         leaf.style.left = position[0] + "%";
         leaf.style.top = position[1] + "%";
