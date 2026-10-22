@@ -214,6 +214,30 @@ opacity:.65;pointer-events:none}
 .nav #backCoverBtn{border:1px solid #856a47;background:linear-gradient(#382a1e,#1d1712);color:#f2d7a3;border-radius:8px;padding:10px 15px}
 .nav #backCoverBtn:disabled{opacity:.35}
 @media(max-width:700px){.cover{border-width:4px;border-left-width:8px}.cover-front,.cover-back{inset:12% 16%;gap:5px}.cover-flower{font-size:19px}.cover-title{font-size:clamp(18px,4.3vw,26px)}.cover-sub{font-size:12px}.cover-emblem{width:75px;margin:2px}.cover-motto{font-size:10px}.cover-back .back-heading{font-size:16px}.cover-back p{font-size:clamp(9px,2.3vw,12px);line-height:1.15}.cover-back .back-divider{font-size:12px}.cover-back .back-sign{font-size:10px}.nav{flex-wrap:wrap;gap:8px}}
+
+/* Exact uploaded artwork replaces all CSS-drawn cover decoration. */
+.cover{
+ background:#321809 url("./diary-front.webp") center center / 100% 100% no-repeat!important;
+ border:0!important;border-radius:3px 12px 12px 3px!important;
+ box-shadow:0 20px 34px #000b,inset 4px 0 8px #120a06a6!important;
+ overflow:hidden;
+}
+.cover:before,.cover:after{display:none!important}
+.cover-front,.cover-back{
+ position:absolute;inset:0!important;width:100%;height:100%;
+ padding:0!important;margin:0!important;gap:0!important;
+ background-position:center;background-size:100% 100%;background-repeat:no-repeat;
+}
+.cover-front{background-image:url("./diary-front.webp")}
+.cover-back{background-image:url("./diary-back.webp")}
+.cover-front>* , .cover-back>*{display:none!important}
+.cover.back-visible{background-image:url("./diary-back.webp")!important}
+.cover.back-visible .cover-front{opacity:0}
+.cover.back-visible .cover-back{opacity:1}
+.cover:not(.back-visible) .cover-front{opacity:1}
+.cover:not(.back-visible) .cover-back{opacity:0}
+.book-spine{background:linear-gradient(90deg,#261206a8,#5a341999),url("./diary-spine.webp") center/100% 100% no-repeat}
+@media(max-width:700px){.cover{border:0!important}}
 </style>
 </head>
 <body>
