@@ -400,6 +400,18 @@ opacity:.65;pointer-events:none}
  .page-number{bottom:-16px!important}
  .epilogue-page{padding:0 4px!important}
 }
+
+/* CLEAN PAGE BACKGROUNDS — no sample text, tape, photos or example page numbers.
+   The decorative SVG contains only drawn flourishes; all journal entries are live. */
+.sheet,.sheet.left,.sheet.right,.sheet.turn-sheet{
+ background-image:url("./diary-page-frame.svg"),radial-gradient(ellipse at 40% 30%,#f9e8c9 0%,#f2dbb3 65%,#d9b98a 100%)!important;
+ background-color:#f2dbb3!important;
+ background-size:100% 100%,100% 100%!important;
+ background-repeat:no-repeat!important;
+}
+.sheet:before,.sheet.left:before,.sheet.right:before,.sheet.turn-sheet:before{display:none!important;content:none!important}
+.sheet:after,.sheet.left:after,.sheet.right:after,.sheet.turn-sheet:after{display:none!important}
+.sheet .page-ornament{display:none!important}
 </style>
 </head>
 <body>
