@@ -170,6 +170,25 @@ opacity:.65;pointer-events:none}
 .book{transition:transform 1450ms cubic-bezier(.35,.05,.18,1),filter 1450ms ease}
 @media(max-width:700px){.epilogue-page{padding:8px 2px 24px}.epilogue-mark{font-size:26px;margin-bottom:5px}.epilogue-heading{font-size:26px;margin-bottom:7px}.epilogue-text{font-size:13px;line-height:1.36}.epilogue-sign{font-size:12px;margin-top:12px}}
 @media(prefers-reduced-motion:reduce){.sheet.page-arriving>div:not(.page-ornament),.page-answer.writing{animation:none!important}}
+
+/* Illustrated prologue: botanical engraving and decorative cartouche. */
+.epilogue-page{position:relative;isolation:isolate;padding:35px 27px 40px;gap:0}
+.epilogue-engraving{position:absolute;inset:5px;pointer-events:none;border:1px solid #a17b4b55;border-radius:19px 3px 19px 3px}
+.epilogue-engraving:after{content:"";position:absolute;inset:7px;border:1px solid #9d75425c;border-radius:14px 2px 14px 2px}
+.epilogue-corner{position:absolute;width:69px;height:69px;color:#916b3f;opacity:.82}
+.epilogue-corner svg{width:100%;height:100%}
+.epilogue-corner.top-left{top:0;left:0}
+.epilogue-corner.top-right{top:0;right:0;transform:scaleX(-1)}
+.epilogue-corner.bottom-left{bottom:0;left:0;transform:scaleY(-1)}
+.epilogue-corner.bottom-right{bottom:0;right:0;transform:scale(-1)}
+.epilogue-flourish{width:min(190px,82%);color:#9c7545;opacity:.83;margin:3px auto 10px}
+.epilogue-flourish svg{width:100%;display:block}
+.epilogue-flourish.bottom{transform:rotate(180deg);margin:13px auto 5px;width:min(155px,65%)}
+.epilogue-mark{font-size:28px;margin:0 0 4px;color:#a27a45}
+.epilogue-heading{margin-bottom:13px;font-size:clamp(27px,3vw,37px);letter-spacing:2.5px}
+.epilogue-text{max-width:325px;font-size:clamp(14px,1.48vw,17px);line-height:1.53;white-space:pre-line}
+.epilogue-sign{font-size:14px;margin-top:5px}
+@media(max-width:700px){.epilogue-page{padding:22px 10px 28px}.epilogue-corner{width:37px;height:37px}.epilogue-flourish{width:110px;margin:0 auto 3px}.epilogue-flourish.bottom{width:95px;margin:5px auto 2px}.epilogue-mark{font-size:19px}.epilogue-heading{font-size:24px;margin-bottom:7px}.epilogue-text{font-size:clamp(11px,2.5vw,13px);line-height:1.33}.epilogue-sign{font-size:11px}}
 </style>
 </head>
 <body>
@@ -259,7 +278,11 @@ function fillEpilogue(el){
  const heading=text("div","epilogue-heading","Пролог");
  const body=text("div","epilogue-text","У каждого дня есть своя история. Некоторые дни хочется запомнить навсегда, другие — просто прожить и отпустить.\n\nЭти страницы хранят не идеальные слова, а настоящие мысли: тихие открытия, маленькие радости, сомнения и надежды.\n\nПусть, перелистывая их спустя время, ты увидишь, каким был твой внутренний мир — и какой путь уже пройден.");
  const sign=text("div","epilogue-sign","365 дней. Одна история. Твоя.");
- frame.append(ornament,heading,body,sign);
+ const top=document.createElement("div");top.className="epilogue-flourish";top.setAttribute("aria-hidden","true");top.innerHTML='<svg viewBox="0 0 240 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 30H73Q95 30 106 17Q120 0 134 17Q145 30 167 30H232"/><path d="M78 30Q72 10 54 13Q61 30 78 30ZM162 30Q168 10 186 13Q179 30 162 30Z"/><path d="M108 28Q99 47 83 45Q89 29 108 28ZM132 28Q141 47 157 45Q151 29 132 28Z"/></g><path d="M120 12L126 24L139 30L126 36L120 48L114 36L101 30L114 24Z" fill="currentColor" opacity=".8"/><circle cx="28" cy="30" r="2" fill="currentColor"/><circle cx="212" cy="30" r="2" fill="currentColor"/></svg>';
+ const bottom=top.cloneNode(true);bottom.className="epilogue-flourish bottom";
+ const border=document.createElement("div");border.className="epilogue-engraving";border.setAttribute("aria-hidden","true");
+ for(const side of ["top-left","top-right","bottom-left","bottom-right"]){const corner=document.createElement("span");corner.className="epilogue-corner "+side;corner.innerHTML='<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 75V32Q5 5 32 5H75"/><path d="M15 62V32Q15 15 32 15H62"/><path d="M19 54Q35 50 42 34Q48 21 61 20"/><path d="M30 43Q19 33 25 21"/></g><g fill="currentColor" opacity=".72"><path d="M41 35Q56 37 62 25Q47 23 41 35Z"/><path d="M30 43Q17 49 17 59Q30 57 30 43Z"/><path d="M37 32Q31 17 42 14Q45 26 37 32Z"/></g></svg>';border.append(corner);}
+ frame.append(border,top,ornament,heading,body,bottom,sign);
  el.replaceChildren(frame);
 }
 function show(){
