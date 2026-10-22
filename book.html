@@ -107,6 +107,47 @@ opacity:.65;pointer-events:none}
 @keyframes pageContentArrive{from{opacity:0;transform:translateY(12px);filter:blur(3px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
 @media(max-width:700px){.page-ornament .corner{font-size:23px}.page-ornament .vine{display:none}.sheet:after{font-size:18px;bottom:9px}}
 @media(prefers-reduced-motion:reduce){.sheet.page-arriving>div:not(.page-ornament){animation:none}}
+
+/* New heirloom leather cover — interior pages remain untouched. */
+.cover{
+ background:
+  radial-gradient(ellipse at 28% 15%,rgba(197,126,67,.20),transparent 48%),
+  repeating-linear-gradient(33deg,transparent 0 3px,rgba(0,0,0,.055) 4px 5px),
+  linear-gradient(105deg,#24130e 0%,#4c291a 13%,#673922 47%,#492719 78%,#27140e 100%);
+ border:7px solid #3b2417;
+ border-left:13px ridge #82512c;
+ border-radius:4px 20px 20px 4px;
+ box-shadow:inset 0 0 0 2px #c49b5b,inset 0 0 0 8px #2d1a12,inset 0 0 0 10px #9e7848,inset 0 0 0 14px #382218,inset 0 0 65px #140b08,0 18px 32px #000a;
+}
+.cover:before{
+ content:"";position:absolute;inset:23px 26px;
+ border:2px solid #c4a06a;
+ border-radius:30px 7px 30px 7px;
+ box-shadow:0 0 0 4px #2c1a13,0 0 0 5px #9c7346,inset 0 0 0 4px #5d3924;
+ pointer-events:none;
+}
+.cover:after{
+ content:"❦";position:absolute;top:30px;left:50%;transform:translateX(-50%);
+ font:37px/1 "Cormorant Garamond",Georgia,serif;
+ color:#d3ad72;text-shadow:0 2px 2px #140b08;
+ border:0;inset:auto;pointer-events:none;
+}
+.cover img{
+ width:clamp(74px,12vw,137px);
+ border:2px solid #e1bc7d;border-radius:50%;
+ padding:11px;background:radial-gradient(circle,#67462d,#261711);
+ box-shadow:0 0 0 5px #352015,0 0 0 7px #ab7d46,0 8px 18px #110805b5;
+}
+.cover-title{
+ font:700 clamp(24px,3.7vw,44px)/1.03 "Cormorant Garamond",Georgia,serif;
+ color:#f1d3a0;text-shadow:0 2px 3px #1c0e09,0 0 15px #d1a25d55;
+ letter-spacing:.5px;max-width:90%;
+}
+.cover-sub{font:600 clamp(10px,1.45vw,17px) "Cormorant Garamond",Georgia,serif;letter-spacing:2.2px;color:#d9b47d}
+.cover-rule{height:9px;width:55%;background:none;position:relative;border-top:1px solid #c5a16b}
+.cover-rule:after{content:"✦";position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:#54301e;color:#dfbb80;padding:0 10px;font-size:18px}
+.book.opening .cover{box-shadow:inset 0 0 0 2px #c49b5b,inset 0 0 0 8px #2d1a12,inset 0 0 0 10px #9e7848,20px 14px 34px #0009}
+@media(max-width:700px){.cover{border-width:5px;border-left-width:9px}.cover:before{inset:15px 13px}.cover:after{top:18px;font-size:23px}.cover img{width:70px;padding:6px}.cover-title{font-size:clamp(18px,4.7vw,28px)}.cover-sub{letter-spacing:1px;font-size:10px}.cover-rule{width:58%;height:4px}}
 </style>
 </head>
 <body>
