@@ -20924,13 +20924,13 @@ restoreSession();
 
 .capsule-growth-leaf {
     position: absolute;
-    width: clamp(9px, 1.5%, 16px);
+    width: clamp(16px, 2.25%, 25px);
     height: auto;
     aspect-ratio: 30 / 44;
     transform: translate(-50%, -50%) rotate(var(--leaf-rotation)) scale(.05);
     transform-origin: 50% 90%;
     opacity: 0;
-    filter: drop-shadow(0 0 2px rgba(255, 164, 55, .35));
+    filter: drop-shadow(0 0 4px rgba(255, 177, 45, .75)) drop-shadow(0 0 9px rgba(255, 144, 31, .3));
     transition: opacity 850ms ease var(--leaf-delay),
                 transform 1150ms cubic-bezier(.2, 1.35, .4, 1) var(--leaf-delay);
 }
@@ -20942,7 +20942,7 @@ restoreSession();
 }
 
 .capsule-growth-leaf.is-grown {
-    opacity: .88;
+    opacity: 1;
     transform: translate(-50%, -50%) rotate(var(--leaf-rotation)) scale(1);
 }
 
@@ -21092,7 +21092,7 @@ restoreSession();
         leaf.style.top = position[1] + "%";
         leaf.style.setProperty("--leaf-rotation", position[2] + "deg");
         leaf.style.setProperty("--leaf-delay", (index % 5 * 90) + "ms");
-        leaf.innerHTML = '<svg viewBox="0 0 30 44" aria-hidden="true"><path d="M15 2 C25 9 27 22 15 37 C5 26 4 13 15 2 Z" fill="#e8a43e" stroke="#ffd075" stroke-width=".65"/><path d="M15 5 Q18 18 15 42 M15 24 L8 16 M15 29 L22 20" fill="none" stroke="#8f4d1c" stroke-width=".9" opacity=".65"/><path d="M13 7 Q8 16 12 26" fill="none" stroke="#ffe09a" stroke-width="1.2" opacity=".55"/></svg>';
+        leaf.innerHTML = '<svg viewBox="0 0 30 44" aria-hidden="true"><path d="M15 2 C25 9 27 22 15 37 C5 26 4 13 15 2 Z" fill="#ffc34b" stroke="#fff0a1" stroke-width=".65"/><path d="M15 5 Q18 18 15 42 M15 24 L8 16 M15 29 L22 20" fill="none" stroke="#8f4d1c" stroke-width=".9" opacity=".65"/><path d="M13 7 Q8 16 12 26" fill="none" stroke="#ffe09a" stroke-width="1.2" opacity=".55"/></svg>';
         leavesLayer.appendChild(leaf);
         return leaf;
     });
