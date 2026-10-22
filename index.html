@@ -20889,8 +20889,9 @@ restoreSession();
 .capsule-month-nav { display:flex; justify-content:space-between; align-items:center; color:#e4bd75; margin-bottom:16px; font-size:18px; }
 .capsule-month-nav button { color:#e4bd75; background:#302519; border:1px solid rgba(201,168,106,.35); border-radius:8px; width:35px; height:35px; cursor:pointer; }
 .capsule-month-nav button:disabled { opacity:.25; cursor:default; }
-.capsule-day-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; }
-.capsule-day { min-height:54px; padding:6px 2px; border-radius:8px; background:#191513; border:1px solid #39302a; color:#8d827a; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; font-size:12px; }
+.capsule-month-progress { color:#d6b875; font-size:13px; margin:0 0 12px; text-align:center; }
+.capsule-day-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; }
+.capsule-day { min-height:50px; padding:6px 1px; border-radius:8px; background:#191513; border:1px solid #39302a; color:#8d827a; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; font-size:11px; }
 .capsule-day.has-answer { color:#e6b567; cursor:pointer; border-color:#73532c; }
 .capsule-day.is-selected { background:#49301b; border-color:#e9a23d; box-shadow:0 0 0 1px rgba(233,162,61,.4); }
 .capsule-day:disabled { cursor:default; }
@@ -21068,6 +21069,7 @@ restoreSession();
               <span id="capsuleMonthTitle">Октябрь 2026</span>
               <button type="button" id="capsuleNextMonth" aria-label="Следующий месяц">›</button>
             </div>
+            <div id="capsuleMonthProgress" class="capsule-month-progress" aria-live="polite"></div>
             <div id="capsuleDayGrid" class="capsule-day-grid" aria-label="Дни месяца"></div>
             <div id="capsuleAnswerDetail" class="capsule-answer-detail" aria-live="polite">Выбери день, чтобы прочитать ответ.</div>
           </aside>
@@ -21166,6 +21168,9 @@ restoreSession();
         monthTitle.textContent = monthNames[month-1] + " " + year;
         prevMonth.disabled = selectedMonth === 0;
         nextMonth.disabled = selectedMonth === archiveMonths.length-1;
+        const answeredCount = Array.from({length:days},(_,i)=>archiveAnswers.has(key+"-"+(i+1))).filter(Boolean).length;
+        document.getElementById("capsuleMonthProgress").textContent =
+            answeredCount + " из " + days + " дней с ответами";
         dayGrid.replaceChildren();
         for(let day=1;day<=days;day++) {
             const answer = archiveAnswers.get(key + "-" + day);
