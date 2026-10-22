@@ -20890,6 +20890,7 @@ restoreSession();
 .capsule-month-nav button { color:#e4bd75; background:#302519; border:1px solid rgba(201,168,106,.35); border-radius:8px; width:35px; height:35px; cursor:pointer; }
 .capsule-month-nav button:disabled { opacity:.25; cursor:default; }
 .capsule-month-placeholder { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:25px; background:radial-gradient(ellipse at 50% 70%, #34474b 0%, #18262b 42%, #0b121a 100%); color:#d8bd91; font:500 19px Georgia,serif; line-height:1.6; }
+.capsule-november .capsule-growth-leaves { display:none; }
 .capsule-month-progress { color:#d6b875; font-size:13px; margin:0 0 12px; text-align:center; }
 .capsule-day-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; }
 .capsule-day { min-height:50px; padding:6px 1px; border-radius:8px; background:#191513; border:1px solid #39302a; color:#8d827a; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; font-size:11px; }
@@ -21237,44 +21238,62 @@ restoreSession();
     // Month-specific tree views. October retains its existing six original images.
     // November's approved artwork will live at capsule-assets/november/tree-01.png
     // (later growth stages can be added without changing archive records).
-    function updateMonthlyTree(key, count, days) {
+    // November uses one fixed landscape and 30 transparent growth layers.
+    // Changing month cancels pending image loads so October never gets overwritten.
+    async function updateMonthlyTree(key, count, days) {
         activeTreeMonth = key;
         const isOctober = key === "2026-10";
         const isNovember = key === "2026-11";
         status.textContent = (isOctober ? "Дерево октября" : isNovember ? "Дерево ноября" : "Дерево " + key)
             + " · " + count + " из " + days + " дней с ответами";
+        const version = ++imageVersion;
+        displayedCount = -1;
+        art.querySelector(".capsule-month-placeholder")?.remove();
+        art.classList.toggle("capsule-november", isNovember);
+        leaves.forEach(leaf => leaf.classList.remove("is-grown"));
+        topImage.style.opacity = "0";
+        topImage.removeAttribute("src");
+        error.classList.add("hidden");
         if (isOctober) {
-            art.classList.remove("capsule-november");
+            image.classList.remove("hidden");
             showProgress(count);
             return;
         }
-        ++imageVersion; // Cancel any pending October image load.
-        displayedCount = -1;
-        leaves.forEach(leaf => leaf.classList.remove("is-grown"));
-        topImage.removeAttribute("src");
-        topImage.style.opacity = "0";
         image.classList.add("hidden");
         image.removeAttribute("src");
-        error.classList.add("hidden");
-        art.classList.toggle("capsule-november", isNovember);
-        const placeholder = art.querySelector(".capsule-month-placeholder");
-        if (placeholder) placeholder.remove();
-        const info = document.createElement("div");
-        info.className = "capsule-month-placeholder";
-        info.textContent = isNovember
-            ? "Ноябрь · Туманный лес. Скоро здесь появится новое дерево."
-            : "Дерево этого месяца пока не подготовлено.";
-        art.appendChild(info);
-        if (isNovember) {
-            const requestedMonth = key;
+        if (!isNovember) {
+            const info = document.createElement("div");
+            info.className = "capsule-month-placeholder";
+            info.textContent = "Дерево этого месяца пока не подготовлено.";
+            art.appendChild(info);
+            return;
+        }
+        const folder = "./capsule-assets/november/";
+        const stage = Math.max(0, Math.min(30, count));
+        const load = src => new Promise((resolve, reject) => {
             const asset = new Image();
-            asset.onload = () => {
-                if (activeTreeMonth !== requestedMonth || overlay.classList.contains("hidden")) return;
-                image.src = asset.src;
-                image.classList.remove("hidden");
-                info.remove();
-            };
-            asset.src = "./capsule-assets/november/tree-01.png";
+            asset.onload = () => resolve(asset.src);
+            asset.onerror = reject;
+            asset.src = src;
+        });
+        try {
+            const [baseSrc, overlaySrc] = await Promise.all([
+                load(folder + "tree-base.png"),
+                stage ? load(folder + "tree-overlay-" + String(stage).padStart(2, "0") + ".png") : Promise.resolve(null)
+            ]);
+            if (version !== imageVersion || activeTreeMonth !== key || overlay.classList.contains("hidden")) return;
+            image.src = baseSrc;
+            image.style.opacity = "1";
+            image.classList.remove("hidden");
+            if (overlaySrc) {
+                topImage.src = overlaySrc;
+                topImage.style.opacity = "1";
+            }
+            displayedCount = stage;
+        } catch (err) {
+            if (version !== imageVersion || activeTreeMonth !== key) return;
+            console.error("November capsule asset loading error:", err);
+            error.classList.remove("hidden");
         }
     }
     let requestNumber = 0;
