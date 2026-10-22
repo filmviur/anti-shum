@@ -20924,21 +20924,19 @@ restoreSession();
 
 .capsule-growth-leaf {
     position: absolute;
-    width: clamp(16px, 2.25%, 25px);
-    height: auto;
-    aspect-ratio: 30 / 44;
+    width: clamp(19px, 2.7%, 30px);
+    aspect-ratio: 40 / 56;
+    background-repeat: no-repeat;
+    /* Original golden leaf is near x=64%, y=22% in tree-01. */
+    background-size: 1950% 1450%;
+    background-position: 63.8% 22.4%;
+    clip-path: polygon(49% 0%, 66% 9%, 82% 24%, 89% 43%, 82% 64%, 65% 84%, 50% 96%, 36% 81%, 17% 61%, 13% 40%, 25% 19%);
     transform: translate(-50%, -50%) rotate(var(--leaf-rotation)) scale(.05);
     transform-origin: 50% 90%;
     opacity: 0;
-    filter: drop-shadow(0 0 4px rgba(255, 177, 45, .75)) drop-shadow(0 0 9px rgba(255, 144, 31, .3));
+    filter: drop-shadow(0 0 3px rgba(255, 176, 58, .5));
     transition: opacity 850ms ease var(--leaf-delay),
                 transform 1150ms cubic-bezier(.2, 1.35, .4, 1) var(--leaf-delay);
-}
-
-.capsule-growth-leaf svg {
-    display: block;
-    width: 100%;
-    height: 100%;
 }
 
 .capsule-growth-leaf.is-grown {
@@ -21092,7 +21090,9 @@ restoreSession();
         leaf.style.top = position[1] + "%";
         leaf.style.setProperty("--leaf-rotation", position[2] + "deg");
         leaf.style.setProperty("--leaf-delay", (index % 5 * 90) + "ms");
-        leaf.innerHTML = '<svg viewBox="0 0 30 44" aria-hidden="true"><path d="M15 2 C25 9 27 22 15 37 C5 26 4 13 15 2 Z" fill="#ffc34b" stroke="#fff0a1" stroke-width=".65"/><path d="M15 5 Q18 18 15 42 M15 24 L8 16 M15 29 L22 20" fill="none" stroke="#8f4d1c" stroke-width=".9" opacity=".65"/><path d="M13 7 Q8 16 12 26" fill="none" stroke="#ffe09a" stroke-width="1.2" opacity=".55"/></svg>';
+        // Sample the glowing leaf painted into the original first-stage artwork.
+        // Reusing its texture avoids synthetic, sticker-like vector leaves.
+        leaf.style.backgroundImage = 'url("./capsule-assets/tree-01.png")';
         leavesLayer.appendChild(leaf);
         return leaf;
     });
