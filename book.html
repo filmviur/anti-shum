@@ -337,6 +337,7 @@ function show(){
  if(!closed){fillSlot(left,index*2);fillSlot(right,index*2+1);}
  $("pageInfo").textContent=closed?"Обложка":index===0?"Пролог · День 1":("Дни "+(index*2)+"–"+Math.min(365,index*2+1)+" / 365");
  prev.disabled=turning||closed;next.disabled=turning||index>=182;
+ if(typeof backCoverBtn!=="undefined")backCoverBtn.disabled=turning||!closed;
  if(!turning&&!closed)revealWriting();
 }
 function move(delta){
@@ -366,7 +367,7 @@ function move(delta){
   setTimeout(()=>{index=-1;turning=false;show();},1320);
   return;
  }
- if(reduced){index=target;show();return;}
+ if(reduced){index=target;cover.classList.remove("back-visible");backCoverBtn.textContent="Задняя обложка";show();return;}
  turning=true;show();
  const fly=document.createElement("div");fly.className="sheet turn-sheet"+(delta<0?" backwards":"");
  const n=delta>0?index*2+1:index*2;
