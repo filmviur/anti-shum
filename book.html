@@ -72,7 +72,7 @@ a{color:#d8b77f}button{cursor:pointer;font:inherit}button:disabled{opacity:.35;c
 <div class="cover" id="cover"><img src="./icon-512.png" alt="Иконка Анти-Шум"><div class="cover-rule"></div><div class="cover-title">Мои 365 дней<br>в Анти-Шум</div><div class="cover-sub">ЛИЧНАЯ КНИГА ВОСПОМИНАНИЙ</div><div class="cover-rule"></div></div>
 </div></main>
 <div class="nav"><button id="prevBtn" disabled>← Назад</button><span id="pageInfo">Обложка</span><button id="nextBtn" disabled>Вперёд →</button></div>
-<p class="notice">Книга наполняется автоматически из твоих ответов. Незаполненные дни сохраняют своё место. Кнопка печати создаёт книжную версию для сохранения в PDF через системное окно печати. Фотографии доступны при действующей авторизации.</p>
+<p class="notice">Книга наполняется автоматически из твоих ответов. Незаполненные дни сохраняют своё место. После 365 дней можно будет сохранить готовую книгу в PDF через системное окно печати. Фотографии доступны при действующей авторизации.</p>
 <script>
 (async function(){
 const client=window.supabase.createClient("https://mkyendzqoohqcwnycuys.supabase.co","sb_publishable_wscrhaPifbezRTe4rWs-Wg_j0kGqktT",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:"anti-shum-auth"}});
@@ -120,7 +120,9 @@ function move(delta){
  setTimeout(()=>{fly.remove();index=target;turning=false;show();},930);
 }
 prev.onclick=()=>move(-1);next.onclick=()=>move(1);
+function canExport(){const end=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate()+365);return Date.now()>=end.getTime();}
 function printBook(){
+ if(!canExport()){alert("Готовая книга станет доступна только после 365 дней. Пока можно листать предварительную версию.");return;}
  const frame=document.createElement("iframe");frame.style.cssText="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none";document.body.append(frame);
  const doc=frame.contentDocument;doc.open();doc.write('<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Мои 365 дней в Анти-Шум</title><style>@page{size:A5 portrait;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Georgia,serif;color:#46372a}.print-page{width:148mm;height:210mm;page-break-after:always;break-after:page;background:#f1e6ce;padding:19mm 16mm;position:relative;border:2mm solid #e0cfad}.title{text-align:center;font-size:16pt;color:#896b42}.date{text-align:center;font-size:20pt;margin:7mm 0}.rule{border-top:1px solid #ad9670;margin-bottom:10mm}.question{font-size:16pt;font-weight:bold;line-height:1.35;margin-bottom:9mm}.answer{font-size:11pt;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}.photo{max-width:100%;max-height:80mm;object-fit:contain;display:block;margin:0 auto 8mm}.foot{position:absolute;bottom:12mm;text-align:center;left:0;right:0;color:#957c56}.empty{text-align:center;color:#ac9577;margin-top:25mm}.book-cover{background:#402719;color:#efd4a3;display:flex;flex-direction:column;align-items:center;justify-content:center;border:8mm double #9d7845;text-align:center}.book-cover img{width:48mm;height:48mm;object-fit:contain}.book-cover h1{font-size:27pt;margin:15mm 0 4mm}@media print{.print-page{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body></body></html>');doc.close();
  const coverPage=doc.createElement("section");coverPage.className="print-page book-cover";
@@ -146,6 +148,8 @@ print.onclick=printBook;
 try{
  const {data:{user},error:authError}=await client.auth.getUser();
  if(authError||!user)throw Error("Чтобы открыть личную книгу, войди в аккаунт Анти-Шум.");
+ userId=user.id;
+ try{seen=new Set(JSON.parse(localStorage.getItem("antiShumBookSeen:"+userId)||"[]"));}catch(e){seen=new Set();}
  const [qs,as]=await Promise.all([
   client.from("questions").select("id,day,question"),
   client.from("answers").select("question_id,answer_text,photo_url,created_at").eq("user_id",user.id).order("created_at",{ascending:true})
@@ -171,9 +175,15 @@ try{
   const {data}=await client.storage.from("answer-photos").createSignedUrl(day.answer.photo_url,3600);
   if(data?.signedUrl)day.photo=data.signedUrl;
  }));
+ days.forEach((day,i)=>{if(day.answer&&!seen.has(i+1))newWriting.add(i+1);});
  const count=days.filter(d=>d.answer).length;
  $("progress").textContent="Заполнено "+count+" из 365 страниц · Книга создаётся вместе с тобой";
- $("loading").hidden=true;print.disabled=false;show();
+ $("loading").hidden=true;
+ const end=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate()+365);
+ print.disabled=!canExport();
+ print.textContent=canExport()?"Сохранить книгу в PDF":"PDF после "+end.toLocaleDateString("ru-RU");
+ print.title=canExport()?"Печатная книга A5":"Доступно после завершения 365 дней";
+ show();
 }catch(err){$("loading").textContent=err.message||"Не удалось загрузить книгу";console.error("Book loading error:",err);}
 })();
 </script>
