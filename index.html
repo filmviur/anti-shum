@@ -20929,8 +20929,9 @@ restoreSession();
     background-repeat: no-repeat;
     /* Transparent silhouette clips the original painted leaf texture. */
     clip-path: polygon(49% 0%, 66% 9%, 82% 24%, 89% 43%, 82% 64%, 65% 84%, 50% 96%, 36% 81%, 17% 61%, 13% 40%, 25% 19%);
-    transform: translate(-50%, -50%) rotate(var(--leaf-rotation)) scale(.05);
-    transform-origin: 50% 90%;
+    transform: translate(-50%, -92%) rotate(var(--leaf-rotation)) scale(.05);
+    /* The bottom tip of the leaf is attached to the branch coordinate. */
+    transform-origin: 50% 92%;
     opacity: 0;
     filter: brightness(var(--leaf-brightness, 1)) drop-shadow(0 0 2px rgba(255, 176, 58, .35));
     transition: opacity 850ms ease var(--leaf-delay),
@@ -20939,7 +20940,7 @@ restoreSession();
 
 .capsule-growth-leaf.is-grown {
     opacity: 1;
-    transform: translate(-50%, -50%) rotate(var(--leaf-rotation)) scale(var(--leaf-scale, 1));
+    transform: translate(-50%, -92%) rotate(var(--leaf-rotation)) scale(var(--leaf-scale, 1));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -21075,7 +21076,7 @@ restoreSession();
     // Branch-tip coordinates (x, y, angle, size, brightness).
     // Deliberately varied so leaves don't look like identical stamps.
     const leafPositions = [
-        [76,23,34,.73,1.02],[27,27,-38,.65,.92],[83,29,24,.70,.98],
+        [76,24,-28,.85,1.03],[27,29,32,.72,.97],[83,25,-22,.78,1.01],
         [27,32,32,.64,.85],[54,17,-17,.88,1.14],[77,20,48,.71,.96],
         [32,20,-37,.67,.91],[60,38,22,.8,1.04],[21,26,-24,.72,.94],
         [46,10,38,.61,.89],[69,15,-49,.77,1.08],[35,39,17,.7,.9],
