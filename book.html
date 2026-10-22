@@ -79,6 +79,7 @@ const client=window.supabase.createClient("https://mkyendzqoohqcwnycuys.supabase
 const $=id=>document.getElementById(id);
 const book=$("book"),cover=$("cover"),left=$("leftPage"),right=$("rightPage");
 const prev=$("prevBtn"),next=$("nextBtn"),print=$("printBtn");
+let userId="",seen=new Set(),newWriting=new Set(),audioCtx=null;
 let index=-1,turning=false,days=[],photoUrls=new Map(),startDate=new Date(2026,9,1);
 const MONTHS=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
 const pad=n=>String(n).padStart(2,"0");
@@ -90,9 +91,9 @@ function buildPage(day,number){
  if(day.answer){
   page.append(text("div","page-question",day.question||"Вопрос дня"));
   if(day.photo){
-   const img=document.createElement("img");img.className="page-photo";img.alt="Фотоответ";img.src=day.photo;page.append(img);
+   const note=document.createElement("div");note.className="photo-note";const img=document.createElement("img");img.className="page-photo";img.alt="Фотоответ";img.src=day.photo;note.append(img);page.append(note);
   }
-  page.append(text("div","page-answer",day.answer.answer_text||""));
+  const written=text("div","page-answer",day.answer.answer_text||"");if(newWriting.has(number))written.dataset.fresh="1";page.append(written);
  }else page.append(text("div","page-empty","Эта страница ждёт твоих мыслей…"));
  page.append(text("div","page-number",String(number)));
  return page;
@@ -107,11 +108,14 @@ function show(){
  prev.disabled=turning||closed;next.disabled=turning||index>=182;
 }
 function move(delta){
- if(turning)return;const target=Math.max(-1,Math.min(182,index+delta));if(target===index)return;
+ if(turning)return;
+ const target=Math.max(-1,Math.min(182,index+delta));if(target===index)return;
  if(index<0||window.matchMedia("(prefers-reduced-motion: reduce)").matches){index=target;show();return;}
  turning=true;show();
- const fly=document.createElement("div");fly.className="sheet turn-sheet";
- const page=days[Math.min(364,index*2+1)];if(page)fly.append(...buildPage(page,index*2+2).childNodes);
+ const fly=document.createElement("div");fly.className="sheet turn-sheet"+(delta<0?" backwards":"");
+ const n=delta>0?index*2+1:index*2;
+ const day=days[Math.min(364,n)];
+ if(day)fly.append(...buildPage(day,Math.min(365,n+1)).childNodes);
  book.append(fly);requestAnimationFrame(()=>requestAnimationFrame(()=>fly.classList.add("turning")));
  setTimeout(()=>{fly.remove();index=target;turning=false;show();},930);
 }
