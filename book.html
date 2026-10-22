@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мои 365 дней в Анти-Шум</title>
+<link rel="icon" href="./icon-512.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{color-scheme:dark;--gold:#c6a26b;--paper:#e9dcc1;--ink:#46372a}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 20%,#28231e,#0b0c11 76%);color:#e5d5bd;font-family:"PT Serif",Georgia,serif}
+header{max-width:1160px;margin:auto;padding:22px 22px 10px;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+h1{font:600 clamp(25px,4vw,40px) "Cormorant Garamond",serif;color:#e8c58b;margin:0}
+a{color:#d8b77f}button{cursor:pointer;font:inherit}button:disabled{opacity:.35;cursor:default}
+.actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.actions button,.nav button{border:1px solid #856a47;background:linear-gradient(#382a1e,#1d1712);color:#f2d7a3;border-radius:8px;padding:10px 15px}
+.actions button:hover:not(:disabled),.nav button:hover:not(:disabled){border-color:#edc989}
+.subtitle{color:#ac9a84;font-size:13px;margin:7px 0 0}
+.stage{display:flex;align-items:center;justify-content:center;min-height:min(73vh,740px);padding:16px 12px;perspective:2200px}
+.book{width:min(940px,96vw);height:min(610px,69vw);min-height:360px;display:grid;grid-template-columns:1fr 1fr;position:relative;filter:drop-shadow(0 25px 25px #0009)}
+.book.cover-mode{grid-template-columns:1fr}
+.cover{position:absolute;inset:0 0 0 50%;border-radius:5px 17px 17px 5px;transform-origin:left center;background:linear-gradient(90deg,#27170f 0%,#57341e 9%,#3b2114 24%,#512d19 74%,#27180e 100%);border:8px ridge #74512e;box-shadow:inset 0 0 0 3px #ba8e4d,inset 0 0 0 13px #342014,0 12px 22px #000a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;padding:28px;text-align:center;z-index:4;backface-visibility:hidden}
+.book.cover-mode .cover{left:0;right:0;margin:auto;width:50%}
+.cover img{width:clamp(80px,14vw,165px);aspect-ratio:1;object-fit:contain;border:3px solid #c9a36d;border-radius:16px;box-shadow:0 5px 24px #0008}
+.cover-title{font:700 clamp(23px,4vw,43px) "Cormorant Garamond",serif;line-height:1.05;color:#f2d5a0;text-shadow:0 2px 5px #100a07}
+.cover-sub{font:500 21px "Cormorant Garamond",serif;color:#d8b47b;letter-spacing:2px}
+.cover-rule{height:1px;width:70%;background:#b8935c}
+.sheet{position:relative;overflow:hidden;background:linear-gradient(90deg,#d2bf9e,#f1e6cd 8%,#eee0c3 95%,#ddc8a5);color:var(--ink);padding:38px 32px 29px;box-shadow:inset 0 0 35px #785e3433;min-width:0}
+.sheet.left{border-radius:11px 2px 2px 11px;border-right:1px solid #8f7555;background:linear-gradient(90deg,#ebdcc0 0%,#f2e5cd 85%,#c9b390 100%)}
+.sheet.right{border-radius:2px 11px 11px 2px}
+.sheet:before{content:"";position:absolute;inset:13px;border:1px solid #a58b634d;pointer-events:none}
+.page-kicker{text-align:center;color:#8a6d46;font:600 14px "Cormorant Garamond",serif;letter-spacing:2px;text-transform:uppercase}
+.page-date{text-align:center;font:600 27px "Cormorant Garamond",serif;margin:10px 0 20px}
+.page-rule{height:1px;background:#a58b6377;margin-bottom:18px}
+.page-question{font:600 clamp(20px,2.3vw,29px) "Cormorant Garamond",serif;line-height:1.16;color:#4d3826;margin-bottom:18px;overflow-wrap:anywhere}
+.page-answer{font:15px/1.75 "PT Serif",Georgia,serif;white-space:pre-wrap;overflow-wrap:anywhere;max-height:44%;overflow:auto}
+.page-photo{display:block;max-width:100%;max-height:32%;object-fit:contain;margin:0 auto 14px;border:5px solid #f8efdb;box-shadow:0 2px 8px #49321d55}
+.page-empty{color:#987f5e;font-style:italic;text-align:center;padding-top:26px}
+.page-number{position:absolute;bottom:21px;left:0;right:0;text-align:center;font:15px "Cormorant Garamond",serif;color:#8d785a}
+.book-spine{position:absolute;z-index:3;left:calc(50% - 8px);top:0;height:100%;width:16px;background:linear-gradient(90deg,#46301d77,#160d0a99,#8d745644);pointer-events:none}
+.turn-sheet{position:absolute;z-index:5;top:0;left:50%;width:50%;height:100%;transform-origin:left center;transform:rotateY(0deg);backface-visibility:hidden;pointer-events:none}
+.turn-sheet.turning{animation:pageflip .9s cubic-bezier(.3,.12,.25,1) both}
+@keyframes pageflip{0%{transform:rotateY(0)}100%{transform:rotateY(-180deg)}}
+.nav{display:flex;justify-content:center;align-items:center;gap:18px;padding:0 12px 12px}.nav span{min-width:150px;text-align:center;color:#d9b781}
+.notice{max-width:900px;margin:0 auto 22px;padding:0 20px;text-align:center;color:#b8a58b;font-size:13px;line-height:1.7}
+#loading{text-align:center;color:#d9b781}
+@media(max-width:700px){.stage{min-height:450px}.book{height:470px;min-height:0}.sheet{padding:29px 15px 22px}.page-date{font-size:21px}.page-question{font-size:19px}.page-answer{font-size:12px;line-height:1.5}.cover{padding:12px;border-width:5px}.cover-title{font-size:23px}.cover-sub{font-size:13px}.cover img{width:80px}.sheet:before{inset:7px}.page-kicker{font-size:10px}.page-number{bottom:12px}}
+@media(prefers-reduced-motion:reduce){.turn-sheet.turning{animation:none}}
+</style>
+</head>
+<body>
+<header><div><h1>Мои 365 дней в Анти-Шум</h1><p class="subtitle" id="progress">Книга воспоминаний · загрузка…</p></div><div class="actions"><a href="./index.html">← Вернуться в Анти-Шум</a><button id="printBtn" disabled>Подготовить PDF для печати</button></div></header>
+<div id="loading">Собираем страницы твоей книги…</div>
+<main class="stage"><div class="book" id="book">
+<div class="sheet left" id="leftPage"></div><div class="sheet right" id="rightPage"></div><div class="book-spine"></div>
+<div class="cover" id="cover"><img src="./icon-512.png" alt="Иконка Анти-Шум"><div class="cover-rule"></div><div class="cover-title">Мои 365 дней<br>в Анти-Шум</div><div class="cover-sub">ЛИЧНАЯ КНИГА ВОСПОМИНАНИЙ</div><div class="cover-rule"></div></div>
+</div></main>
+<div class="nav"><button id="prevBtn" disabled>← Назад</button><span id="pageInfo">Обложка</span><button id="nextBtn" disabled>Вперёд →</button></div>
+<p class="notice">Книга наполняется автоматически из твоих ответов. Незаполненные дни сохраняют своё место. Кнопка печати создаёт книжную версию для сохранения в PDF через системное окно печати. Фотографии доступны при действующей авторизации.</p>
+<script>
+(async function(){
+const client=window.supabase.createClient("https://mkyendzqoohqcwnycuys.supabase.co","sb_publishable_wscrhaPifbezRTe4rWs-Wg_j0kGqktT",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:"anti-shum-auth"}});
+const $=id=>document.getElementById(id);
+const book=$("book"),cover=$("cover"),left=$("leftPage"),right=$("rightPage");
+const prev=$("prevBtn"),next=$("nextBtn"),print=$("printBtn");
+let index=-1,turning=false,days=[],photoUrls=new Map(),startDate=new Date(2026,9,1);
+const MONTHS=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+const pad=n=>String(n).padStart(2,"0");
+const key=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const text=(tag,cls,value)=>{const el=document.createElement(tag);el.className=cls;el.textContent=value;return el};
+function buildPage(day,number){
+ const page=document.createElement("div");
+ page.append(text("div","page-kicker","День "+number+" из 365"),text("div","page-date",day.date.getDate()+" "+MONTHS[day.date.getMonth()]+" "+day.date.getFullYear()),text("div","page-rule",""));
+ if(day.answer){
+  page.append(text("div","page-question",day.question||"Вопрос дня"));
+  if(day.photo){
+   const img=document.createElement("img");img.className="page-photo";img.alt="Фотоответ";img.src=day.photo;page.append(img);
+  }
+  page.append(text("div","page-answer",day.answer.answer_text||""));
+ }else page.append(text("div","page-empty","Эта страница ждёт твоих мыслей…"));
+ page.append(text("div","page-number",String(number)));
+ return page;
+}
+function fill(el,day,number){el.replaceChildren(...buildPage(day,number).childNodes);}
+function show(){
+ const closed=index<0;cover.style.display=closed?"flex":"none";
+ book.classList.toggle("cover-mode",closed);
+ left.style.visibility=closed?"hidden":"visible";right.style.visibility=closed?"hidden":"visible";
+ if(!closed){const n=index*2;fill(left,days[n],n+1);if(days[n+1])fill(right,days[n+1],n+2);else right.replaceChildren();}
+ $("pageInfo").textContent=closed?"Обложка":(index*2+1)+"–"+Math.min(365,index*2+2)+" / 365";
+ prev.disabled=turning||closed;next.disabled=turning||index>=182;
+}
+function move(delta){
+ if(turning)return;const target=Math.max(-1,Math.min(182,index+delta));if(target===index)return;
+ if(index<0||window.matchMedia("(prefers-reduced-motion: reduce)").matches){index=target;show();return;}
+ turning=true;show();
+ const fly=document.createElement("div");fly.className="sheet turn-sheet";
+ const page=days[Math.min(364,index*2+1)];if(page)fly.append(...buildPage(page,index*2+2).childNodes);
+ book.append(fly);requestAnimationFrame(()=>requestAnimationFrame(()=>fly.classList.add("turning")));
+ setTimeout(()=>{fly.remove();index=target;turning=false;show();},930);
+}
+prev.onclick=()=>move(-1);next.onclick=()=>move(1);
+function printBook(){
+ const frame=document.createElement("iframe");frame.style.cssText="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none";document.body.append(frame);
+ const doc=frame.contentDocument;doc.open();doc.write('<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Мои 365 дней в Анти-Шум</title><style>@page{size:A5 portrait;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Georgia,serif;color:#46372a}.print-page{width:148mm;height:210mm;page-break-after:always;break-after:page;background:#f1e6ce;padding:19mm 16mm;position:relative;border:2mm solid #e0cfad}.title{text-align:center;font-size:16pt;color:#896b42}.date{text-align:center;font-size:20pt;margin:7mm 0}.rule{border-top:1px solid #ad9670;margin-bottom:10mm}.question{font-size:16pt;font-weight:bold;line-height:1.35;margin-bottom:9mm}.answer{font-size:11pt;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}.photo{max-width:100%;max-height:80mm;object-fit:contain;display:block;margin:0 auto 8mm}.foot{position:absolute;bottom:12mm;text-align:center;left:0;right:0;color:#957c56}.empty{text-align:center;color:#ac9577;margin-top:25mm}.book-cover{background:#402719;color:#efd4a3;display:flex;flex-direction:column;align-items:center;justify-content:center;border:8mm double #9d7845;text-align:center}.book-cover img{width:48mm;height:48mm;object-fit:contain}.book-cover h1{font-size:27pt;margin:15mm 0 4mm}@media print{.print-page{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body></body></html>');doc.close();
+ const coverPage=doc.createElement("section");coverPage.className="print-page book-cover";
+ const coverImg=doc.createElement("img");coverImg.src=new URL("./icon-512.png",location.href).href;coverPage.append(coverImg);
+ const heading=doc.createElement("h1");heading.textContent="Мои 365 дней в Анти-Шум";coverPage.append(heading);
+ const sub=doc.createElement("div");sub.textContent="ЛИЧНАЯ КНИГА ВОСПОМИНАНИЙ";coverPage.append(sub);doc.body.append(coverPage);
+ days.forEach((day,i)=>{
+  const page=doc.createElement("section");page.className="print-page";
+  const append=(tag,cls,value)=>{const el=doc.createElement(tag);el.className=cls;el.textContent=value;page.append(el)};
+  append("div","title","День "+(i+1)+" из 365");
+  append("div","date",day.date.getDate()+" "+MONTHS[day.date.getMonth()]+" "+day.date.getFullYear());
+  append("div","rule","");
+  if(day.answer){
+   append("div","question",day.question||"Вопрос дня");
+   if(day.photo){const img=doc.createElement("img");img.className="photo";img.src=day.photo;page.append(img);}
+   append("div","answer",day.answer.answer_text||"");
+  }else append("div","empty","Эта страница ждёт твоих мыслей…");
+  append("div","foot",String(i+1));doc.body.append(page);
+ });
+ const images=[...doc.images];Promise.all(images.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;}))).then(()=>{frame.contentWindow.focus();frame.contentWindow.print();setTimeout(()=>frame.remove(),120000);});
+}
+print.onclick=printBook;
+try{
+ const {data:{user},error:authError}=await client.auth.getUser();
+ if(authError||!user)throw Error("Чтобы открыть личную книгу, войди в аккаунт Анти-Шум.");
+ const [qs,as]=await Promise.all([
+  client.from("questions").select("id,day,question"),
+  client.from("answers").select("question_id,answer_text,photo_url,created_at").eq("user_id",user.id).order("created_at",{ascending:true})
+ ]);
+ if(qs.error)throw qs.error;if(as.error)throw as.error;
+ const questions=new Map((qs.data||[]).map(q=>[String(q.id),q]));
+ const answers=new Map();
+ for(const a of as.data||[]){
+  const date=new Date(a.created_at);if(isNaN(date))continue;
+  const q=questions.get(String(a.question_id));
+  let dayKey=key(date);
+  if(date.getFullYear()===2026&&date.getMonth()===9&&q&&Number(q.day)>=1&&Number(q.day)<=31)
+   dayKey="2026-10-"+pad(Number(q.day));
+  answers.set(dayKey,{answer:a,question:q?.question||""});
+ }
+ for(let i=0;i<365;i++){
+  const date=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate()+i);
+  const data=answers.get(key(date));days.push({date,answer:data?.answer||null,question:data?.question||"",photo:null});
+ }
+ // Resolve only actual user photos; no photos are embedded for other accounts.
+ await Promise.all(days.map(async day=>{
+  if(!day.answer?.photo_url)return;
+  const {data}=await client.storage.from("answer-photos").createSignedUrl(day.answer.photo_url,3600);
+  if(data?.signedUrl)day.photo=data.signedUrl;
+ }));
+ const count=days.filter(d=>d.answer).length;
+ $("progress").textContent="Заполнено "+count+" из 365 страниц · Книга создаётся вместе с тобой";
+ $("loading").hidden=true;print.disabled=false;show();
+}catch(err){$("loading").textContent=err.message||"Не удалось загрузить книгу";console.error("Book loading error:",err);}
+})();
+</script>
+</body></html>
