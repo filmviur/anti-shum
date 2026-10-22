@@ -20915,39 +20915,39 @@ restoreSession();
     transition: opacity 1100ms ease-in-out;
 }
 
-.capsule-growth-lights {
+.capsule-growth-leaves {
     position: absolute;
     inset: 0;
-    pointer-events: none;
     overflow: hidden;
+    pointer-events: none;
 }
 
-.capsule-growth-light {
+.capsule-growth-leaf {
     position: absolute;
-    width: clamp(3px, .7vw, 8px);
-    aspect-ratio: 1;
-    border-radius: 50%;
-    background: #fff0a5;
-    box-shadow: 0 0 7px 3px rgba(255, 183, 65, .65),
-                0 0 19px 9px rgba(255, 137, 42, .22);
+    width: clamp(15px, 2.8%, 28px);
+    height: auto;
+    aspect-ratio: 40 / 56;
+    transform: translate(-50%, -50%) rotate(var(--leaf-rotation)) scale(.05);
+    transform-origin: 50% 90%;
     opacity: 0;
-    transform: scale(.2);
-    transition: opacity 1000ms ease, transform 1200ms ease;
+    filter: drop-shadow(0 0 6px rgba(255, 171, 40, .6));
+    transition: opacity 850ms ease var(--leaf-delay),
+                transform 1150ms cubic-bezier(.2, 1.35, .4, 1) var(--leaf-delay);
 }
 
-.capsule-growth-light.is-awake {
-    opacity: var(--capsule-glow, .3);
-    transform: scale(1);
-    animation: capsuleLightBreath 4s ease-in-out infinite alternate;
+.capsule-growth-leaf svg {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
-@keyframes capsuleLightBreath {
-    from { filter: brightness(.75); }
-    to { filter: brightness(1.4); }
+.capsule-growth-leaf.is-grown {
+    opacity: .95;
+    transform: translate(-50%, -50%) rotate(var(--leaf-rotation)) scale(1);
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .capsule-growth-light { transition: none; animation: none !important; }
+    .capsule-growth-leaf { transition: none; }
 }
 
 .capsule-image-error {
@@ -21067,28 +21067,33 @@ restoreSession();
     image.insertAdjacentElement("afterend", topImage);
 
     image.onerror = function () { error.classList.remove("hidden"); };
-    // Tiny lights appear one by one as new days are answered.
-    // They sit above one complete image; landscapes are never blended.
+    // Every answered day adds a golden leaf on the tree's branches.
+    // Leaf coordinates are normalized to the square artwork.
     const art = image.closest(".capsule-art");
-    const lightsLayer = document.createElement("div");
-    lightsLayer.className = "capsule-growth-lights";
-    lightsLayer.setAttribute("aria-hidden", "true");
-    art.appendChild(lightsLayer);
-    const lightPositions = [
-        [46,29],[58,37],[34,41],[68,28],[23,33],[51,18],[77,40],
-        [41,47],[62,51],[30,23],[71,18],[19,48],[54,43],[38,15],
-        [83,32],[26,56],[65,12],[48,55],[75,52],[15,27],[57,10],
-        [33,34],[69,46],[44,8],[80,21],[22,18],[60,27],[37,57],
-        [52,50],[72,34],[47,35]
+    const leavesLayer = document.createElement("div");
+    leavesLayer.className = "capsule-growth-leaves";
+    leavesLayer.setAttribute("aria-hidden", "true");
+    art.appendChild(leavesLayer);
+
+    const leafPositions = [
+        [64,27,-28],[39,31,40],[72,34,-45],[27,35,25],[54,19,-35],
+        [77,23,45],[32,22,-25],[60,40,35],[21,29,-30],[46,12,20],
+        [69,17,-45],[35,42,45],[82,35,-20],[51,35,20],[25,47,-35],
+        [74,45,35],[44,25,-25],[58,10,35],[17,39,-30],[67,51,25],
+        [36,13,-40],[80,16,40],[29,17,-30],[57,31,25],[46,43,-40],
+        [73,11,30],[20,21,-25],[62,22,40],[42,38,-30],[84,27,25],
+        [53,48,-35]
     ];
-    const lights = lightPositions.map(function (position, index) {
-        const light = document.createElement("span");
-        light.className = "capsule-growth-light";
-        light.style.left = position[0] + "%";
-        light.style.top = position[1] + "%";
-        light.style.animationDelay = (index % 7 * -0.43) + "s";
-        lightsLayer.appendChild(light);
-        return light;
+    const leaves = leafPositions.map(function (position, index) {
+        const leaf = document.createElement("span");
+        leaf.className = "capsule-growth-leaf";
+        leaf.style.left = position[0] + "%";
+        leaf.style.top = position[1] + "%";
+        leaf.style.setProperty("--leaf-rotation", position[2] + "deg");
+        leaf.style.setProperty("--leaf-delay", (index % 5 * 90) + "ms");
+        leaf.innerHTML = '<svg viewBox="0 0 40 56" aria-hidden="true"><defs><linearGradient id="capsuleLeafGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3a1"/><stop offset=".48" stop-color="#ffb935"/><stop offset="1" stop-color="#b94d13"/></linearGradient></defs><path d="M20 3 C38 14 39 34 20 47 C2 35 2 15 20 3 Z" fill="url(#capsuleLeafGold)" stroke="#ffe29a" stroke-width="1.2"/><path d="M20 7 L20 53 M20 31 L9 22 M20 39 L31 25" fill="none" stroke="#9c4b12" stroke-width="1.5" opacity=".65"/></svg>';
+        leavesLayer.appendChild(leaf);
+        return leaf;
     });
 
     let requestNumber = 0;
@@ -21124,10 +21129,9 @@ restoreSession();
         }, 0);
         const stage = stages[stageIndex];
 
-        lights.forEach(function (light, index) {
-            light.classList.toggle("is-awake", index < count);
+        leaves.forEach(function (leaf, index) {
+            leaf.classList.toggle("is-grown", index < count);
         });
-        art.style.setProperty("--capsule-glow", (0.14 + count / 31 * 0.32).toFixed(3));
 
         if (displayedCount === count) return;
         try {
