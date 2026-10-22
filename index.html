@@ -21247,6 +21247,7 @@ restoreSession();
         status.textContent = (isOctober ? "Дерево октября" : isNovember ? "Дерево ноября" : "Дерево " + key)
             + " · " + count + " из " + days + " дней с ответами";
         const version = ++imageVersion;
+        art.querySelector(".capsule-previous-growth")?.remove();
         displayedCount = -1;
         art.querySelector(".capsule-month-placeholder")?.remove();
         art.classList.toggle("capsule-november", isNovember);
@@ -21276,19 +21277,50 @@ restoreSession();
             asset.onerror = reject;
             asset.src = src;
         });
+        const storageKey = "antiShumCapsuleSeen:" + currentUser.id + ":" + key;
+        let previousStage = stage;
         try {
-            const [baseSrc, overlaySrc] = await Promise.all([
+            const saved = localStorage.getItem(storageKey);
+            if (saved !== null) previousStage = Math.max(0, Math.min(stage, Number(saved) || 0));
+        } catch (_) {}
+        const shouldAnimate = previousStage < stage &&
+            !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        try {
+            const [baseSrc, overlaySrc, previousSrc] = await Promise.all([
                 load(folder + "tree-base.png"),
-                stage ? load(folder + "tree-overlay-" + String(stage).padStart(2, "0") + ".png") : Promise.resolve(null)
+                stage ? load(folder + "tree-overlay-" + String(stage).padStart(2, "0") + ".png") : Promise.resolve(null),
+                shouldAnimate && previousStage
+                    ? load(folder + "tree-overlay-" + String(previousStage).padStart(2, "0") + ".png")
+                    : Promise.resolve(null)
             ]);
             if (version !== imageVersion || activeTreeMonth !== key || overlay.classList.contains("hidden")) return;
             image.src = baseSrc;
             image.style.opacity = "1";
             image.classList.remove("hidden");
             if (overlaySrc) {
+                topImage.style.transition = shouldAnimate ? "opacity 2600ms ease-in-out" : "none";
+                topImage.style.opacity = shouldAnimate ? "0" : "1";
                 topImage.src = overlaySrc;
-                topImage.style.opacity = "1";
+                if (shouldAnimate) {
+                    if (previousSrc) {
+                        const previous = document.createElement("img");
+                        previous.className = "capsule-tree-next capsule-previous-growth";
+                        previous.alt = "";
+                        previous.setAttribute("aria-hidden", "true");
+                        previous.src = previousSrc;
+                        previous.style.transition = "none";
+                        previous.style.opacity = "1";
+                        topImage.insertAdjacentElement("beforebegin", previous);
+                    }
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        if (version === imageVersion && activeTreeMonth === key) topImage.style.opacity = "1";
+                    }));
+                    setTimeout(() => {
+                        if (version === imageVersion) art.querySelector(".capsule-previous-growth")?.remove();
+                    }, 2800);
+                }
             }
+            try { localStorage.setItem(storageKey, String(stage)); } catch (_) {}
             displayedCount = stage;
         } catch (err) {
             if (version !== imageVersion || activeTreeMonth !== key) return;
