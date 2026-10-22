@@ -20825,146 +20825,6 @@ cancelAppealBtn.addEventListener("click", function() {
    КАПСУЛА ВРЕМЕНИ — ЭКРАН
 ========================================= */
 
-document.addEventListener("DOMContentLoaded", function initTimeCapsule() {
-    const openBtn = document.getElementById("openTimeCapsuleBtn");
-    const overlay = document.getElementById("timeCapsuleOverlay");
-    const backBtn = document.getElementById("capsuleBackBtn");
-    const image = document.getElementById("capsuleTreeImage");
-    const error = document.getElementById("capsuleImageError");
-    const status = overlay?.querySelector(".capsule-status");
-    if (!openBtn || !overlay || !backBtn || !image || !error || !status) return;
-
-    // Six existing images form 31 gradually blended states.
-    // The slower early growth prevents a nearly full crown after 9 answers.
-    const stages = [1, 7, 15, 22, 28, 31];
-    const topImage = document.createElement("img");
-    topImage.alt = "";
-    topImage.setAttribute("aria-hidden", "true");
-    topImage.className = "capsule-tree-next";
-    image.insertAdjacentElement("afterend", topImage);
-
-    let imageVersion = 0;
-    let displayedCount = -1;
-    const imageCache = new Map();
-
-    function imagePath(day) {
-        return "./capsule-assets/tree-" + String(day).padStart(2, "0") + ".png";
-    }
-
-    function preloadStage(day) {
-        if (imageCache.has(day)) return imageCache.get(day);
-        const loading = new Promise(function (resolve, reject) {
-            const asset = new Image();
-            asset.onload = function () { resolve(asset.src); };
-            asset.onerror = reject;
-            asset.src = imagePath(day);
-        });
-        imageCache.set(day, loading);
-        return loading;
-    }
-
-    async function showProgress(answerCount) {
-        const count = Math.max(0, Math.min(31, answerCount));
-        if (displayedCount === count) return;
-        const version = ++imageVersion;
-
-        // Each answered day has its own blend, not a sudden jump to a new file.
-        const position = Math.pow(count / 31, 2.2) * (stages.length - 1);
-        const lowerIndex = Math.min(Math.floor(position), stages.length - 1);
-        const upperIndex = Math.min(lowerIndex + 1, stages.length - 1);
-        const blend = position - lowerIndex;
-
-        try {
-            const sources = await Promise.all([
-                preloadStage(stages[lowerIndex]),
-                preloadStage(stages[upperIndex])
-            ]);
-            if (version !== imageVersion || overlay.classList.contains("hidden")) return;
-
-            image.src = sources[0];
-            topImage.src = sources[1];
-            image.classList.remove("hidden");
-            error.classList.add("hidden");
-            topImage.style.opacity = "0";
-            // Trigger CSS transition after setting the new source.
-            requestAnimationFrame(function () {
-                requestAnimationFrame(function () {
-                    if (version === imageVersion) topImage.style.opacity = String(blend);
-                });
-            });
-            displayedCount = count;
-        } catch (err) {
-            console.error("Time capsule image loading error:", err);
-            if (version === imageVersion) {
-                image.classList.add("hidden");
-                topImage.style.opacity = "0";
-                error.classList.remove("hidden");
-            }
-        }
-    }
-
-    async function updateTree() {
-        const request = ++requestNumber;
-        if (!currentUser) {
-            status.textContent = "Войдите в профиль, чтобы увидеть своё дерево";
-            return;
-        }
-
-        status.textContent = "Загружаем историю дерева…";
-        try {
-            const questionsResult = await supabaseClient
-                .from("questions")
-                .select("id, day")
-                .gte("day", 1)
-                .lte("day", 31);
-
-            if (questionsResult.error) throw questionsResult.error;
-            const questions = questionsResult.data || [];
-            const daysById = new Map(questions.map(q => [String(q.id), Number(q.day)]));
-            let answeredDays = new Set();
-
-            if (questions.length) {
-                const answerResult = await supabaseClient
-                    .from("answers")
-                    .select("question_id")
-                    .eq("user_id", currentUser.id)
-                    .in("question_id", questions.map(q => q.id));
-
-                if (answerResult.error) throw answerResult.error;
-                answeredDays = new Set(
-                    (answerResult.data || [])
-                        .map(a => daysById.get(String(a.question_id)))
-                        .filter(day => Number.isInteger(day) && day >= 1 && day <= 31)
-                );
-            }
-
-            if (request !== requestNumber || overlay.classList.contains("hidden")) return;
-            const count = answeredDays.size;
-            // Progress is smoothly interpolated across all 31 answers.
-            status.textContent = "Твоё дерево · " + count + " из 31 дней с ответами";
-            showProgress(count);
-        } catch (err) {
-            console.error("Time capsule loading error:", err);
-            if (request === requestNumber) {
-                status.textContent = "Не удалось загрузить прогресс дерева";
-            }
-        }
-    }
-
-    function closeCapsule() {
-        requestNumber++;
-        overlay.classList.add("hidden");
-        document.body.style.overflow = "";
-    }
-
-    openBtn.addEventListener("click", function () {
-        overlay.classList.remove("hidden");
-        document.body.style.overflow = "hidden";
-        overlay.scrollTop = 0;
-        updateTree();
-    });
-    backBtn.addEventListener("click", closeCapsule);
-});
 
 /* =========================================================
    START
@@ -21150,6 +21010,151 @@ restoreSession();
 
     </div>
 </section>
+
+<script>
+/* Time capsule: initialize only after the overlay and its image exist. */
+(function initTimeCapsule() {
+    const openBtn = document.getElementById("openTimeCapsuleBtn");
+    const overlay = document.getElementById("timeCapsuleOverlay");
+    const backBtn = document.getElementById("capsuleBackBtn");
+    const image = document.getElementById("capsuleTreeImage");
+    const error = document.getElementById("capsuleImageError");
+    const status = overlay?.querySelector(".capsule-status");
+    if (!openBtn || !overlay || !backBtn || !image || !error || !status) return;
+
+    // Six existing images form 31 gradually blended states.
+    // The slower early growth prevents a nearly full crown after 9 answers.
+    const stages = [1, 7, 15, 22, 28, 31];
+    const topImage = document.createElement("img");
+    topImage.alt = "";
+    topImage.setAttribute("aria-hidden", "true");
+    topImage.className = "capsule-tree-next";
+    image.insertAdjacentElement("afterend", topImage);
+
+    image.onerror = function () { error.classList.remove("hidden"); };
+    let imageVersion = 0;
+    let displayedCount = -1;
+    const imageCache = new Map();
+
+    function imagePath(day) {
+        return "./capsule-assets/tree-" + String(day).padStart(2, "0") + ".png";
+    }
+
+    function preloadStage(day) {
+        if (imageCache.has(day)) return imageCache.get(day);
+        const loading = new Promise(function (resolve, reject) {
+            const asset = new Image();
+            asset.onload = function () { resolve(asset.src); };
+            asset.onerror = reject;
+            asset.src = imagePath(day);
+        });
+        imageCache.set(day, loading);
+        return loading;
+    }
+
+    async function showProgress(answerCount) {
+        const count = Math.max(0, Math.min(31, answerCount));
+        if (displayedCount === count) return;
+        const version = ++imageVersion;
+
+        // Each answered day has its own blend, not a sudden jump to a new file.
+        const position = Math.pow(count / 31, 2.2) * (stages.length - 1);
+        const lowerIndex = Math.min(Math.floor(position), stages.length - 1);
+        const upperIndex = Math.min(lowerIndex + 1, stages.length - 1);
+        const blend = position - lowerIndex;
+
+        try {
+            const sources = await Promise.all([
+                preloadStage(stages[lowerIndex]),
+                preloadStage(stages[upperIndex])
+            ]);
+            if (version !== imageVersion || overlay.classList.contains("hidden")) return;
+
+            image.src = sources[0];
+            topImage.src = sources[1];
+            image.classList.remove("hidden");
+            error.classList.add("hidden");
+            topImage.style.opacity = "0";
+            // Trigger CSS transition after setting the new source.
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    if (version === imageVersion) topImage.style.opacity = String(blend);
+                });
+            });
+            displayedCount = count;
+        } catch (err) {
+            console.error("Time capsule image loading error:", err);
+            if (version === imageVersion) {
+                image.classList.add("hidden");
+                topImage.style.opacity = "0";
+                error.classList.remove("hidden");
+            }
+        }
+    }
+
+    async function updateTree() {
+        const request = ++requestNumber;
+        if (!currentUser) {
+            status.textContent = "Войдите в профиль, чтобы увидеть своё дерево";
+            return;
+        }
+
+        status.textContent = "Загружаем историю дерева…";
+        try {
+            const questionsResult = await supabaseClient
+                .from("questions")
+                .select("id, day")
+                .gte("day", 1)
+                .lte("day", 31);
+
+            if (questionsResult.error) throw questionsResult.error;
+            const questions = questionsResult.data || [];
+            const daysById = new Map(questions.map(q => [String(q.id), Number(q.day)]));
+            let answeredDays = new Set();
+
+            if (questions.length) {
+                const answerResult = await supabaseClient
+                    .from("answers")
+                    .select("question_id")
+                    .eq("user_id", currentUser.id)
+                    .in("question_id", questions.map(q => q.id));
+
+                if (answerResult.error) throw answerResult.error;
+                answeredDays = new Set(
+                    (answerResult.data || [])
+                        .map(a => daysById.get(String(a.question_id)))
+                        .filter(day => Number.isInteger(day) && day >= 1 && day <= 31)
+                );
+            }
+
+            if (request !== requestNumber || overlay.classList.contains("hidden")) return;
+            const count = answeredDays.size;
+            // Progress is smoothly interpolated across all 31 answers.
+            status.textContent = "Твоё дерево · " + count + " из 31 дней с ответами";
+            showProgress(count);
+        } catch (err) {
+            console.error("Time capsule loading error:", err);
+            if (request === requestNumber) {
+                status.textContent = "Не удалось загрузить прогресс дерева";
+            }
+        }
+    }
+
+    function closeCapsule() {
+        requestNumber++;
+        overlay.classList.add("hidden");
+        document.body.style.overflow = "";
+    }
+
+    openBtn.addEventListener("click", function () {
+        overlay.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+        overlay.scrollTop = 0;
+        updateTree();
+    });
+    backBtn.addEventListener("click", closeCapsule);
+})();
+</script>
 
 </body>
 </html>
