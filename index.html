@@ -21058,36 +21058,26 @@ restoreSession();
         if (displayedCount === count) return;
         const version = ++imageVersion;
 
-        // Each answered day has its own blend, not a sudden jump to a new file.
-        const position = Math.pow(count / 31, 2.2) * (stages.length - 1);
-        const lowerIndex = Math.min(Math.floor(position), stages.length - 1);
-        const upperIndex = Math.min(lowerIndex + 1, stages.length - 1);
-        const blend = position - lowerIndex;
+        // Show one fully opaque painting. Persistent blending of two
+        // different landscapes created ghost branches and an unfinished look.
+        const stage = stages.reduce(function (chosen, day) {
+            return count >= day ? day : chosen;
+        }, 1);
 
         try {
-            const sources = await Promise.all([
-                preloadStage(stages[lowerIndex]),
-                preloadStage(stages[upperIndex])
-            ]);
+            const source = await preloadStage(stage);
             if (version !== imageVersion || overlay.classList.contains("hidden")) return;
-
-            image.src = sources[0];
-            topImage.src = sources[1];
+            image.src = source;
+            image.style.opacity = "1";
             image.classList.remove("hidden");
-            error.classList.add("hidden");
             topImage.style.opacity = "0";
-            // Trigger CSS transition after setting the new source.
-            requestAnimationFrame(function () {
-                requestAnimationFrame(function () {
-                    if (version === imageVersion) topImage.style.opacity = String(blend);
-                });
-            });
+            topImage.removeAttribute("src");
+            error.classList.add("hidden");
             displayedCount = count;
         } catch (err) {
             console.error("Time capsule image loading error:", err);
             if (version === imageVersion) {
                 image.classList.add("hidden");
-                topImage.style.opacity = "0";
                 error.classList.remove("hidden");
             }
         }
