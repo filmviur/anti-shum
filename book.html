@@ -592,12 +592,91 @@ opacity:.65;pointer-events:none}
  .book .sheet .question-label,.book .sheet .answer-label{font-size:14px!important}
  .book .sheet .page-question,.book .sheet .page-answer{font-size:16px!important}
 }
+
+/* 3D-книга в закрытом виде: физические пропорции оригинальной обложки. */
+.stage{position:relative;isolation:isolate}
+.book-closed-scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;perspective:1500px;z-index:8}
+.book-closed-scene[hidden]{display:none!important}
+.book-3d{
+ --cover-yaw:-8deg;--open-yaw:-165deg;
+ width:min(74vw,360px);aspect-ratio:719/995;height:auto;position:relative;
+ transform-style:preserve-3d;transform:rotateX(-3deg) rotateY(var(--cover-yaw));
+ transition:transform 620ms cubic-bezier(.22,.7,.25,1),opacity .5s ease;
+ cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;
+ outline-offset:9px;will-change:transform;
+}
+.book-3d:focus-visible{outline:2px solid #d9b781;border-radius:7px}
+.book-3d.dragging{cursor:grabbing;transition:none}
+.book-3d-face{position:absolute;inset:0;border-radius:4px 12px 12px 4px;
+ background-position:center;background-size:100% 100%;background-repeat:no-repeat;
+ backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 0 0 1px #412212,0 9px 15px #120a06a6}
+.book-3d-front{background-image:url("./diary-front.webp");transform:translateZ(13px)}
+.book-3d-back{background-image:url("./diary-back.webp");transform:rotateY(180deg) translateZ(13px)}
+.book-3d-spine,.book-3d-pages{position:absolute;top:0;height:100%;width:26px;backface-visibility:hidden}
+.book-3d-spine{left:-13px;background:#4a2a16 url("./diary-spine.webp") center/100% 100% no-repeat;transform:rotateY(-90deg);box-shadow:inset 0 0 8px #100700bb}
+.book-3d-pages{right:-13px;transform:rotateY(90deg);background:repeating-linear-gradient(90deg,#bda782 0 1px,#f5e6c8 1px 3px)}
+.book-closed-scene.opening{pointer-events:none}
+.book-closed-scene.opening .book-3d{
+ transform:rotateX(-5deg) rotateY(var(--open-yaw)) scale(.89);
+ opacity:0;transition:transform 1.3s cubic-bezier(.2,.72,.12,1),opacity .8s ease .35s
+}
+/* Кнопки на телефоне всегда образуют аккуратные строки. */
+.nav.book-nav{width:min(780px,100%);margin:0 auto;padding:8px 14px 16px;
+ display:flex;flex-direction:column;align-items:stretch;gap:10px}
+.book-nav-main{display:grid;grid-template-columns:minmax(0,1fr) minmax(95px,auto) minmax(0,1fr);align-items:center;gap:12px}
+.book-nav-main button{min-width:0;max-width:100%;white-space:nowrap}
+.nav.book-nav #pageInfo{min-width:0;max-width:260px;line-height:1.3;overflow-wrap:anywhere;text-align:center}
+.book-nav-extra{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.book-nav-extra button[hidden]{display:none!important}
+.book-nav-hint{text-align:center;color:#b7a187;font:italic 14px/1.5 "Cormorant Garamond",Georgia,serif}
+.book-nav button:focus-visible{outline:2px solid #e8c58b;outline-offset:3px}
+/* Два лица одного физического листа: изображение и текст переворачиваются вместе. */
+.book .turn-sheet{padding:0!important;background:none!important;box-shadow:none!important;
+ overflow:visible!important;backface-visibility:visible!important;
+ -webkit-backface-visibility:visible!important;transform-style:preserve-3d!important;
+ filter:drop-shadow(-5px 4px 7px #36231355)}
+.book .turn-sheet .turn-face{position:absolute!important;inset:0;width:100%;height:100%;margin:0;
+ backface-visibility:hidden!important;-webkit-backface-visibility:hidden!important;
+ transform:translateZ(1px);overflow:hidden!important}
+.book .turn-sheet .turn-face.turn-back{transform:rotateY(180deg) translateZ(1px)}
+.book .turn-sheet.turning{animation:pageflip 1.18s cubic-bezier(.38,.03,.23,1) both}
+.book .turn-sheet.backwards.turning{animation:pageflipBack 1.18s cubic-bezier(.38,.03,.23,1) both}
+.book .turn-sheet:after{content:"";position:absolute;inset:0;pointer-events:none;
+ background:linear-gradient(90deg,#27170814,transparent 38%,#fff2ce35 61%,#20110326);
+ opacity:0;transform:translateZ(2px)}
+.book .turn-sheet.turning:after{animation:paperSheen 1.18s ease both}
+@keyframes paperSheen{0%,100%{opacity:.12}46%,57%{opacity:.85}}
+.book,.book .sheet{touch-action:pan-y}
+@media(max-width:700px){
+ .stage{padding:10px 8px;min-height:420px}
+ .book-3d{width:min(77vw,325px)}
+ .nav.book-nav{gap:8px;padding:2px 12px 12px}
+ .book-nav-main{grid-template-columns:minmax(0,1fr) minmax(85px,auto) minmax(0,1fr);gap:5px}
+ .book-nav-main button{font-size:clamp(12px,3.6vw,15px);padding:9px 7px}
+ .nav.book-nav #pageInfo{font-size:clamp(12px,3.2vw,15px);max-width:125px}
+ .book-nav-extra button{font-size:13px;padding:9px 12px}
+ .book-nav-hint{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){
+ .book-3d,.book-closed-scene.opening .book-3d,.book .turn-sheet.turning,
+ .book .turn-sheet.backwards.turning{transition:none!important;animation:none!important}
+}
 </style>
 </head>
 <body>
 <header><div><h1>Мои 365 дней в Анти-Шум</h1><p class="subtitle" id="progress">Книга воспоминаний · загрузка…</p></div><div class="actions"><a href="./index.html">← Вернуться в Анти-Шум</a><button id="printBtn" disabled>Подготовить PDF для печати</button></div></header>
 <div id="loading">Собираем страницы твоей книги…</div>
-<main class="stage"><div class="book" id="book">
+<main class="stage" id="bookStage">
+<div class="book-closed-scene" id="closedScene" hidden>
+ <div class="book-3d" id="closedBook3d" role="button" tabindex="0"
+      aria-label="Закрытая книга. Проведи пальцем, чтобы повернуть, или нажми, чтобы открыть">
+  <div class="book-3d-face book-3d-front" aria-hidden="true"></div>
+  <div class="book-3d-face book-3d-back" aria-hidden="true"></div>
+  <div class="book-3d-spine" aria-hidden="true"></div>
+  <div class="book-3d-pages" aria-hidden="true"></div>
+ </div>
+</div>
+<div class="book" id="book">
 <div class="sheet left" id="leftPage"></div><div class="sheet right" id="rightPage"></div><div class="book-spine"></div>
 <div class="cover" id="cover">
  <div class="cover-front">
@@ -620,7 +699,18 @@ opacity:.65;pointer-events:none}
  </div>
 </div>
 </div></main>
-<div class="nav"><button id="prevBtn" disabled>← Назад</button><span id="pageInfo">Обложка</span><button id="nextBtn" disabled>Вперёд →</button><button id="backCoverBtn" type="button">Задняя обложка</button></div>
+<nav class="nav book-nav" aria-label="Управление книгой">
+ <div class="book-nav-main">
+  <button id="prevBtn" type="button" disabled>← Назад</button>
+  <span id="pageInfo" aria-live="polite">Обложка</span>
+  <button id="nextBtn" type="button" disabled>Вперёд →</button>
+ </div>
+ <div class="book-nav-extra">
+  <button id="backCoverBtn" type="button">Задняя обложка</button>
+  <button id="bookSoundBtn" type="button" aria-pressed="true">🔊 Звук</button>
+ </div>
+ <div class="book-nav-hint" id="bookHint">Поверни книгу пальцем · Нажми, чтобы открыть</div>
+</nav>
 <p class="notice">Книга наполняется автоматически из твоих ответов. Незаполненные дни сохраняют своё место. После 365 дней можно будет сохранить готовую книгу в PDF через системное окно печати. Фотографии доступны при действующей авторизации.</p>
 <script>
 (async function(){
@@ -668,6 +758,7 @@ function arrivePages(){
  setTimeout(()=>{left.classList.remove("page-arriving");right.classList.remove("page-arriving");},900);
 }
 function penSound(){
+ if(!soundEnabled)return;
  try{
   const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;
   audioCtx=audioCtx||new Audio();if(audioCtx.state==="suspended")audioCtx.resume();
@@ -714,6 +805,53 @@ function fillEpilogue(el){
  frame.append(border,top,ornament,heading,body,bottom,sign);
  el.replaceChildren(frame);
 }
+
+const backCoverBtn=$("backCoverBtn"),closedScene=$("closedScene"),closedBook3d=$("closedBook3d");
+const soundBtn=$("bookSoundBtn"),bookHint=$("bookHint");
+let coverYaw=-8,rotateGesture=null,swipeGesture=null;
+let soundEnabled=true;
+try{soundEnabled=localStorage.getItem("antiShumBookSound")!=="off";}catch(e){}
+function setCoverYaw(value,animated=true){
+ coverYaw=value;
+ closedBook3d.classList.toggle("dragging",!animated);
+ closedBook3d.style.setProperty("--cover-yaw",value+"deg");
+ const facingBack=Math.cos(value*Math.PI/180)<0;
+ backCoverBtn.textContent=facingBack?"Лицевая обложка":"Задняя обложка";
+ closedBook3d.setAttribute("aria-label",(facingBack?"Задняя":"Лицевая")+
+  " сторона книги. Проведи пальцем для вращения или нажми, чтобы открыть");
+}
+function updateSoundButton(){
+ soundBtn.textContent=soundEnabled?"🔊 Звук включён":"🔇 Без звука";
+ soundBtn.setAttribute("aria-pressed",String(soundEnabled));
+}
+updateSoundButton();setCoverYaw(-8);
+soundBtn.onclick=()=>{
+ soundEnabled=!soundEnabled;updateSoundButton();
+ try{localStorage.setItem("antiShumBookSound",soundEnabled?"on":"off");}catch(e){}
+};
+function pageTurnSound(){
+ if(!soundEnabled)return;
+ try{
+  const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;
+  audioCtx=audioCtx||new Audio();if(audioCtx.state==="suspended")audioCtx.resume();
+  const sr=audioCtx.sampleRate,duration=.46;
+  const buffer=audioCtx.createBuffer(1,Math.ceil(sr*duration),sr);
+  const data=buffer.getChannelData(0);let soft=0;
+  for(let i=0;i<data.length;i++){
+   soft=.77*soft+.23*(Math.random()*2-1);
+   const x=i/data.length,fade=Math.sin(Math.PI*x)**1.4;
+   data[i]=soft*fade*(.75+.25*Math.sin(2*Math.PI*x*8));
+  }
+  const source=audioCtx.createBufferSource();source.buffer=buffer;
+  const filter=audioCtx.createBiquadFilter();filter.type="bandpass";filter.frequency.value=1100;filter.Q.value=.5;
+  const volume=audioCtx.createGain();const t=audioCtx.currentTime;
+  volume.gain.setValueAtTime(.001,t);
+  volume.gain.linearRampToValueAtTime(.105,t+.08);
+  volume.gain.exponentialRampToValueAtTime(.001,t+duration);
+  source.connect(filter);filter.connect(volume);volume.connect(audioCtx.destination);
+  source.start(t);source.stop(t+duration);
+ }catch(e){console.debug("Page audio unavailable",e);}
+}
 function show(){
  const closed=index<0;
  book.classList.toggle("cover-mode",closed);
@@ -722,53 +860,104 @@ function show(){
  if(!closed){fillSlot(left,index*2);fillSlot(right,index*2+1);}
  $("pageInfo").textContent=closed?"Обложка":index===0?"Пролог · День 1":("Дни "+(index*2)+"–"+Math.min(365,index*2+1)+" / 365");
  prev.disabled=turning||closed;next.disabled=turning||index>=182;
- if(typeof backCoverBtn!=="undefined")backCoverBtn.disabled=turning||!closed;
+ backCoverBtn.hidden=!closed;backCoverBtn.disabled=turning;
+ bookHint.textContent=closed?"Вращай закрытую книгу пальцем · Нажми, чтобы открыть":
+  "Листай страницы свайпом влево или вправо";
+ if(!turning){
+  closedScene.hidden=!closed;
+  book.style.visibility=closed?"hidden":"visible";
+ }
  if(!turning&&!closed)revealWriting();
 }
 function move(delta){
  if(turning)return;
  const target=Math.max(-1,Math.min(182,index+delta));if(target===index)return;
  const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
- if(index===-1&&target===0&&!reduced){
-  cover.classList.remove("back-visible");backCoverBtn.textContent="Задняя обложка";
-  turning=true;
+ if(reduced){index=target;pageTurnSound();show();return;}
+ if(index===-1&&target===0){
+  turning=true;closedScene.hidden=false;
+  closedBook3d.style.setProperty("--open-yaw",(coverYaw-155)+"deg");
+  closedScene.classList.add("opening");
   fillSlot(left,0);fillSlot(right,1);
-  cover.style.display="flex";
+  book.style.visibility="visible";cover.style.display="flex";
   book.classList.remove("closing","opening");
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
    book.classList.remove("cover-mode");book.classList.add("opening");
   }));
-  next.disabled=true;prev.disabled=true;
-  setTimeout(()=>{index=0;turning=false;show();arrivePages();},1520);
+  next.disabled=true;prev.disabled=true;backCoverBtn.disabled=true;
+  pageTurnSound();
+  setTimeout(()=>{
+   closedScene.classList.remove("opening");closedScene.hidden=true;
+   index=0;turning=false;show();arrivePages();
+  },1520);
   return;
  }
- if(index===0&&target===-1&&!reduced){
+ if(index===0&&target===-1){
   turning=true;cover.style.display="flex";
   book.classList.remove("opening","closing");
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-   book.classList.add("cover-mode","closing");
-  }));
-  next.disabled=true;prev.disabled=true;
-  setTimeout(()=>{index=-1;turning=false;show();},1320);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>book.classList.add("cover-mode","closing")));
+  next.disabled=true;prev.disabled=true;pageTurnSound();
+  setTimeout(()=>{index=-1;turning=false;setCoverYaw(-8);show();},1320);
   return;
  }
- if(reduced){index=target;cover.classList.remove("back-visible");backCoverBtn.textContent="Задняя обложка";show();return;}
  turning=true;show();
- const fly=document.createElement("div");fly.className="sheet turn-sheet"+(delta<0?" backwards":"");
- const n=delta>0?index*2+1:index*2;
- if(n===0){const tmp=document.createElement("div");fillEpilogue(tmp);fly.append(...tmp.childNodes);}
- else if(days[n-1])fly.append(...buildPage(days[n-1],n).childNodes);
- book.append(fly);requestAnimationFrame(()=>requestAnimationFrame(()=>fly.classList.add("turning")));
+ const outgoing=delta>0?index*2+1:index*2;
+ const incoming=delta>0?target*2:target*2+1;
+ const fly=document.createElement("div");fly.className="turn-sheet"+(delta<0?" backwards":"");
+ const front=document.createElement("div");front.className="sheet "+(delta>0?"right":"left")+" turn-face turn-front";
+ const back=document.createElement("div");back.className="sheet "+(delta>0?"left":"right")+" turn-face turn-back";
+ fillSlot(front,outgoing);fillSlot(back,incoming);
+ fly.append(front,back);book.append(fly);
+ pageTurnSound();
+ requestAnimationFrame(()=>requestAnimationFrame(()=>fly.classList.add("turning")));
+ setTimeout(()=>{if(turning){fillSlot(left,target*2);fillSlot(right,target*2+1);}},550);
  setTimeout(()=>{fly.remove();index=target;turning=false;show();arrivePages();},1210);
 }
 prev.onclick=()=>move(-1);next.onclick=()=>move(1);
-const backCoverBtn=$("backCoverBtn");
 backCoverBtn.onclick=()=>{
- if(turning)return;
- if(index!==-1){move(-1);return;}
- const back=cover.classList.toggle("back-visible");
- backCoverBtn.textContent=back?"Лицевая обложка":"Задняя обложка";
+ if(turning||index>=0)return;
+ setCoverYaw(Math.cos(coverYaw*Math.PI/180)<0?0:180,true);
 };
+
+closedBook3d.addEventListener("keydown",event=>{
+ if(event.key==="Enter"||event.key===" "){event.preventDefault();move(1);}
+ if(event.key==="ArrowRight"||event.key==="ArrowLeft"){
+  event.preventDefault();setCoverYaw(coverYaw+(event.key==="ArrowRight"?45:-45),true);
+ }
+});
+closedBook3d.addEventListener("pointerdown",event=>{
+ if(turning||(event.pointerType==="mouse"&&event.button!==0))return;
+ rotateGesture={id:event.pointerId,x:event.clientX,y:event.clientY,yaw:coverYaw,moved:false};
+ try{closedBook3d.setPointerCapture(event.pointerId);}catch(e){}
+});
+closedBook3d.addEventListener("pointermove",event=>{
+ if(!rotateGesture||event.pointerId!==rotateGesture.id)return;
+ const dx=event.clientX-rotateGesture.x,dy=event.clientY-rotateGesture.y;
+ if(Math.abs(dx)>7&&Math.abs(dx)>Math.abs(dy)){
+  rotateGesture.moved=true;setCoverYaw(rotateGesture.yaw+dx*.9,false);
+  if(event.cancelable)event.preventDefault();
+ }
+});
+closedBook3d.addEventListener("pointerup",event=>{
+ if(!rotateGesture||event.pointerId!==rotateGesture.id)return;
+ const wasDrag=rotateGesture.moved;
+ rotateGesture=null;closedBook3d.classList.remove("dragging");
+ if(wasDrag)setCoverYaw(coverYaw,true);else move(1);
+});
+closedBook3d.addEventListener("pointercancel",()=>{
+ rotateGesture=null;closedBook3d.classList.remove("dragging");
+});
+book.addEventListener("pointerdown",event=>{
+ if(index<0||turning||(event.pointerType==="mouse"&&event.button!==0))return;
+ swipeGesture={id:event.pointerId,x:event.clientX,y:event.clientY};
+});
+book.addEventListener("pointerup",event=>{
+ if(!swipeGesture||event.pointerId!==swipeGesture.id)return;
+ const dx=event.clientX-swipeGesture.x,dy=event.clientY-swipeGesture.y;
+ swipeGesture=null;
+ if(Math.abs(dx)>42&&Math.abs(dx)>Math.abs(dy)*1.2)move(dx<0?1:-1);
+});
+book.addEventListener("pointercancel",()=>{swipeGesture=null;});
 
 function canExport(){const end=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate()+365);return Date.now()>=end.getTime();}
 function printBook(){
