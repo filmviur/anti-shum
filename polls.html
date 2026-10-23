@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#100c09">
+<title>Вопросы проекта — Анти-Шум</title>
+<link rel="icon" href="./icon-512.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&display=swap&subset=cyrillic" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;color:#dcccb4;background:radial-gradient(circle at 50% 0,rgba(118,82,42,.17),transparent 38%),linear-gradient(140deg,#0c0a08,#17110d 60%,#0c0a08);font:15px/1.65 Georgia,"Times New Roman",serif}
+button,input,textarea{font:inherit}button{cursor:pointer}a{color:#e1c08b}
+button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid #ecc584;outline-offset:3px}
+header{max-width:960px;margin:auto;padding:21px 15px 11px;display:flex;justify-content:space-between;align-items:center;gap:15px}
+.logo{font:700 24px "Cormorant Garamond",Georgia,serif;letter-spacing:.13em;color:#e1c58b;text-decoration:none}
+.back{font-size:13px;text-decoration:none;border:1px solid rgba(214,175,106,.4);border-radius:5px;padding:7px 12px}
+main{max-width:900px;margin:12px auto 80px;padding:0 15px}
+.hero,.panel,.poll-card{background:linear-gradient(135deg,rgba(61,43,27,.7),rgba(25,19,15,.96));border:1px solid rgba(204,159,88,.39);border-radius:11px;box-shadow:0 10px 35px rgba(0,0,0,.22)}
+.hero{text-align:center;padding:clamp(25px,6vw,46px)}
+.eyebrow{font-size:11px;letter-spacing:.23em;color:#c2a67d;text-transform:uppercase}
+h1,h2,h3{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;color:#e7c994;line-height:1.16}
+h1{font-size:clamp(36px,7vw,58px);margin:8px 0 12px}
+h2{font-size:30px;margin:0 0 11px}
+h3{font-size:26px;margin:0 0 10px}
+.hero p{max-width:660px;margin:10px auto;color:#c6b59c}
+.pills{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:18px}
+.pill{font-size:12px;border:1px solid rgba(205,162,91,.45);border-radius:30px;padding:4px 10px;color:#d9c29b}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:25px 0 13px}
+.toolbar h2{margin:0}
+.panel{padding:24px;margin:22px 0}
+.poll-card{padding:23px;margin:14px 0 20px}
+.poll-card p{margin:7px 0 14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.poll-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#a99a81;font-size:12px;margin-bottom:8px}
+.tag{color:#dec28e;border:1px solid rgba(208,163,83,.38);padding:2px 9px;border-radius:18px}
+.choice-row{display:flex;flex-wrap:wrap;gap:8px;margin:15px 0}
+.choice{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(215,178,104,.31);border-radius:7px;padding:10px 14px;cursor:pointer;min-height:44px;color:#e4cba6}
+.choice:has(input:checked){border-color:#e5c58d;background:rgba(135,93,38,.21)}
+input[type=radio],input[type=checkbox]{accent-color:#cda765}
+.btn{min-height:43px;padding:10px 15px;border:1px solid #ad8a4d;border-radius:6px;color:#e9cb91;background:linear-gradient(120deg,#493521,#2d2118)}
+.btn:hover{background:#55402a}.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-secondary{border-color:rgba(185,160,119,.34);background:#29231d;color:#d0bba0}
+.btn-danger{border-color:rgba(176,111,89,.5);color:#d9b4a1}
+input[type=text],textarea{display:block;width:100%;max-width:100%;min-height:44px;border:1px solid rgba(205,169,105,.35);background:rgba(5,4,3,.37);border-radius:6px;color:#eadcc7;padding:11px 12px;font-size:16px}
+textarea{resize:vertical;min-height:100px}
+label.field{display:block;font-size:14px;color:#d0bb98;margin:14px 0}
+label.field input,label.field textarea{margin-top:6px}
+.message{padding:11px 14px;border:1px solid rgba(212,172,106,.33);border-radius:7px;background:rgba(115,82,40,.14);margin:13px 0}
+.muted{font-size:13px;color:#a99a87}
+.success{color:#e9d8b0}
+.error{color:#ffb0a1}
+.idea-area{border-top:1px solid rgba(206,166,106,.2);margin-top:23px;padding-top:20px}
+.idea-area h4{font:600 22px "Cormorant Garamond",Georgia,serif;color:#e0c28d;margin:0}
+.admin-box{margin-top:23px;border-top:1px dashed rgba(213,167,91,.35);padding-top:19px}
+.admin-stats{font-size:13px;color:#c7b69b;margin:12px 0}
+.admin-actions{display:flex;gap:8px;flex-wrap:wrap}
+.ideas-list{display:grid;gap:10px;margin:14px 0 0}
+.idea-item{border:1px solid rgba(212,167,95,.22);background:rgba(0,0,0,.19);border-radius:8px;padding:13px}
+.idea-item p{white-space:pre-wrap;overflow-wrap:anywhere;margin:5px 0 11px}
+.idea-actions{display:flex;gap:7px;flex-wrap:wrap}
+.admin-form{border:1px solid rgba(211,165,95,.35);border-radius:10px;background:rgba(31,23,17,.92);padding:22px;margin:22px 0}
+.admin-form .checkline{display:flex;gap:10px;align-items:start;margin:14px 0}
+.hidden{display:none!important}
+footer{text-align:center;color:#9d8e79;font-size:13px;margin:30px 0}
+@media(max-width:600px){header{padding:13px 13px 5px}.logo{font-size:19px}.back{font-size:12px;padding:6px 9px}.hero{padding:25px 18px}.poll-card,.panel,.admin-form{padding:18px}.toolbar{align-items:flex-start}.choice{flex:1 1 100%}.btn{min-height:46px}}
+</style>
+</head>
+<body>
+<header><a href="./index.html" class="logo">АНТИ-ШУМ</a><a class="back" href="./index.html">← Вернуться в профиль</a></header>
+<main>
+<div class="hero">
+<div class="eyebrow">Услышим друг друга без споров</div>
+<h1>Вопросы проекта</h1>
+<p>Здесь мы вместе выбираем, каким станет «Анти-Шум». Один человек — один голос. Иногда можно предложить собственную идею. Никаких публичных споров и оценивания чужих предложений.</p>
+<div class="pills"><span class="pill">Бесплатно для всех</span><span class="pill">ДА · НЕТ · ДРУГОЕ</span><span class="pill">Предложения проходят модерацию</span></div>
+</div>
+<div id="status" class="message" role="status" aria-live="polite">Проверяем доступ к голосованиям…</div>
+<div id="app" class="hidden">
+<section id="admin" class="admin-form hidden" aria-label="Создать голосование">
+<h2>Управление голосованиями</h2>
+<p class="muted">Только администратор публикует новые вопросы. После публикации участникам с включёнными push-уведомлениями придёт объявление.</p>
+<form id="createPollForm">
+<label class="field">Вопрос голосования<input type="text" id="pollTitle" maxlength="300" minlength="8" required placeholder="Например: Нужна ли новая тема для вопросов месяца?"></label>
+<label class="field">Пояснение (необязательно)<textarea id="pollDetails" maxlength="1500" rows="3" placeholder="Коротко объясни, что означает этот вопрос"></textarea></label>
+<label class="checkline"><input type="checkbox" id="pollAllowIdeas"> <span>Разрешить каждому участнику предложить одну идею к этому вопросу</span></label>
+<div class="admin-actions"><button type="submit" class="btn" id="createPollBtn">Опубликовать голосование и отправить уведомление</button><button type="button" class="btn btn-secondary" id="saveDraftBtn">Сохранить черновик</button></div>
+</form>
+</section>
+<div class="toolbar"><h2>Актуальные вопросы</h2><button class="btn btn-secondary" type="button" id="refreshBtn">↻ Обновить</button></div>
+<div id="pollList" aria-live="polite"></div>
+</div>
+<footer><a href="./rules.html#polls">Как работают голосования</a> · <a href="./rules.html">Правила сайта</a></footer>
+</main>
+<script>
+"use strict";
+const supabaseClient = window.supabase.createClient(
+ "https://mkyendzqoohqcwnycuys.supabase.co",
+ "sb_publishable_wscrhaPifbezRTe4rWs-Wg_j0kGqktT",
+ {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:"anti-shum-auth"}}
+);
+const $=id=>document.getElementById(id);
+const status=$("status"),app=$("app"),pollList=$("pollList"),adminPanel=$("admin");
+let user=null,admin=false,polls=[],votes=[],ideas=[];
+function node(tag,cls,content) {
+ const e=document.createElement(tag);
+ if(cls)e.className=cls;
+ if(content!==undefined)e.textContent=String(content);
+ return e;
+}
+function message(value,error=false){
+ status.textContent=value;
+ status.classList.toggle("error",error);
+}
+function closeTo(p){return !!p.closes_at&&new Date(p.closes_at).getTime()<=Date.now()}
+function isOpen(p){return p.status==="published"&&!closeTo(p)}
+function labelChoice(v){return v==="yes"?"ДА":v==="no"?"НЕТ":"ДРУГОЕ"}
+function smallButton(label,className,handler) {
+ const b=node("button","btn "+(className||""),label);
+ b.type="button";b.addEventListener("click",handler);return b;
+}
+async function init() {
+ try{
+  const {data,error}=await supabaseClient.auth.getUser();
+  if(error)throw error;
+  user=data.user;
+  if(!user||user.is_anonymous){message("Голосовать могут зарегистрированные участники. Войди в профиль на главной странице.");return}
+  const r=await supabaseClient.rpc("is_anti_shum_admin");
+  if(r.error)throw r.error;
+  admin=r.data===true;
+  app.classList.remove("hidden");
+  adminPanel.classList.toggle("hidden",!admin);
+  await load();
+ }catch(e){console.error(e);message("Не удалось открыть вопросы проекта: "+(e.message||"ошибка соединения"),true)}
+}
+async function load(){
+ message("Обновляем голосования…");
+ const [p,v,i]=await Promise.all([
+  supabaseClient.from("project_polls").select("*").order("created_at",{ascending:false}),
+  supabaseClient.from("project_poll_votes").select("poll_id,choice,user_id"),
+  supabaseClient.from("project_poll_ideas").select("id,poll_id,user_id,idea_text,status,created_at").order("created_at",{ascending:false})
+ ]);
+ if(p.error||v.error||i.error) {
+  message("Не удалось получить голосования: "+(p.error||v.error||i.error).message,true);return;
+ }
+ polls=p.data||[];votes=v.data||[];ideas=i.data||[];
+ render();
+ message(polls.length?("Загружено голосований: "+polls.length):"Опросов пока нет. Как только появится новый вопрос, он будет здесь.");
+}
+function render(){
+ pollList.replaceChildren();
+ if(!polls.length){
+  pollList.appendChild(node("div","panel","Здесь скоро появятся первые вопросы о развитии «Анти-Шума»."));
+  return;
+ }
+ for(const p of polls){
+  const card=node("article","poll-card");
+  const meta=node("div","poll-meta");
+  meta.appendChild(node("span","tag",p.status==="draft"?"Черновик":isOpen(p)?"Голосование открыто":"Голосование закрыто"));
+  if(p.allow_ideas)meta.appendChild(node("span","", "✦ Можно предложить идею"));
+  card.appendChild(meta);
+  card.appendChild(node("h3","",p.title));
+  if(p.details)card.appendChild(node("p","",p.details));
+  const myVote=votes.find(v=>v.poll_id===p.id&&v.user_id===user.id);
+  if(myVote){
+   card.appendChild(node("div","message success","Ваш голос учтён: "+labelChoice(myVote.choice)+". Спасибо, что помогаете развивать проект."));
+  }else if(isOpen(p)){
+   const choices=node("div","choice-row");
+   let selected="yes";
+   const button=smallButton("Отдать голос","","");
+   ["yes","no","other"].forEach((val,index)=>{
+    const label=node("label","choice");
+    const input=document.createElement("input");input.type="radio";input.name="vote-"+p.id;input.value=val;input.checked=index===0;
+    input.addEventListener("change",()=>selected=val);
+    label.append(input,document.createTextNode(labelChoice(val)));choices.appendChild(label);
+   });
+   card.appendChild(choices);
+   button.addEventListener("click",async()=>{
+    button.disabled=true;
+    const result=await supabaseClient.from("project_poll_votes").insert({poll_id:p.id,user_id:user.id,choice:selected});
+    if(result.error){message(result.error.code==="23505"?"Этот голос уже был учтён.":result.error.message,true);button.disabled=false;return}
+    await load();
+   });
+   card.appendChild(button);
+  }else if(p.status!=="draft"){
+   card.appendChild(node("p","muted","Приём голосов завершён."));
+  }
+  if(p.allow_ideas&&isOpen(p)){
+   const myIdea=ideas.find(i=>i.poll_id===p.id&&i.user_id===user.id);
+   const area=node("div","idea-area");
+   area.appendChild(node("h4","","Предложить свою идею"));
+   area.appendChild(node("p","muted","Одна идея от человека. Она отправится только администрации и не станет публичным обсуждением."));
+   if(myIdea)area.appendChild(node("div","message success","Идея получена. Статус: "+(myIdea.status==="pending"?"ожидает проверки":myIdea.status==="approved"?"одобрена":"не принята")+"."));
+   else{
+    const text=document.createElement("textarea");text.maxLength=500;text.minLength=5;text.rows=3;text.placeholder="Опиши идею своими словами (до 500 символов)";
+    area.appendChild(text);
+    const send=smallButton("Отправить идею","");
+    send.addEventListener("click",async()=>{
+     const value=text.value.trim();
+     if(value.length<5){message("Идея должна содержать хотя бы 5 символов.",true);return}
+     send.disabled=true;
+     const res=await supabaseClient.from("project_poll_ideas").insert({poll_id:p.id,user_id:user.id,idea_text:value});
+     if(res.error){message(res.error.code==="23505"?"Одна идея к этому вопросу уже отправлена.":res.error.message,true);send.disabled=false;return}
+     await load();
+    });
+    area.appendChild(send);
+   }
+   card.appendChild(area);
+  }
+  if(admin){renderAdminControls(p,card)}
+  pollList.appendChild(card);
+ }
+}
+function renderAdminControls(p,card){
+ const wrap=node("div","admin-box");
+ wrap.appendChild(node("h4","","Только для администратора"));
+ const count={yes:0,no:0,other:0};
+ votes.filter(v=>v.poll_id===p.id).forEach(v=>count[v.choice]++);
+ wrap.appendChild(node("div","admin-stats","Голоса: ДА — "+count.yes+" · НЕТ — "+count.no+" · ДРУГОЕ — "+count.other));
+ const actions=node("div","admin-actions");
+ if(p.status==="draft")actions.appendChild(smallButton("Опубликовать и уведомить","",()=>changePollStatus(p,"published")));
+ if(p.status==="published")actions.appendChild(smallButton("Закрыть голосование","btn-danger",()=>changePollStatus(p,"closed")));
+ wrap.appendChild(actions);
+ const list=ideas.filter(i=>i.poll_id===p.id);
+ if(list.length){
+  wrap.appendChild(node("h4","","Предложения участников ("+list.length+")"));
+  const area=node("div","ideas-list");
+  for(const idea of list){
+   const row=node("div","idea-item");
+   row.appendChild(node("span","tag",idea.status==="pending"?"Ожидает модерации":idea.status==="approved"?"Одобрено":"Отклонено"));
+   row.appendChild(node("p","",idea.idea_text));
+   const buttons=node("div","idea-actions");
+   if(idea.status==="pending"){
+    buttons.appendChild(smallButton("Одобрить","",()=>moderateIdea(idea.id,"approved")));
+    buttons.appendChild(smallButton("Отклонить","btn-danger",()=>moderateIdea(idea.id,"rejected")));
+   }
+   buttons.appendChild(smallButton("Сделать из идеи новый вопрос","btn-secondary",()=>{
+    $("pollTitle").value=idea.idea_text.slice(0,300);
+    window.scrollTo({top:0,behavior:"smooth"});
+    $("pollTitle").focus();
+   }));
+   row.appendChild(buttons);area.appendChild(row);
+  }
+  wrap.appendChild(area);
+ }
+ card.appendChild(wrap);
+}
+async function announcePoll(p){
+ const body="Новый вопрос в разделе «Вопросы проекта»: "+p.title+(p.allow_ideas?" Здесь можно предложить свою идею.":"");
+ const result=await supabaseClient.from("announcements").insert({title:"Вопросы проекта",body,created_by:user.id});
+ if(result.error){console.warn("Poll announcement failed",result.error);return false}
+ return true;
+}
+async function createPoll(statusValue){
+ if(!admin)return;
+ const title=$("pollTitle").value.trim(),details=$("pollDetails").value.trim(),allowIdeas=$("pollAllowIdeas").checked;
+ if(title.length<8){message("Вопрос должен содержать минимум 8 символов.",true);return}
+ const button=$("createPollBtn");button.disabled=true;$("saveDraftBtn").disabled=true;
+ try{
+  const r=await supabaseClient.from("project_polls").insert({
+   title,details,allow_ideas:allowIdeas,status:statusValue,created_by:user.id,
+   published_at:statusValue==="published"?new Date().toISOString():null
+  }).select("id,title,allow_ideas").single();
+  if(r.error)throw r.error;
+  const pushed=statusValue==="published"?await announcePoll(r.data):true;
+  $("createPollForm").reset();
+  await load();
+  message(statusValue==="draft"?"Черновик сохранён.":pushed?"Вопрос опубликован, уведомление отправлено.":"Вопрос опубликован, но уведомление не удалось отправить.");
+ }catch(e){message("Не удалось сохранить: "+e.message,true)}finally{button.disabled=false;$("saveDraftBtn").disabled=false}
+}
+async function changePollStatus(p,statusValue){
+ if(!admin)return;
+ const r=await supabaseClient.from("project_polls").update({
+  status:statusValue,
+  published_at:statusValue==="published"?new Date().toISOString():p.published_at
+ }).eq("id",p.id);
+ if(r.error){message("Не удалось изменить статус: "+r.error.message,true);return}
+ const pushed=statusValue==="published"?await announcePoll(p):true;
+ await load();
+ message(statusValue==="published"?(pushed?"Вопрос опубликован, уведомление отправлено.":"Вопрос опубликован без уведомления."):"Голосование закрыто.");
+}
+async function moderateIdea(id,newStatus){
+ if(!admin)return;
+ const r=await supabaseClient.from("project_poll_ideas").update({status:newStatus}).eq("id",id);
+ if(r.error){message("Ошибка модерации: "+r.error.message,true);return}
+ await load();message("Решение по предложению сохранено.");
+}
+$("createPollForm").addEventListener("submit",e=>{e.preventDefault();createPoll("published")});
+$("saveDraftBtn").addEventListener("click",()=>createPoll("draft"));
+$("refreshBtn").addEventListener("click",load);
+init();
+</script>
+</body></html>
