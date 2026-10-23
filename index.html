@@ -14378,14 +14378,9 @@ async function loadFeed() {
                 error: usersError
             } =
                 await supabaseClient
-                    .from("users")
-                    .select(
-                        "id, display_name, avatar_url"
-                    )
-                    .in(
-                        "id",
-                        userIds
-                    );
+                    .rpc("get_anti_shum_feed_authors", {
+                        p_user_ids: userIds
+                    });
 
             if (usersError) {
                 throw usersError;
