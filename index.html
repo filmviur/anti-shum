@@ -8457,6 +8457,62 @@
     }
 }
 
+
+/* Admin Support: comfortable, full-width reply editor with submit underneath. */
+.admin-support-reply {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    min-width: 0;
+    width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.admin-support-reply .admin-support-input {
+    display: block;
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    min-height: 150px;
+    max-height: 360px;
+    padding: 15px 16px;
+    box-sizing: border-box;
+    line-height: 1.55;
+    font-size: 16px;
+    resize: vertical;
+}
+
+.admin-support-reply .admin-support-send-btn {
+    align-self: flex-end;
+    flex: 0 0 auto;
+    min-width: 184px;
+    min-height: 48px;
+    padding: 11px 20px;
+}
+
+@media (max-width: 650px) {
+    .admin-support-reply {
+        padding: 14px;
+        gap: 12px;
+    }
+
+    .admin-support-reply .admin-support-input {
+        min-height: 170px;
+        max-height: 40dvh;
+        padding: 15px;
+    }
+
+    .admin-support-reply .admin-support-send-btn {
+        align-self: stretch;
+        width: 100%;
+        min-width: 0;
+        min-height: 50px;
+        font-size: 16px;
+    }
+}
+
 </style>
 
 <style id="diary-motion-system">
@@ -9988,6 +10044,7 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
                         id="adminSupportInput"
                         class="admin-support-input"
                         maxlength="1000"
+                        rows="5"
                         placeholder="Ответить пользователю..."
                     ></textarea>
 
