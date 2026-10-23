@@ -5,6 +5,8 @@
 <title>Мои 365 дней в Анти-Шум</title>
 <meta name="diary-layout-version" content="typography-v3-20261022">
 <link rel="icon" href="./icon-512.png">
+<link rel="preload" as="image" href="./diary-front.webp" fetchpriority="high">
+<link rel="preload" as="image" href="./diary-spine.webp">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=PT+Serif:wght@400;700&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -839,13 +841,69 @@ opacity:.65;pointer-events:none}
   max-height:82px!important
  }
 }
+
+/* Print-minded diary: one complete entry per page; no inner scrolling. */
+#book{visibility:hidden}
+#progress{min-height:2.65em}
+#loading{min-height:1.45em}
+#printBtn{min-height:44px}
+#closedScene{animation:closedBookEntrance .38s ease both}
+@keyframes closedBookEntrance{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){#closedScene{animation:none}}
+@media(max-width:700px) and (orientation:portrait){
+ #book:not(.mobile-reading){width:min(94vw,420px)!important;height:auto!important;min-height:0!important;aspect-ratio:719/995!important;display:block!important}
+}
+.book .sheet .entry-layout{overflow:hidden!important;position:relative!important}
+.book .sheet .entry-layout .page-flow{
+ position:relative;display:flex;flex-direction:column;
+ align-items:stretch;justify-content:flex-start;
+ flex:0 0 auto!important;min-height:0!important;height:auto!important;
+ width:100%;max-width:none!important;overflow:visible!important;
+ transform-origin:top left;will-change:transform
+}
+.book .sheet .page-flow .entry-heading{flex:0 0 auto!important}
+.book .sheet .page-flow .question-block,
+.book .sheet .entry-layout:has(.photo-note) .page-flow .question-block,
+.book.mobile-reading .sheet .page-flow .question-block,
+.book.mobile-reading .sheet .entry-layout:has(.photo-note) .page-flow .question-block{
+ flex:0 0 auto!important;min-height:0!important;max-height:none!important;
+ overflow:visible!important
+}
+.book .sheet .page-flow .answer-block,
+.book .sheet .entry-layout:has(.photo-note) .page-flow .answer-block,
+.book.mobile-reading .sheet .page-flow .answer-block,
+.book.mobile-reading .sheet .entry-layout:has(.photo-note) .page-flow .answer-block{
+ display:block!important;flex:0 0 auto!important;
+ min-height:0!important;max-height:none!important;
+ height:auto!important;overflow:visible!important
+}
+.book .sheet .page-flow .page-answer{
+ display:block!important;flex:none!important;
+ min-height:0!important;max-height:none!important;height:auto!important;
+ overflow:visible!important;overscroll-behavior:auto!important;
+ padding-bottom:2px!important
+}
+.book .sheet .page-flow .photo-note{
+ flex:0 0 auto!important;overflow:visible!important
+}
+.book .sheet .epilogue-page{overflow:hidden!important}
+.book .sheet .epilogue-page .prologue-flow{
+ width:100%;max-width:none;min-height:0;height:auto;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ flex:0 0 auto;overflow:visible;transform-origin:top left
+}
+.book .sheet .prologue-flow .epilogue-text{
+ display:block!important;flex:0 0 auto!important;
+ min-height:0!important;height:auto!important;max-height:none!important;
+ overflow:visible!important;width:100%!important
+}
 </style>
 </head>
 <body>
 <header><div><h1>Мои 365 дней в Анти-Шум</h1><p class="subtitle" id="progress">Книга воспоминаний · загрузка…</p></div><div class="actions"><a href="./index.html">← Вернуться в Анти-Шум</a><button id="printBtn" disabled>Подготовить PDF для печати</button></div></header>
 <div id="loading">Собираем страницы твоей книги…</div>
 <main class="stage" id="bookStage">
-<div class="book-closed-scene" id="closedScene" hidden>
+<div class="book-closed-scene" id="closedScene">
  <div class="book-3d" id="closedBook3d" role="button" tabindex="0"
       aria-label="Закрытая книга. Проведи пальцем, чтобы повернуть, или нажми, чтобы открыть">
   <div class="book-3d-face book-3d-front" aria-hidden="true"></div>
@@ -897,7 +955,7 @@ const $=id=>document.getElementById(id);
 const book=$("book"),cover=$("cover"),left=$("leftPage"),right=$("rightPage");
 const prev=$("prevBtn"),next=$("nextBtn"),print=$("printBtn");
 let userId="",seen=new Set(),newWriting=new Set(),audioCtx=null;
-let index=-1,turning=false,days=[],photoUrls=new Map(),startDate=new Date(2026,9,1);
+let index=-1,turning=false,bookReady=false,days=[],photoUrls=new Map(),startDate=new Date(2026,9,1);
 const MONTHS=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
 const pad=n=>String(n).padStart(2,"0");
 const key=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
@@ -913,7 +971,7 @@ function buildPage(day,number){
   page.append(q);
   if(day.photo){
    const note=document.createElement("div");note.className="photo-note";
-   const img=document.createElement("img");img.className="page-photo";img.alt="Фотоответ";img.loading="eager";img.decoding="async";img.src=day.photo;
+   const img=document.createElement("img");img.className="page-photo";img.alt="Фотоответ";img.loading="eager";img.decoding="async";img.src=day.photo;img.addEventListener("load",()=>{if(img.isConnected)fitPageContent(img.closest(".sheet"));},{once:true});
    const clip=document.createElementNS("http://www.w3.org/2000/svg","svg");clip.setAttribute("class","photo-clip");clip.setAttribute("viewBox","0 0 38 72");clip.setAttribute("aria-hidden","true");
    clip.innerHTML='<path d="M15 52V17C15 9 20 5 26 7C31 9 32 14 32 20V49C32 60 26 65 19 65C11 65 6 60 6 51V28C6 21 11 17 17 17C23 17 26 22 26 28V49"/><path class="paperclip-highlight" d="M17 51V17C17 11 21 7 25 9"/>';
    note.append(img,clip);page.append(note);
@@ -923,6 +981,12 @@ function buildPage(day,number){
   const written=text("div","page-answer",day.answer.answer_text||"");if(newWriting.has(number))written.dataset.fresh="1";answer.append(written);page.append(answer);
  }else page.append(text("div","page-empty","Эта страница ждёт твоих мыслей…"));
  page.append(text("div","entry-bottom-flourish","❧ ─── ✥ ─── ❧"),text("div","page-number",String(number)));
+ const flow=document.createElement("div");flow.className="page-flow";
+ for(const child of [...page.children]){
+  if(child.classList.contains("page-number")||child.classList.contains("entry-bottom-flourish"))continue;
+  flow.append(child);
+ }
+ page.prepend(flow);
  return page;
 }
 function fill(el,day,number){
@@ -983,7 +1047,9 @@ function fillEpilogue(el){
  const bottom=top.cloneNode(true);bottom.className="epilogue-flourish bottom";
  const border=document.createElement("div");border.className="epilogue-engraving";border.setAttribute("aria-hidden","true");
  for(const side of ["top-left","top-right","bottom-left","bottom-right"]){const corner=document.createElement("span");corner.className="epilogue-corner "+side;corner.innerHTML='<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 75V32Q5 5 32 5H75"/><path d="M15 62V32Q15 15 32 15H62"/><path d="M19 54Q35 50 42 34Q48 21 61 20"/><path d="M30 43Q19 33 25 21"/></g><g fill="currentColor" opacity=".72"><path d="M41 35Q56 37 62 25Q47 23 41 35Z"/><path d="M30 43Q17 49 17 59Q30 57 30 43Z"/><path d="M37 32Q31 17 42 14Q45 26 37 32Z"/></g></svg>';border.append(corner);}
- frame.append(border,top,ornament,heading,body,bottom,sign);
+ const flow=document.createElement("div");flow.className="prologue-flow";
+ flow.append(top,ornament,heading,body,bottom,sign);
+ frame.append(border,flow);
  el.replaceChildren(frame);
 }
 
@@ -1029,37 +1095,28 @@ function setPageFace(el,number){
  el.classList.toggle("right",number%2!==0);
 }
 function fitPageContent(el){
- const page=el.querySelector(".entry-layout");if(!page)return;
- const question=page.querySelector(".page-question");if(!question)return;
- const height=page.clientHeight;if(!height)return;
- const note=page.querySelector(".photo-note");
- const photo=note?.querySelector("img");
- question.style.removeProperty("font-size");
- const maxQuestionHeight=height*(note?.32:.44);
- let questionSize=Math.round(parseFloat(getComputedStyle(question).fontSize))||21;
- while(question.scrollHeight>maxQuestionHeight&&questionSize>16){
-  questionSize--;
-  question.style.setProperty("font-size",questionSize+"px","important");
+ if(!el)return;
+ const page=el.querySelector(".entry-layout,.epilogue-page");if(!page)return;
+ const flow=page.querySelector(".page-flow,.prologue-flow");if(!flow)return;
+ // All content is laid out naturally; scale the complete composition to one leaf.
+ flow.style.removeProperty("width");flow.style.removeProperty("transform");
+ const available=page.clientHeight-7;if(available<=0)return;
+ const measure=scale=>{
+  flow.style.width=(100/scale).toFixed(3)+"%";
+  flow.style.transform="scale("+scale.toFixed(4)+")";
+  return flow.scrollHeight*scale;
+ };
+ if(measure(1)<=available+1)return;
+ let low=.35,high=1;
+ if(measure(low)>available){
+  for(let i=0;i<10&&measure(low)>available;i++)low*=.9;
+  measure(low);return;
  }
- if(photo){
-  const heading=page.querySelector(".entry-heading");
-  const questionBlock=page.querySelector(".question-block");
-  const answerLength=page.querySelector(".page-answer")?.textContent.length||0;
-  const reservedForAnswer=Math.min(height*.31,Math.max(70,56+answerLength*.16));
-  const available=height-(heading?.offsetHeight||0)-(questionBlock?.scrollHeight||0)-reservedForAnswer-30;
-  const photoHeight=Math.max(62,Math.min(isPortraitPage()?82:98,available));
-  photo.style.setProperty("height",photoHeight+"px","important");
+ for(let i=0;i<15;i++){
+  const mid=(low+high)/2;
+  if(measure(mid)<=available)low=mid;else high=mid;
  }
- const answer=page.querySelector(".page-answer");if(!answer)return;
- // Long entries keep every character but adapt their handwriting size first.
- answer.style.removeProperty("font-size");
- let answerSize=Math.round(parseFloat(getComputedStyle(answer).fontSize))||21;
- const minimumSize=isPortraitPage()?15:16;
- while(answer.scrollHeight>answer.clientHeight+2&&answerSize>minimumSize){
-  answerSize--;
-  answer.style.setProperty("font-size",answerSize+"px","important");
- }
- // Extremely long answers remain scrollable inside the writing area.
+ measure(Math.max(.1,low-.006));
 }
 function renderMobileLeaf(pageNumber){
  setPageFace(left,pageNumber);
@@ -1098,7 +1155,7 @@ function show(){
  if(!turning&&!closed)revealWriting();
 }
 function move(delta){
- if(turning)return;
+ if(!bookReady||turning)return;
  const single=isPortraitPage();book.classList.toggle("mobile-reading",single);
  const targetLeaf=single?Math.max(-1,Math.min(365,mobileLeaf+delta)):null;
  const target=single?(targetLeaf<0?-1:Math.floor(targetLeaf/2)):
@@ -1220,25 +1277,53 @@ function canExport(){const end=new Date(startDate.getFullYear(),startDate.getMon
 function printBook(){
  if(!canExport()){alert("Готовая книга станет доступна только после 365 дней. Пока можно листать предварительную версию.");return;}
  const frame=document.createElement("iframe");frame.style.cssText="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none";document.body.append(frame);
- const doc=frame.contentDocument;doc.open();doc.write('<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Мои 365 дней в Анти-Шум</title><style>@page{size:A5 portrait;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Georgia,serif;color:#46372a}.print-page{width:148mm;height:210mm;page-break-after:always;break-after:page;background:#f1e6ce;padding:19mm 16mm;position:relative;border:2mm solid #e0cfad}.title{text-align:center;font-size:16pt;color:#896b42}.date{text-align:center;font-size:20pt;margin:7mm 0}.rule{border-top:1px solid #ad9670;margin-bottom:10mm}.question{font-size:16pt;font-weight:bold;line-height:1.35;margin-bottom:9mm}.answer{font-size:11pt;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}.photo{max-width:100%;max-height:80mm;object-fit:contain;display:block;margin:0 auto 8mm}.foot{position:absolute;bottom:12mm;text-align:center;left:0;right:0;color:#957c56}.empty{text-align:center;color:#ac9577;margin-top:25mm}.book-cover{background:#402719;color:#efd4a3;display:flex;flex-direction:column;align-items:center;justify-content:center;border:8mm double #9d7845;text-align:center}.book-cover img{width:48mm;height:48mm;object-fit:contain}.book-cover h1{font-size:27pt;margin:15mm 0 4mm}@media print{.print-page{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body></body></html>');doc.close();
+ const doc=frame.contentDocument;doc.open();doc.write('<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Мои 365 дней в Анти-Шум</title><style>@page{size:A5 portrait;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Georgia,serif;color:#46372a}.print-page{width:148mm;height:210mm;page-break-after:always;break-after:page;background:#f1e6ce;padding:16mm 15mm 19mm;position:relative;border:2mm solid #e0cfad;overflow:hidden}.title{text-align:center;font-size:16pt;color:#896b42}.date{text-align:center;font-size:20pt;margin:7mm 0}.rule{border-top:1px solid #ad9670;margin-bottom:10mm}.question{font-size:14pt;font-weight:bold;line-height:1.2;margin-bottom:5mm;overflow-wrap:anywhere}.answer{font-size:11pt;line-height:1.4;white-space:pre-wrap;overflow-wrap:anywhere}.photo{max-width:100%;max-height:55mm;object-fit:contain;display:block;margin:0 auto 6mm}.foot{position:absolute;bottom:12mm;text-align:center;left:0;right:0;color:#957c56}.empty{text-align:center;color:#ac9577;margin-top:25mm}.book-cover{background:#402719;color:#efd4a3;display:flex;flex-direction:column;align-items:center;justify-content:center;border:8mm double #9d7845;text-align:center}.book-cover img{width:48mm;height:48mm;object-fit:contain}.book-cover h1{font-size:27pt;margin:15mm 0 4mm}@media print{.print-page{-webkit-print-color-adjust:exact;print-color-adjust:exact}} .print-flow{width:100%;height:auto;overflow:visible;transform-origin:top left} </style></head><body></body></html>');doc.close();
  const coverPage=doc.createElement("section");coverPage.className="print-page book-cover";
  const coverImg=doc.createElement("img");coverImg.src=new URL("./icon-512.png",location.href).href;coverPage.append(coverImg);
  const heading=doc.createElement("h1");heading.textContent="Мои 365 дней в Анти-Шум";coverPage.append(heading);
  const sub=doc.createElement("div");sub.textContent="ЛИЧНАЯ КНИГА ВОСПОМИНАНИЙ";coverPage.append(sub);doc.body.append(coverPage);
  days.forEach((day,i)=>{
   const page=doc.createElement("section");page.className="print-page";
-  const append=(tag,cls,value)=>{const el=doc.createElement(tag);el.className=cls;el.textContent=value;page.append(el)};
+  const flow=doc.createElement("div");flow.className="print-flow";page.append(flow);
+  const append=(tag,cls,value)=>{const el=doc.createElement(tag);el.className=cls;el.textContent=value;flow.append(el)};
   append("div","title","День "+(i+1)+" из 365");
   append("div","date",day.date.getDate()+" "+MONTHS[day.date.getMonth()]+" "+day.date.getFullYear());
   append("div","rule","");
   if(day.answer){
    append("div","question",day.question||"Вопрос дня");
-   if(day.photo){const img=doc.createElement("img");img.className="photo";img.src=day.photo;page.append(img);}
+   if(day.photo){const img=doc.createElement("img");img.className="photo";img.src=day.photo;flow.append(img);}
    append("div","answer",day.answer.answer_text||"");
   }else append("div","empty","Эта страница ждёт твоих мыслей…");
-  append("div","foot",String(i+1));doc.body.append(page);
+  const foot=doc.createElement("div");foot.className="foot";foot.textContent=String(i+1);page.append(foot);
+  doc.body.append(page);
  });
- const images=[...doc.images];Promise.all(images.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;}))).then(()=>{frame.contentWindow.focus();frame.contentWindow.print();setTimeout(()=>frame.remove(),120000);});
+ const images=[...doc.images];
+ Promise.all(images.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;})))
+ .then(()=>Promise.resolve(doc.fonts?.ready))
+ .then(()=>{
+  // A5 sheets have fixed physical boundaries; fit each full composition before printing.
+  for(const page of doc.querySelectorAll(".print-page:not(.book-cover)")){
+   const flow=page.querySelector(".print-flow");if(!flow)continue;
+   const style=frame.contentWindow.getComputedStyle(page);
+   const available=page.clientHeight-(parseFloat(style.paddingTop)||0)-(parseFloat(style.paddingBottom)||0)-6;
+   const measure=scale=>{
+    flow.style.width=(100/scale).toFixed(3)+"%";
+    flow.style.transform="scale("+scale.toFixed(4)+")";
+    return flow.scrollHeight*scale;
+   };
+   if(measure(1)>available){
+    let low=.5,high=1;
+    if(measure(low)>available){for(let i=0;i<12&&measure(low)>available;i++)low*=.9;}
+    else for(let i=0;i<15;i++){
+     const mid=(low+high)/2;
+     if(measure(mid)<=available)low=mid;else high=mid;
+    }
+    measure(Math.max(.1,low-.005));
+   }
+  }
+  frame.contentWindow.focus();frame.contentWindow.print();
+  setTimeout(()=>frame.remove(),120000);
+ });
 }
 print.onclick=printBook;
 try{
@@ -1274,11 +1359,13 @@ try{
  days.forEach((day,i)=>{if(day.answer&&!seen.has(i+1))newWriting.add(i+1);});
  const count=days.filter(d=>d.answer).length;
  $("progress").textContent="Заполнено "+count+" из 365 страниц · Книга создаётся вместе с тобой";
- $("loading").hidden=true;
+ // Keep the loading row's space so the cover does not shift when ready.
+ $("loading").style.visibility="hidden";
  const end=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate()+365);
  print.disabled=!canExport();
  print.textContent=canExport()?"Сохранить книгу в PDF":"PDF после "+end.toLocaleDateString("ru-RU");
  print.title=canExport()?"Печатная книга A5":"Доступно после завершения 365 дней";
+ bookReady=true;
  show();
 }catch(err){$("loading").textContent=err.message||"Не удалось загрузить книгу";console.error("Book loading error:",err);}
 })();
