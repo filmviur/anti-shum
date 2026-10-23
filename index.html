@@ -1203,6 +1203,19 @@
 }
 
 
+/* Администратор отвечает на обращения в админ-панели.
+   Убираем дублирующий значок поддержки из верхней панели. */
+#appScreen.admin-account #supportBtn {
+    display: none !important;
+}
+
+@media (max-width: 600px) {
+    /* Пустая строка со значком больше не отодвигает кнопки профиля. */
+    #appScreen.admin-account .app-global-actions {
+        margin-bottom: 0;
+    }
+}
+
 /* =========================
    МОБИЛЬНОЕ РАСПОЛОЖЕНИЕ
    УВЕДОМЛЕНИЙ И ПОДДЕРЖКИ
@@ -15262,6 +15275,12 @@ async function loadProfile() {
     */
 
     function updateAnnouncementButtonVisibility() {
+
+        // Выравниваем шапку и видимость поддержки для админского аккаунта.
+        appScreen.classList.toggle(
+            "admin-account",
+            Boolean(currentUser && isCurrentUserAdmin)
+        );
 
        const button =
     document.getElementById("announcementsBtn");
