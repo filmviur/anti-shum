@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Мои 365 дней в Анти-Шум</title>
-<meta name="diary-layout-version" content="stable-spread-20261023">
+<meta name="diary-layout-version" content="typography-v3-20261022">
 <link rel="icon" href="./icon-512.png">
 <link rel="preload" as="image" href="./diary-front.webp" fetchpriority="high">
 <link rel="preload" as="image" href="./diary-spine.webp">
@@ -924,53 +924,6 @@ opacity:.65;pointer-events:none}
  #book:not(.mobile-reading) .sheet .photo-note .page-photo{max-height:clamp(45px,12vw,110px)!important}
  #book:not(.mobile-reading) .book-spine{left:calc(50% - 4px)!important;width:8px!important}
 }
-
-/* 23 Oct: stable layout and genuinely safe writing area inside the illustrated frame. */
-@media(max-width:900px){
- #bookStage{box-sizing:border-box!important;height:min(65svh,max(330px,calc(97vw + 40px)))!important;min-height:0!important;padding:14px 8px!important;overflow:visible!important}
- #closedBook3d{width:min(70vw,320px,35svh)!important;height:auto!important;aspect-ratio:719/995!important;max-height:calc(100% - 22px)!important}
- #book:not(.mobile-reading) .sheet,
- #book:not(.mobile-reading) .sheet.left,
- #book:not(.mobile-reading) .sheet.right,
- #book:not(.mobile-reading) .turn-face{
-  box-sizing:border-box!important;
-  padding:clamp(24px,7vw,57px) clamp(30px,9vw,68px) clamp(29px,8vw,64px)!important
- }
- #book:not(.mobile-reading) .sheet .entry-layout{box-sizing:border-box!important;padding:0 0 5px!important;height:100%!important;overflow:hidden!important}
- #book:not(.mobile-reading) .sheet .epilogue-page{padding:0 0 5px!important;height:100%!important;min-height:0!important}
- #book:not(.mobile-reading) .sheet .entry-heading{max-width:100%!important;margin:1px auto 5px!important;padding:2px 6px 4px!important;transform:rotate(-1deg)!important}
- #book:not(.mobile-reading) .sheet .page-question{box-sizing:border-box!important;padding:4px 5px!important;transform:none!important;border-radius:2px}
- #book:not(.mobile-reading) .sheet .question-block{margin:0 0 6px!important}
- #book:not(.mobile-reading) .sheet .answer-block{margin:2px 0 0!important}
- #book:not(.mobile-reading) .sheet .question-label,
- #book:not(.mobile-reading) .sheet .answer-label{margin-bottom:3px!important}
- #book:not(.mobile-reading) .sheet .entry-layout .page-number{bottom:-5px!important;font-size:clamp(10px,2.5vw,13px)!important}
- #book:not(.mobile-reading) .sheet .page-flow .page-empty{
-  box-sizing:border-box!important;max-width:100%!important;margin:0!important;
-  padding:clamp(14px,4vw,44px) 1px 0!important;color:#8c6c4b!important;
-  font:italic 500 clamp(13px,3.2vw,18px)/1.3 "Cormorant Garamond",Georgia,serif!important;
-  overflow-wrap:anywhere!important;white-space:normal!important
- }
- #book:not(.mobile-reading) .sheet .page-flow .photo-note{
-  width:min(76%,155px)!important;max-width:76%!important;
-  margin:2px auto 6px!important;padding:5px 5px 13px!important;transform:rotate(1deg)!important
- }
- #book:not(.mobile-reading) .sheet .page-flow .photo-note .page-photo{
-  box-sizing:border-box!important;width:100%!important;
-  height:clamp(48px,13vw,98px)!important;max-height:none!important;object-fit:contain!important
- }
- #book:not(.mobile-reading) .sheet .photo-clip{top:-12px!important;right:5px!important;width:17px!important;height:35px!important;transform:rotate(8deg)!important}
- #book:not(.mobile-reading) .sheet .prologue-flow{box-sizing:border-box!important;overflow:visible!important}
- #book:not(.mobile-reading) .sheet .prologue-flow .epilogue-text{
-  box-sizing:border-box!important;overflow-wrap:anywhere!important;
-  white-space:pre-line!important;max-height:none!important;overflow:visible!important;line-height:1.18!important
- }
-}
-#closedScene.opening .book-3d{
- opacity:0!important;
- transition:opacity .16s ease-out,transform .85s cubic-bezier(.2,.72,.12,1)!important
-}
-@media(prefers-reduced-motion:reduce){#closedScene.opening .book-3d{opacity:0!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -1108,14 +1061,8 @@ function revealWriting(){
  }
 }
 function fillSlot(el,pageNumber){
- // Keep loaded text and photos in the same DOM between page-flips and resize.
- if(el.dataset.bookPage===String(pageNumber)&&el.childElementCount)return;
- if(pageNumber===0)fillEpilogue(el);
- else{
-  const day=days[pageNumber-1];
-  if(day)fill(el,day,pageNumber);else el.replaceChildren();
- }
- el.dataset.bookPage=String(pageNumber);
+ if(pageNumber===0){fillEpilogue(el);return;}
+ const day=days[pageNumber-1];if(day)fill(el,day,pageNumber);else el.replaceChildren();
 }
 function fillEpilogue(el){
  const frame=document.createElement("div");frame.className="epilogue-page";
@@ -1180,22 +1127,23 @@ function fitPageContent(el){
  const flow=page.querySelector(".page-flow,.prologue-flow");if(!flow)return;
  // All content is laid out naturally; scale the complete composition to one leaf.
  flow.style.removeProperty("width");flow.style.removeProperty("transform");
- const availableHeight=page.clientHeight-7,availableWidth=page.clientWidth-2;
- if(availableHeight<=0||availableWidth<=0)return;
- const fits=scale=>{
+ const available=page.clientHeight-7;if(available<=0)return;
+ const measure=scale=>{
   flow.style.width=(100/scale).toFixed(3)+"%";
   flow.style.transform="scale("+scale.toFixed(4)+")";
-  return flow.scrollHeight*scale<=availableHeight
-   &&flow.scrollWidth*scale<=availableWidth+1;
+  return flow.scrollHeight*scale;
  };
- if(fits(1))return;
- let low=.34,high=1;
- while(!fits(low)&&low>.075)low*=.8;
- for(let i=0;i<18;i++){
-  const mid=(low+high)/2;
-  if(fits(mid))low=mid;else high=mid;
+ if(measure(1)<=available+1)return;
+ let low=.35,high=1;
+ if(measure(low)>available){
+  for(let i=0;i<10&&measure(low)>available;i++)low*=.9;
+  measure(low);return;
  }
- fits(Math.max(.065,low-.008));
+ for(let i=0;i<15;i++){
+  const mid=(low+high)/2;
+  if(measure(mid)<=available)low=mid;else high=mid;
+ }
+ measure(Math.max(.1,low-.006));
 }
 function renderMobileLeaf(pageNumber){
  setPageFace(left,pageNumber);
@@ -1251,16 +1199,13 @@ function move(delta){
   turning=true;closedScene.hidden=false;
   closedBook3d.style.setProperty("--open-yaw",(coverYaw-155)+"deg");
   closedScene.classList.add("opening");
-  // Lay out BOTH leaves before they become visible: cover-mode is a one-column grid.
-  book.style.visibility="hidden";
-  book.classList.remove("cover-mode","closing","opening");
-  cover.style.display="none";
   if(single)renderMobileLeaf(0);
-  else{fillSlot(left,0);fillSlot(right,1);fitPageContent(left);fitPageContent(right);}
-  requestAnimationFrame(()=>{
-   book.style.visibility="visible";
-   book.classList.add("opening");
-  });
+  else{fillSlot(left,0);fillSlot(right,1);}
+  book.style.visibility="visible";cover.style.display="none";
+  book.classList.remove("closing","opening");
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+   book.classList.remove("cover-mode");book.classList.add("opening");
+  }));
   next.disabled=true;prev.disabled=true;backCoverBtn.disabled=true;
   pageTurnSound();
   setTimeout(()=>{
@@ -1294,10 +1239,7 @@ function move(delta){
  requestAnimationFrame(()=>requestAnimationFrame(()=>fly.classList.add("turning")));
  setTimeout(()=>{
   if(!turning)return;
-  if(!single){
-   fillSlot(left,target*2);fillSlot(right,target*2+1);
-   fitPageContent(left);fitPageContent(right);
-  }
+  if(!single){fillSlot(left,target*2);fillSlot(right,target*2+1);}
  },550);
  setTimeout(()=>{
   fly.remove();
@@ -1469,7 +1411,6 @@ try{
  print.disabled=!canExport();
  print.textContent=canExport()?"Сохранить книгу в PDF":"PDF после "+end.toLocaleDateString("ru-RU");
  print.title=canExport()?"Печатная книга A5":"Доступно после завершения 365 дней";
- if(document.fonts?.ready)await document.fonts.ready;
  bookReady=true;
  show();
 }catch(err){$("loading").textContent=err.message||"Не удалось загрузить книгу";console.error("Book loading error:",err);}
