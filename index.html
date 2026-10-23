@@ -8640,6 +8640,37 @@
 .global-rules-link:hover { background: #392a1c; }
 .global-rules-link:focus-visible { outline: 2px solid #f0cb87; outline-offset: 3px; }
 
+
+/* Демо: страницу «Друг проекта» можно читать, но оплата отключена */
+.profile-friend-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    margin-bottom: 28px;
+    padding: 17px 12px;
+    border: 1px dashed rgba(201,168,106,.35);
+    border-radius: 5px;
+    background: linear-gradient(135deg, #29231c, #171310);
+    text-align: center;
+    text-decoration: none;
+    opacity: .74;
+    transition: opacity .2s, border-color .2s;
+}
+.profile-friend-card:hover,
+.profile-friend-card:focus-visible { opacity: .96; border-color: rgba(225,188,109,.6); }
+.profile-friend-card__title {
+    color: #ccb080;
+    font: 600 21px/1.25 "Cormorant Garamond",Georgia,serif;
+}
+.profile-friend-card__badge {
+    color: #9e9688;
+    font: 600 10px/1.5 Georgia,serif;
+    letter-spacing: .05em;
+}
+.profile-friend-card__hint { color: #a69783; font: 12px/1.4 Georgia,serif; }
+
 </style>
 
 <style id="diary-motion-system">
@@ -9586,6 +9617,14 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 <div class="profile-section-title">МОИ 365 ДНЕЙ В АНТИ-ШУМ</div>
 <a href="./book.html" class="secondary-btn" style="display:block;width:100%;padding:17px;margin-bottom:28px;border:1px solid rgba(201,168,106,.35);border-radius:5px;background:linear-gradient(135deg,#3b2d1e,#1c1712);color:#d6b875;font-family:'Cormorant Garamond',Georgia,serif;font-size:21px;text-align:center;text-decoration:none;">
     📖 Открыть мою книгу
+</a>
+
+<!-- Друг проекта: информационная карточка для демо-версии -->
+<div class="profile-section-title">ДРУГ ПРОЕКТА</div>
+<a href="./friend.html" class="profile-friend-card" aria-label="Друг проекта — информация, подписка в демо временно недоступна">
+    <span class="profile-friend-card__title">✦ Друг проекта</span>
+    <span class="profile-friend-card__badge">🔒 ДЕМО · ПОДПИСКА НЕДОСТУПНА</span>
+    <span class="profile-friend-card__hint">Открыть описание · 1,99 $/месяц после демо</span>
 </a>
 
 <!-- Лента собственных ответов скрыта в профиле. Архив и книга сохраняются. -->
