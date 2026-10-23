@@ -19,6 +19,7 @@
 <meta name="apple-mobile-web-app-title" content="Анти-Шум">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.0/dist/tus.min.js"></script>
 
 <link
     rel="preconnect"
@@ -6130,6 +6131,95 @@
 }
 
 
+/* Вложения в поддержку: отдельная строка, не мешающая тексту. */
+.support-attach-controls {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+.support-attach-controls .secondary-btn {
+    min-height: 42px;
+}
+.support-attachment-hint,
+.support-upload-status {
+    color: #a99a83;
+    font: 12px/1.5 Georgia, serif;
+}
+.support-upload-status:not(:empty) {
+    margin-top: 9px;
+}
+.support-attachment-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 11px;
+    padding: 10px;
+    border: 1px solid rgba(201,168,106,.22);
+    border-radius: 7px;
+    background: rgba(0,0,0,.18);
+}
+.support-attachment-preview-media {
+    flex: 0 0 68px;
+}
+.support-attachment-preview-media img,
+.support-attachment-preview-media video {
+    display: block;
+    width: 68px;
+    height: 68px;
+    object-fit: cover;
+    border-radius: 5px;
+    background: #100c09;
+}
+.support-attachment-preview-name {
+    flex: 1;
+    min-width: 0;
+    color: #d8c7ae;
+    font: 13px/1.35 Georgia, serif;
+    overflow-wrap: anywhere;
+}
+.support-attachment-preview .secondary-btn {
+    flex: 0 0 auto;
+    font-size: 12px;
+}
+.support-attachment-content {
+    margin-top: 8px;
+    min-width: 0;
+}
+.support-attachment-content img,
+.support-attachment-content video {
+    display: block;
+    max-width: 100%;
+    max-height: 260px;
+    width: auto;
+    height: auto;
+    border-radius: 7px;
+    background: #100c09;
+}
+.support-attachment-content video {
+    width: min(300px,100%);
+}
+.support-attachment-content a {
+    display: inline-block;
+    margin-top: 6px;
+    color: #d6b775;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+    .support-message,
+    .admin-support-message {
+        max-width: 93%;
+    }
+    .support-attachment-preview {
+        flex-wrap: wrap;
+    }
+    .support-attachment-hint {
+        width: 100%;
+    }
+}
+
 /* =========================
    ОКНО ПОДДЕРЖКИ
 ========================= */
@@ -10355,6 +10445,23 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
             maxlength="1000"
             placeholder="Напиши, что случилось..."
         ></textarea>
+
+        <div class="support-attach-controls">
+            <button id="supportAttachBtn" class="secondary-btn" type="button">
+                📎 Прикрепить фото или видео
+            </button>
+            <input id="supportAttachmentInput" type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,video/mp4,video/webm,video/quicktime,video/x-m4v,.jpg,.jpeg,.png,.webp,.gif,.heic,.heif,.mp4,.webm,.mov,.m4v"
+                class="hidden">
+            <span class="support-attachment-hint">Фото — до 8 МБ, видео — до 20 МБ</span>
+        </div>
+
+        <div id="supportAttachmentPreview" class="support-attachment-preview hidden">
+            <div id="supportAttachmentPreviewMedia" class="support-attachment-preview-media"></div>
+            <span id="supportAttachmentPreviewName" class="support-attachment-preview-name"></span>
+            <button id="supportAttachmentRemoveBtn" class="secondary-btn" type="button">Убрать</button>
+        </div>
+        <div id="supportUploadStatus" class="support-upload-status" role="status" aria-live="polite"></div>
 
         <div class="modal-actions">
 
@@ -15531,7 +15638,7 @@ async function loadAdminSupportConversations() {
             await supabaseClient
                 .from("support_messages")
                 .select(
-                    "id, user_id, guest_conversation_id, message_text, is_from_admin, is_read, created_at"
+                    "id, user_id, guest_conversation_id, message_text, is_from_admin, is_read, created_at, attachment_path, attachment_mime"
                 )
                 .order("created_at", {
                     ascending: false
@@ -15667,7 +15774,12 @@ async function loadAdminSupportConversations() {
             preview.className = "admin-support-conversation-preview";
 
             preview.textContent =
-                conversation.lastMessage?.message_text || "";
+                conversation.lastMessage?.message_text ||
+                (conversation.lastMessage?.attachment_mime?.startsWith("video/")
+                    ? "📎 Видео"
+                    : conversation.lastMessage?.attachment_path
+                        ? "📎 Фото"
+                        : "");
 
             item.appendChild(name);
             item.appendChild(preview);
@@ -15869,7 +15981,7 @@ async function openAdminSupportConversation(
         } = await supabaseClient
             .from("support_messages")
             .select(
-                "id, user_id, message_text, is_from_admin, is_read, created_at"
+                "id, user_id, message_text, is_from_admin, is_read, created_at, attachment_path, attachment_mime"
             )
             .eq(conversationColumn, conversationId)
             .order("created_at", {
@@ -15917,11 +16029,12 @@ async function openAdminSupportConversation(
                     : "admin-support-message admin-support-message-user";
 
             messageElement.textContent =
-                message.message_text;
+                message.message_text || "";
 
             adminSupportMessages.appendChild(
                 messageElement
             );
+            appendSupportAttachment(messageElement, message);
         });
 
         /*
@@ -19822,6 +19935,50 @@ async function markSupportMessagesAsRead() {
 }
 
 
+/* Закрытые медиа доступны только участнику переписки и администратору.
+   Ссылка выдаётся на ограниченное время после проверки RLS. */
+async function appendSupportAttachment(messageElement, message) {
+    if (!message.attachment_path || !message.attachment_mime) return;
+
+    const container = document.createElement("div");
+    container.className = "support-attachment-content";
+    container.textContent = "Загружаю вложение…";
+    messageElement.appendChild(container);
+
+    try {
+        const { data, error } = await supabaseClient.storage
+            .from("support-attachments")
+            .createSignedUrl(message.attachment_path, 3600);
+
+        if (error) throw error;
+        if (!container.isConnected) return;
+
+        const isImage = message.attachment_mime.startsWith("image/");
+        const media = document.createElement(isImage ? "img" : "video");
+        media.src = data.signedUrl;
+
+        if (isImage) {
+            media.alt = "Фото, прикреплённое к обращению";
+            media.loading = "lazy";
+        } else {
+            media.controls = true;
+            media.preload = "metadata";
+            media.playsInline = true;
+        }
+
+        const openLink = document.createElement("a");
+        openLink.href = data.signedUrl;
+        openLink.target = "_blank";
+        openLink.rel = "noopener noreferrer";
+        openLink.textContent = isImage ? "Открыть фото" : "Открыть видео";
+
+        container.replaceChildren(media, openLink);
+    } catch (error) {
+        console.error("Support attachment read error:", error);
+        container.textContent = "Не удалось загрузить вложение. Попробуй открыть переписку ещё раз.";
+    }
+}
+
 /*
     Загружаем полную переписку с поддержкой.
     Работает для пользователей и гостей.
@@ -19842,7 +19999,7 @@ async function loadSupportMessages() {
             supabaseClient
                 .from("support_messages")
                 .select(
-                    "id, message_text, is_from_admin, is_read, created_at"
+                    "id, message_text, is_from_admin, is_read, created_at, attachment_path, attachment_mime"
                 );
 
         if (currentUser) {
@@ -19885,11 +20042,12 @@ async function loadSupportMessages() {
                     : "support-message support-message-user";
 
             messageElement.textContent =
-                message.message_text;
+                message.message_text || "";
 
             supportMessages.appendChild(
                 messageElement
             );
+            appendSupportAttachment(messageElement, message);
         });
 
         supportMessages.scrollTop =
@@ -20107,99 +20265,201 @@ return;
 }
 
     
+
 /* =========================================================
-   SUPPORT CONTROLS AND SEND
+   SUPPORT: TEXT, PHOTO, VIDEO
 ========================================================= */
+const supportMessages = document.getElementById("supportMessages");
+const supportInput = document.getElementById("supportInput");
+const sendSupportBtn = document.getElementById("sendSupportBtn");
+const supportAttachBtn = document.getElementById("supportAttachBtn");
+const supportAttachmentInput = document.getElementById("supportAttachmentInput");
+const supportAttachmentPreview = document.getElementById("supportAttachmentPreview");
+const supportAttachmentPreviewMedia = document.getElementById("supportAttachmentPreviewMedia");
+const supportAttachmentPreviewName = document.getElementById("supportAttachmentPreviewName");
+const supportAttachmentRemoveBtn = document.getElementById("supportAttachmentRemoveBtn");
+const supportUploadStatus = document.getElementById("supportUploadStatus");
 
-const supportMessages =
-    document.getElementById("supportMessages");
+const SUPPORT_ATTACHMENT_BUCKET = "support-attachments";
+const SUPPORT_EXT_MIME = {
+    jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png",
+    webp: "image/webp", gif: "image/gif", heic: "image/heic",
+    heif: "image/heif", mp4: "video/mp4", webm: "video/webm",
+    mov: "video/quicktime", m4v: "video/x-m4v"
+};
+const SUPPORT_MIME_EXT = {
+    "image/jpeg":"jpg","image/png":"png","image/webp":"webp",
+    "image/gif":"gif","image/heic":"heic","image/heif":"heif",
+    "video/mp4":"mp4","video/webm":"webm",
+    "video/quicktime":"mov","video/x-m4v":"m4v"
+};
+let selectedSupportAttachment = null;
+let supportPreviewUrl = null;
 
-const supportInput =
-    document.getElementById("supportInput");
+function getSupportAttachmentInfo(file) {
+    const ext = (file.name.split(".").pop() || "").toLowerCase();
+    const mime = SUPPORT_MIME_EXT[file.type]
+        ? file.type
+        : (!file.type ? SUPPORT_EXT_MIME[ext] : null);
 
-const sendSupportBtn =
-    document.getElementById("sendSupportBtn");
+    if (!mime) throw new Error("Выбери фото JPG, PNG, WEBP, GIF, HEIC или видео MP4, WEBM, MOV.");
 
+    const isImage = mime.startsWith("image/");
+    const limit = (isImage ? 8 : 20) * 1024 * 1024;
+    if (!file.size || file.size > limit) {
+        throw new Error(isImage
+            ? "Размер фото не должен превышать 8 МБ."
+            : "Размер видео не должен превышать 20 МБ.");
+    }
+    return {file, mime, extension:SUPPORT_MIME_EXT[mime], isImage};
+}
 
-/*
-    Закрытие окна поддержки.
-*/
+function clearSupportAttachment() {
+    selectedSupportAttachment = null;
+    supportAttachmentInput.value = "";
+    if (supportPreviewUrl) URL.revokeObjectURL(supportPreviewUrl);
+    supportPreviewUrl = null;
+    supportAttachmentPreviewMedia.replaceChildren();
+    supportAttachmentPreviewName.textContent = "";
+    supportAttachmentPreview.classList.add("hidden");
+    supportUploadStatus.textContent = "";
+}
+supportAttachBtn.addEventListener("click", () => supportAttachmentInput.click());
+supportAttachmentRemoveBtn.addEventListener("click", clearSupportAttachment);
+supportAttachmentInput.addEventListener("change", function() {
+    const file = this.files?.[0];
+    if (!file) return;
+    let info;
+    try { info = getSupportAttachmentInfo(file); }
+    catch (error) { showNotice(error.message); this.value = ""; return; }
+
+    clearSupportAttachment();
+    selectedSupportAttachment = info;
+    supportPreviewUrl = URL.createObjectURL(file);
+    const media = document.createElement(info.isImage ? "img" : "video");
+    media.src = supportPreviewUrl;
+    if (info.isImage) media.alt = "Выбранное фото";
+    else { media.muted = true; media.preload = "metadata"; media.playsInline = true; }
+    supportAttachmentPreviewMedia.appendChild(media);
+    supportAttachmentPreviewName.textContent =
+        file.name + " · " + (file.size / 1048576).toFixed(1) + " МБ";
+    supportAttachmentPreview.classList.remove("hidden");
+});
+
+async function uploadSupportAttachment(info, path) {
+    const progress = n => supportUploadStatus.textContent =
+        "Загрузка вложения: " + n + "%";
+
+    /* Небольшие файлы — стандартная загрузка, крупные — возобновляемая. */
+    if (info.file.size <= 6 * 1024 * 1024 || !window.tus?.Upload) {
+        progress(0);
+        const {error} = await supabaseClient.storage
+            .from(SUPPORT_ATTACHMENT_BUCKET)
+            .upload(path, info.file, {
+                contentType:info.mime, cacheControl:"3600", upsert:false
+            });
+        if (error) throw error;
+        progress(100);
+        return;
+    }
+
+    const {data, error} = await supabaseClient.auth.getSession();
+    if (error || !data?.session?.access_token) {
+        throw error || new Error("Сессия истекла. Открой поддержку ещё раз.");
+    }
+    const endpoint = SUPABASE_URL.replace(
+        ".supabase.co", ".storage.supabase.co"
+    ) + "/storage/v1/upload/resumable";
+
+    await new Promise((resolve,reject) => {
+        const upload = new window.tus.Upload(info.file, {
+            endpoint, retryDelays:[0,3000,5000,10000],
+            chunkSize:6*1024*1024, uploadDataDuringCreation:true,
+            removeFingerprintOnSuccess:true,
+            headers:{authorization:"Bearer " + data.session.access_token},
+            metadata:{
+                bucketName:SUPPORT_ATTACHMENT_BUCKET, objectName:path,
+                contentType:info.mime, cacheControl:"3600"
+            },
+            onProgress:(sent,total) => progress(total ? Math.round(sent / total * 100) : 0),
+            onError:reject, onSuccess:resolve
+        });
+        upload.start();
+    });
+}
 
 closeSupportBtn.addEventListener("click", function() {
     supportModal.classList.add("hidden");
 });
 
-
-/*
-    Отправка сообщений пользователя или гостя.
-*/
-
-sendSupportBtn.addEventListener(
-    "click",
-    async function() {
-
-        const guestConversationId =
-            getGuestSupportConversationId();
-
-        if (!currentUser && !guestConversationId) {
-            showNotice("Сначала открой поддержку.");
-            return;
-        }
-
-        const message = supportInput.value.trim();
-
-        if (!message) {
-            showNotice("Напиши сообщение.");
-            return;
-        }
-
-        sendSupportBtn.disabled = true;
-
-        try {
-
-            const messageData = {
-                message_text: message,
-                is_from_admin: false,
-                is_read: false
-            };
-
-            if (currentUser) {
-                messageData.user_id = currentUser.id;
-            } else {
-                messageData.user_id = null;
-                messageData.guest_conversation_id =
-                    guestConversationId;
-            }
-
-            const { error } =
-                await supabaseClient
-                    .from("support_messages")
-                    .insert(messageData);
-
-            if (error) {
-                throw error;
-            }
-
-            supportInput.value = "";
-
-            await loadSupportMessages();
-
-        } catch (error) {
-
-            console.error("Support send error:", error);
-
-            showNotice(
-                error?.message ||
-                "Не удалось отправить сообщение."
-            );
-
-        } finally {
-            sendSupportBtn.disabled = false;
-        }
+sendSupportBtn.addEventListener("click", async function() {
+    const guestConversationId = getGuestSupportConversationId();
+    if (!currentUser && !guestConversationId) {
+        showNotice("Сначала открой поддержку.");
+        return;
     }
-);
+    const message = supportInput.value.trim();
+    const attachment = selectedSupportAttachment;
+    if (!message && !attachment) {
+        showNotice("Напиши сообщение или прикрепи фото/видео.");
+        return;
+    }
 
-    
+    sendSupportBtn.disabled = true;
+    supportAttachBtn.disabled = true;
+    supportAttachmentRemoveBtn.disabled = true;
+    const originalText = sendSupportBtn.textContent;
+    sendSupportBtn.textContent = attachment ? "Загружаю..." : "Отправляю...";
+    let uploadedPath = null;
+
+    try {
+        const messageData = {message_text:message,is_from_admin:false,is_read:false};
+        if (currentUser) messageData.user_id = currentUser.id;
+        else {
+            messageData.user_id = null;
+            messageData.guest_conversation_id = guestConversationId;
+        }
+
+        if (attachment) {
+            const {data,error} = await supabaseClient.auth.getUser();
+            if (error || !data?.user?.id) {
+                throw error || new Error("Не удалось подтвердить сессию.");
+            }
+            uploadedPath = data.user.id + "/" +
+                crypto.randomUUID() + "." + attachment.extension;
+            await uploadSupportAttachment(attachment, uploadedPath);
+            messageData.attachment_path = uploadedPath;
+            messageData.attachment_mime = attachment.mime;
+        }
+
+        const {error} = await supabaseClient
+            .from("support_messages").insert(messageData);
+        if (error) throw error;
+        uploadedPath = null;
+
+        supportInput.value = "";
+        clearSupportAttachment();
+        await loadSupportMessages();
+    } catch (error) {
+        if (uploadedPath) {
+            try {
+                await supabaseClient.storage
+                    .from(SUPPORT_ATTACHMENT_BUCKET).remove([uploadedPath]);
+            } catch (cleanupError) {
+                console.warn("Support attachment cleanup:",cleanupError);
+            }
+        }
+        supportUploadStatus.textContent = "";
+        console.error("Support send error:",error);
+        showNotice(error?.message || "Не удалось отправить обращение.");
+    } finally {
+        sendSupportBtn.disabled = false;
+        supportAttachBtn.disabled = false;
+        supportAttachmentRemoveBtn.disabled = false;
+        sendSupportBtn.textContent = originalText;
+    }
+});
+
 /* =========================================================
    ANNOUNCEMENTS MODAL CONTROLS
 ========================================================= */
