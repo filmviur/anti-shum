@@ -8616,6 +8616,30 @@
     }
 }
 
+
+/* Правила доступны до и после открытия дневной сессии */
+.global-rules-link {
+    position: fixed;
+    z-index: 2147480000;
+    left: calc(12px + env(safe-area-inset-left, 0px));
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 8px 13px;
+    border: 1px solid rgba(216, 174, 103, .62);
+    border-radius: 22px;
+    background: rgba(30, 22, 16, .96);
+    color: #e7c994;
+    box-shadow: 0 3px 16px rgba(0, 0, 0, .35);
+    font: 600 13px/1 Georgia, "Times New Roman", serif;
+    text-decoration: none;
+    letter-spacing: .02em;
+}
+.global-rules-link:hover { background: #392a1c; }
+.global-rules-link:focus-visible { outline: 2px solid #f0cb87; outline-offset: 3px; }
+
 </style>
 
 <style id="diary-motion-system">
@@ -8673,6 +8697,7 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 </head>
 
 <body>
+<a class="global-rules-link" href="./rules.html" aria-label="Правила сайта">§ Правила</a>
 
 <div class="page">
     <div class="container">
