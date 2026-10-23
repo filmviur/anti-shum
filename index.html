@@ -8533,7 +8533,15 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 ========================= -->
 
 
-<section id="authScreen" class="auth-screen">
+<!-- Неподвижный стартовый экран до восстановления сессии. -->
+<section id="bootScreen" class="auth-screen" aria-live="polite">
+    <div class="auth-card">
+        <div class="auth-logo">АНТИ-ШУМ</div>
+        <div class="auth-subtitle">20 минут без информационного шума</div>
+    </div>
+</section>
+
+<section id="authScreen" class="auth-screen hidden">
 
     <div class="auth-card">
 
@@ -8980,7 +8988,7 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 
         <button
             id="enableNotificationsBtn"
-            class="icon-btn"
+            class="icon-btn hidden"
             type="button"
             title="Включить уведомления"
         >
@@ -10986,6 +10994,8 @@ let cameraStream = null;
 let currentReportAnswerId = null;
 
 let appInitializedUserId = null;
+let appInitializationUserId = null;
+let appInitializationPromise = null;
 
 
 /* =========================
@@ -11014,6 +11024,9 @@ let selectedSupportGuestConversationId = null;
     /* =========================================================
    ELEMENTS
 ========================================================= */
+
+const bootScreen =
+    document.getElementById("bootScreen");
 
 const authScreen =
     document.getElementById("authScreen");
@@ -11803,6 +11816,26 @@ function formatDate(dateString) {
 
 function showOnly(view) {
 
+    const views = [
+        questionView,
+        feedView,
+        profileView,
+        closedView,
+        adminView
+    ];
+
+    // Повторный вызов не должен перерисовывать экран и менять прокрутку.
+    if (
+        view &&
+        views.every(item =>
+            item === view
+                ? !item.classList.contains("hidden")
+                : item.classList.contains("hidden")
+        )
+    ) {
+        return;
+    }
+
     /* =========================
        СКРЫВАЕМ ВСЕ ЭКРАНЫ
     ========================= */
@@ -12241,6 +12274,7 @@ function isGuestSession(session) {
 
 function showAuthScreen() {
 
+    bootScreen.classList.add("hidden");
     authScreen.classList.remove("hidden");
     appScreen.classList.add("hidden");
 }
@@ -12434,6 +12468,35 @@ async function restoreSession() {
 
 async function initializeUser() {
 
+    const userId = currentUser?.id;
+
+    if (!userId || appInitializedUserId === userId) {
+        return;
+    }
+
+    // INITIAL_SESSION и restoreSession могут сработать одновременно.
+    if (appInitializationUserId === userId && appInitializationPromise) {
+        return appInitializationPromise;
+    }
+
+    appInitializationUserId = userId;
+
+    const pending = runUserInitialization(userId);
+    appInitializationPromise = pending;
+
+    try {
+        await pending;
+    } finally {
+        if (appInitializationPromise === pending) {
+            appInitializationPromise = null;
+            appInitializationUserId = null;
+        }
+    }
+}
+
+
+async function runUserInitialization(initializingUserId) {
+
     if (!currentUser) {
         return;
     }
@@ -12617,6 +12680,7 @@ appScreen.classList.add("hidden");
 
             authScreen.classList.add("hidden");
             appScreen.classList.add("hidden");
+            bootScreen.classList.add("hidden");
 
             blockedScreen.classList.remove("hidden");
 
@@ -12658,18 +12722,9 @@ appScreen.classList.add("hidden");
        ПРОВЕРКА ИНИЦИАЛИЗАЦИИ
     ========================= */
 
-    if (
-        appInitializedUserId === currentUser.id
-    ) {
-        /*
-            Уже инициализирован.
-            Но если экран закрыт после перезагрузки,
-            состояние всё равно проверяем ниже.
-        */
+    if (currentUser?.id !== initializingUserId) {
+        return;
     }
-
-    appInitializedUserId =
-        currentUser.id;
 
 
     /* =========================
@@ -12745,8 +12800,6 @@ appScreen.classList.add("hidden");
 
     authScreen.classList.add("hidden");
 
-    appScreen.classList.remove("hidden");
-
 
     /* =========================
        ЗАГРУЖАЕМ ПРОФИЛЬ
@@ -12774,6 +12827,15 @@ appScreen.classList.add("hidden");
     ========================= */
 
     await loadTodayQuestionAndState();
+
+    if (currentUser?.id !== initializingUserId) {
+        return;
+    }
+
+    // Все данные экрана готовы: теперь показываем его без скачков.
+    appInitializedUserId = initializingUserId;
+    bootScreen.classList.add("hidden");
+    appScreen.classList.remove("hidden");
 
 
     /* =========================
