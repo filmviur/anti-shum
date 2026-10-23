@@ -51,6 +51,16 @@ self.addEventListener("push", event => {
         data.type = "daily";
     }
 
+    // Объявления о новых голосованиях сразу ведут в раздел «Вопросы проекта».
+    // Остальные объявления сохраняют прежнее поведение.
+    if (
+        data.type === "announcement" &&
+        typeof data.body === "string" &&
+        data.body.startsWith("Новый вопрос в разделе «Вопросы проекта»:")
+    ) {
+        data.url = "./polls.html";
+    }
+
     let targetUrl = new URL("./", self.registration.scope);
 
     try {
