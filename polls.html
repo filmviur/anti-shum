@@ -123,6 +123,9 @@ function smallButton(label,className,handler) {
 }
 async function init() {
  try{
+  const {data:sessionData,error:sessionError}=await supabaseClient.auth.getSession();
+  if(sessionError)throw sessionError;
+  if(!sessionData.session){message("Голосования доступны через личный профиль. Сначала войди или зарегистрируйся на главной странице.");return}
   const {data,error}=await supabaseClient.auth.getUser();
   if(error)throw error;
   user=data.user;
