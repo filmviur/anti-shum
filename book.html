@@ -742,6 +742,42 @@ opacity:.65;pointer-events:none}
  .book.mobile-reading .sheet .photo-note .page-photo{height:105px!important;max-height:none!important}
 }
 
+
+/* Mobile diary repairs verified against the 23 October screen recording. */
+.book-3d{--book-depth:clamp(39px,12vw,56px)}
+.book-3d-pages{background:linear-gradient(90deg,#75593d6b,transparent 19%,#fff8d625 50%,#7c5a37a0),repeating-linear-gradient(180deg,#e2cfb1 0 1px,#c9b496 1px 2px,#e5d2b2 2px 3px)!important;box-shadow:inset 0 0 11px #53381eb0,0 0 0 1px #75523591!important}
+.book:not(.cover-mode)::after{height:7px!important;bottom:-5px!important;background:repeating-linear-gradient(180deg,#dfcaab 0 1px,#ac8c68 1px 2px,#d6bd9a 2px 3px)!important}
+.book.opening .cover{display:none!important}
+.book .sheet .question-block{flex:0 0 auto!important;min-height:0!important;max-height:52%!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain;scrollbar-width:thin}
+.book .sheet .entry-layout:has(.photo-note) .question-block{flex:0 0 auto!important;max-height:45%!important;overflow-y:auto!important}
+.book .sheet .answer-block,.book .sheet .entry-layout:has(.photo-note) .answer-block{flex:1 1 auto!important;min-height:40px!important;max-height:none!important;overflow:hidden!important;margin-top:3px!important}
+.book .sheet .photo-note{flex:0 0 auto!important;position:relative!important;align-self:center!important;width:min(61%,170px)!important;max-width:100%!important;margin:3px auto 9px!important;transform:rotate(1.3deg)!important;overflow:visible!important}
+.book .sheet .photo-clip{width:19px!important;height:39px!important;top:-13px!important;right:8px!important;transform:rotate(9deg)!important;opacity:.87}
+.book .sheet .photo-clip path{stroke-width:2.8!important}
+.book .sheet .photo-note .page-photo{height:98px!important;max-height:98px!important;width:100%!important;object-fit:contain!important}
+.book .sheet .epilogue-page{justify-content:flex-start!important;gap:0!important;padding:5px 9px 10px!important;overflow:hidden!important;min-height:0!important}
+.book .sheet .epilogue-heading{flex:0 0 auto!important;line-height:1.05!important;margin:2px 0 7px!important}
+.book .sheet .epilogue-text{flex:0 1 auto!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;line-height:1.23!important;scrollbar-width:thin}
+.book .sheet .epilogue-flourish{flex:0 0 auto!important;width:90px!important;margin:0 auto 3px!important}
+.book .sheet .epilogue-flourish.bottom{width:75px!important;margin:4px auto 2px!important}
+.book .sheet .epilogue-sign{flex:0 0 auto!important;margin:2px 0 0!important;line-height:1.12!important}
+.book .sheet.page-arriving>div:not(.page-ornament){animation:quietFade .34s ease-out both!important}
+@media(max-width:700px) and (orientation:portrait){
+ .stage{perspective:1150px!important}
+ .book.mobile-reading .sheet .entry-layout{overflow:hidden!important;padding:2px 8px 9px!important}
+ .book.mobile-reading .sheet .question-block{flex:0 0 auto!important;max-height:53%!important;margin:2px 0 9px!important}
+ .book.mobile-reading .sheet .entry-layout:has(.photo-note) .question-block{flex:0 0 auto!important;max-height:45%!important;margin-bottom:5px!important}
+ .book.mobile-reading .sheet .page-question{font-size:clamp(18px,5.35vw,21px)!important;line-height:1.13!important}
+ .book.mobile-reading .sheet .photo-note{width:min(61%,170px)!important;margin:2px auto 7px!important}
+ .book.mobile-reading .sheet .photo-note .page-photo{height:88px!important;max-height:88px!important}
+ .book.mobile-reading .sheet .answer-block,.book.mobile-reading .sheet .entry-layout:has(.photo-note) .answer-block{flex:1 1 auto!important;min-height:45px!important;margin-top:2px!important}
+ .book.mobile-reading .sheet .epilogue-page{padding:2px 8px 8px!important}
+ .book.mobile-reading .sheet .epilogue-heading{font-size:27px!important;margin:2px 0 5px!important}
+ .book.mobile-reading .sheet .epilogue-text{font-size:clamp(12.5px,3.7vw,14px)!important;line-height:1.19!important}
+ .book.mobile-reading .sheet .epilogue-flourish{width:75px!important;margin:0 auto 2px!important}
+ .book.mobile-reading .sheet .epilogue-flourish.bottom{width:67px!important;margin:3px auto 1px!important}
+ .book.mobile-reading .sheet .epilogue-sign{font-size:12px!important;margin:0!important}
+}
 </style>
 </head>
 <body>
@@ -839,7 +875,7 @@ function arrivePages(){
  for(const page of [left,right]){
   page.classList.remove("page-arriving");void page.offsetWidth;page.classList.add("page-arriving");
  }
- setTimeout(()=>{left.classList.remove("page-arriving");right.classList.remove("page-arriving");},900);
+ setTimeout(()=>{left.classList.remove("page-arriving");right.classList.remove("page-arriving");},410);
 }
 function penSound(){
  if(!soundEnabled)return;
@@ -921,9 +957,9 @@ function pageTurnSound(){
  if(!soundEnabled)return;
  try{
   if(paperTimer)clearTimeout(paperTimer);
-  paperAudio.pause();paperAudio.currentTime=0;paperAudio.playbackRate=1.8;
+  paperAudio.pause();paperAudio.currentTime=0;paperAudio.playbackRate=1.0;
   const playing=paperAudio.play();if(playing?.catch)playing.catch(()=>{});
-  paperTimer=setTimeout(()=>{paperAudio.pause();paperTimer=null;},1540);
+  paperTimer=setTimeout(()=>{paperAudio.pause();paperTimer=null;},1350);
  }catch(e){console.debug("Paper recording unavailable",e);}
 }
 function isPortraitPage(){return window.matchMedia("(max-width:700px) and (orientation:portrait)").matches;}
@@ -947,9 +983,10 @@ function fitPageContent(el){
  if(photo){
   const heading=page.querySelector(".entry-heading");
   const questionBlock=page.querySelector(".question-block");
-  const reservedForAnswer=height*.38;
-  const available=height-(heading?.offsetHeight||0)-(questionBlock?.scrollHeight||0)-reservedForAnswer-53;
-  const photoHeight=Math.max(58,Math.min(110,available));
+  const answerLength=page.querySelector(".page-answer")?.textContent.length||0;
+  const reservedForAnswer=Math.min(height*.31,Math.max(70,56+answerLength*.16));
+  const available=height-(heading?.offsetHeight||0)-(questionBlock?.scrollHeight||0)-reservedForAnswer-30;
+  const photoHeight=Math.max(68,Math.min(isPortraitPage()?88:98,available));
   photo.style.setProperty("height",photoHeight+"px","important");
  }
 }
@@ -1009,7 +1046,7 @@ function move(delta){
   closedScene.classList.add("opening");
   if(single)renderMobileLeaf(0);
   else{fillSlot(left,0);fillSlot(right,1);}
-  book.style.visibility="visible";cover.style.display="flex";
+  book.style.visibility="visible";cover.style.display="none";
   book.classList.remove("closing","opening");
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
    book.classList.remove("cover-mode");book.classList.add("opening");
@@ -1040,12 +1077,14 @@ function move(delta){
  if(single){setPageFace(front,outgoing);setPageFace(back,incoming);}
  fillSlot(front,outgoing);fillSlot(back,incoming);
  fly.append(front,back);book.append(fly);
+ // The incoming page is beneath the leaf from the start, avoiding a mid-turn jump.
+ if(single)renderMobileLeaf(targetLeaf);
+ fitPageContent(front);fitPageContent(back);
  pageTurnSound();
  requestAnimationFrame(()=>requestAnimationFrame(()=>fly.classList.add("turning")));
  setTimeout(()=>{
   if(!turning)return;
-  if(single)renderMobileLeaf(targetLeaf);
-  else{fillSlot(left,target*2);fillSlot(right,target*2+1);}
+  if(!single){fillSlot(left,target*2);fillSlot(right,target*2+1);}
  },550);
  setTimeout(()=>{
   fly.remove();
