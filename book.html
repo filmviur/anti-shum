@@ -661,6 +661,87 @@ opacity:.65;pointer-events:none}
  .book-3d,.book-closed-scene.opening .book-3d,.book .turn-sheet.turning,
  .book .turn-sheet.backwards.turning{transition:none!important;animation:none!important}
 }
+
+/* Diary 2026-10-23: true book proportions, thicker 365-page spine, legible content. */
+.book-3d{--book-depth:clamp(56px,18vw,78px)}
+.book-3d-front{transform:translateZ(calc(var(--book-depth)/2))}
+.book-3d-back{transform:rotateY(180deg) translateZ(calc(var(--book-depth)/2))}
+.book-3d-spine{width:var(--book-depth);left:calc(var(--book-depth)/-2);background:#44240f url("./diary-spine.webp") center / 100% 100% no-repeat;transform:rotateY(-90deg);box-shadow:inset -2px 0 7px #10070055}
+.book-3d-pages{width:var(--book-depth);right:calc(var(--book-depth)/-2);transform:rotateY(90deg);background:repeating-linear-gradient(180deg,#e7d1a8 0 2px,#bda381 3px,#f9e8c6 4px 5px);box-shadow:inset 0 0 8px #4c321a88}
+.book{width:min(940px,96vw,105vh);height:auto;min-height:0;aspect-ratio:1.44;isolation:isolate}
+.book:not(.cover-mode)::after{content:"";position:absolute;inset:auto 7px -7px 7px;height:11px;pointer-events:none;z-index:-1;border-radius:0 0 12px 12px;background:repeating-linear-gradient(180deg,#ad8862 0 1px,#f1dcba 1px 3px,#cbb28c 3px 4px);box-shadow:0 8px 12px #0005}
+.book .book-spine{left:calc(50% - 8px);width:16px;background:linear-gradient(90deg,#3e2110af 0%,#a1815a80 33%,#36200d99 55%,#24160b9e 100%)!important;box-shadow:-4px 0 10px #29140755,4px 0 10px #29140755}
+/* Restore the actual .entry-layout wrapper to give each region its own space. */
+.book .sheet .entry-layout{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;height:100%!important;min-height:0!important;overflow:hidden!important;padding:0 4px 9px!important}
+.book .sheet .entry-heading{flex:0 0 auto;align-self:center;margin:0 auto 10px!important;max-width:95%!important;padding:5px 13px 6px!important}
+.book .sheet .page-kicker{font-size:31px!important;line-height:1.02!important}
+.book .sheet .page-date{font-size:18px!important;line-height:1.14!important}
+.book .sheet .question-block{flex:0 1 auto;min-height:0;max-width:100%!important;margin:2px 0 11px!important}
+.book .sheet .question-label,.book .sheet .answer-label{font-size:18px!important;line-height:1.08!important;margin:0 0 5px!important}
+.book .sheet .page-question{display:block!important;width:fit-content!important;max-width:100%!important;max-height:none!important;overflow:visible!important;font-size:21px!important;line-height:1.12!important;padding:5px 9px!important;overflow-wrap:break-word!important;transform:rotate(-.5deg)!important}
+.book .sheet .answer-block{flex:1 1 auto!important;min-height:0!important;margin:7px 0 0!important;overflow:hidden!important;display:flex!important;flex-direction:column!important}
+.book .sheet .page-answer{flex:1 1 auto;min-height:0!important;max-height:100%!important;overflow-y:auto!important;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#ac8a6250 transparent;font-size:21px!important;line-height:1.18!important;padding:0 4px 2px!important}
+/* Photograph is a real Polaroid placed between question and handwriting. */
+.book .sheet .photo-note{position:relative!important;display:block!important;align-self:center!important;flex:0 0 auto!important;width:fit-content!important;max-width:min(68%,210px)!important;max-height:none!important;margin:0 auto 7px!important;padding:6px 6px 16px!important;transform:rotate(2.5deg)!important;background:#f9f3e5!important;border:1px solid #d6c39f!important;box-shadow:2px 4px 8px #583b2847,0 1px 1px #fff8 inset!important;z-index:2!important}
+.book .sheet .photo-note .page-photo{display:block!important;width:auto!important;height:auto!important;max-width:100%!important;max-height:clamp(88px,12vh,120px)!important;object-fit:contain!important;border:0!important;box-shadow:none!important;margin:0!important}
+.book .sheet .photo-note:before{content:none!important;display:none!important}
+.book .sheet .photo-clip{position:absolute;z-index:3;top:-21px;right:11px;width:27px;height:53px;overflow:visible;transform:rotate(12deg);filter:drop-shadow(1px 1px 1px #291a1670);pointer-events:none}
+.book .sheet .photo-clip path{fill:none;stroke:#9da1a2;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round}
+.book .sheet .photo-clip .paperclip-highlight{stroke:#f4f1e9;stroke-width:1.15}
+.book .sheet .entry-layout:has(.photo-note) .question-block{margin-bottom:5px!important}
+.book .sheet .entry-layout:has(.photo-note) .answer-block{min-height:36%!important;margin-top:3px!important}
+/* Inner ornament artwork remains; the book opens at a more plausible ratio. */
+@media(max-width:700px) and (orientation:portrait){
+ .stage{min-height:0!important;padding:15px 6px 18px}
+ .book.mobile-reading{width:min(94vw,420px)!important;height:auto!important;min-height:0!important;aspect-ratio:719/995!important;display:block!important;grid-template-columns:none!important}
+ .book.mobile-reading .sheet#leftPage{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important}
+ .book.mobile-reading .sheet#rightPage{display:none!important}
+ .book.mobile-reading .sheet,.book.mobile-reading .sheet.left,.book.mobile-reading .sheet.right,.book.mobile-reading .turn-sheet{
+  padding:12% 10% 12.5%!important
+ }
+ .book.mobile-reading .book-spine{left:0!important;width:9px!important;z-index:6;box-shadow:2px 0 12px #26160955!important}
+ .book.mobile-reading .turn-sheet{left:0!important;top:0!important;width:100%!important;height:100%!important;transform-origin:left center!important}
+ .book.mobile-reading .turn-sheet.backwards{transform-origin:right center!important}
+ .book.mobile-reading .cover{left:0!important;width:100%!important;right:auto!important;transform-origin:left center!important}
+ .book.mobile-reading.cover-mode .cover{left:0!important;transform:rotateY(0deg)!important}
+ .book.mobile-reading.opening .cover{left:0!important;transform:rotateY(-175deg)!important}
+ .book.mobile-reading.closing .cover{left:0!important;transform:rotateY(0deg)!important}
+ .book.mobile-reading .sheet .entry-layout{padding:3px 10px 12px!important}
+ .book.mobile-reading .sheet .entry-heading{margin:0 auto 9px!important;padding:4px 13px 7px!important}
+ .book.mobile-reading .sheet .page-kicker{font-size:31px!important}
+ .book.mobile-reading .sheet .page-date{font-size:18px!important}
+ .book.mobile-reading .sheet .question-block{margin-bottom:11px!important}
+ .book.mobile-reading .sheet .question-label,.book.mobile-reading .sheet .answer-label{font-size:18px!important;margin-bottom:5px!important}
+ .book.mobile-reading .sheet .page-question{font-size:21px!important;line-height:1.12!important}
+ .book.mobile-reading .sheet .page-answer{font-size:21px!important;line-height:1.19!important}
+ .book.mobile-reading .sheet .photo-note{max-width:66%!important;margin:0 auto 8px!important;padding:5px 5px 13px!important}
+ .book.mobile-reading .sheet .photo-note .page-photo{max-height:clamp(72px,13vh,115px)!important}
+ .book.mobile-reading .sheet .entry-layout:has(.photo-note) .answer-block{min-height:39%!important}
+ .book.mobile-reading .sheet .epilogue-heading{font-size:31px!important;line-height:1.07!important}
+ .book.mobile-reading .sheet .epilogue-text{font-size:16px!important;line-height:1.32!important;overflow:visible!important;max-height:none!important}
+ .book.mobile-reading .sheet .epilogue-flourish{width:102px!important}
+ .book.mobile-reading .sheet .epilogue-sign{font-size:14px!important}
+ .book.mobile-reading .sheet .page-number{bottom:2px!important;font-size:15px!important}
+ .book.mobile-reading .sheet .page-empty{font-size:23px!important}
+ .book-3d{width:min(81vw,345px)}
+}
+@media(min-width:701px),(orientation:landscape){
+ .book:not(.mobile-reading) .sheet .entry-layout:has(.photo-note) .photo-note .page-photo{max-height:clamp(75px,12vh,110px)!important}
+}
+@media(prefers-reduced-motion:reduce){.book-3d,.book .turn-sheet{animation:none!important}}
+
+
+/* Photo has a stable footprint before the image downloads, preventing page jumps. */
+.book .sheet .photo-note{width:min(64%,178px)!important}
+.book .sheet .photo-note .page-photo{display:block!important;width:100%!important;height:110px!important;max-height:none!important;object-fit:contain!important;background:#d9c5a5}
+.book .sheet .page-answer::-webkit-scrollbar{width:4px}
+.book .sheet .page-answer::-webkit-scrollbar-thumb{background:#a47a4a70;border-radius:5px}
+.book .turn-sheet{filter:none!important;box-shadow:-3px 5px 12px #2c1a1240!important}
+@media(max-width:700px) and (orientation:portrait){
+ .book.mobile-reading .sheet .photo-note{width:min(62%,174px)!important}
+ .book.mobile-reading .sheet .photo-note .page-photo{height:105px!important;max-height:none!important}
+}
+
 </style>
 </head>
 <body>
@@ -735,7 +816,10 @@ function buildPage(day,number){
   page.append(q);
   if(day.photo){
    const note=document.createElement("div");note.className="photo-note";
-   const img=document.createElement("img");img.className="page-photo";img.alt="Фотоответ";img.src=day.photo;note.append(img);page.append(note);
+   const img=document.createElement("img");img.className="page-photo";img.alt="Фотоответ";img.loading="eager";img.decoding="async";img.src=day.photo;
+   const clip=document.createElementNS("http://www.w3.org/2000/svg","svg");clip.setAttribute("class","photo-clip");clip.setAttribute("viewBox","0 0 38 72");clip.setAttribute("aria-hidden","true");
+   clip.innerHTML='<path d="M15 52V17C15 9 20 5 26 7C31 9 32 14 32 20V49C32 60 26 65 19 65C11 65 6 60 6 51V28C6 21 11 17 17 17C23 17 26 22 26 28V49"/><path class="paperclip-highlight" d="M17 51V17C17 11 21 7 25 9"/>';
+   note.append(img,clip);page.append(note);
   }
   const answer=document.createElement("div");answer.className="answer-block";
   answer.append(text("div","answer-label","Мой ответ:"));
@@ -749,7 +833,7 @@ function fill(el,day,number){
  const ornament=document.createElement("div");ornament.className="page-ornament";ornament.setAttribute("aria-hidden","true");
  for(const pos of ["tl","tr","bl","br"]){const corner=document.createElement("span");corner.className="corner "+pos;corner.textContent="❦";ornament.append(corner);}
  for(const pos of ["left-vine","right-vine"]){const vine=document.createElement("span");vine.className="vine "+pos;ornament.append(vine);}
- el.replaceChildren(ornament,...contents.childNodes);
+ el.replaceChildren(ornament,contents);
 }
 function arrivePages(){
  for(const page of [left,right]){
@@ -778,7 +862,7 @@ function penSound(){
 function revealWriting(){
  if(index<0||window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
  let changed=false;
- for(const [element,n] of [[left,index*2],[right,index*2+1]]){
+ for(const [element,n] of (isPortraitPage()?[[left,mobileLeaf]]:[[left,index*2],[right,index*2+1]])){
   if(!newWriting.has(n))continue;
   const written=element.querySelector('[data-fresh="1"]');if(!written)continue;
   written.classList.add("writing");newWriting.delete(n);seen.add(n);changed=true;
@@ -829,37 +913,73 @@ soundBtn.onclick=()=>{
  soundEnabled=!soundEnabled;updateSoundButton();
  try{localStorage.setItem("antiShumBookSound",soundEnabled?"on":"off");}catch(e){}
 };
+// Natural page-turn foley: planish (public domain), Wikimedia Commons, "Turning a page.ogg".
+const paperAudio=new window.Audio("https://upload.wikimedia.org/wikipedia/commons/6/6b/Turning_a_page.ogg");
+paperAudio.preload="auto";paperAudio.volume=.43;
+let paperTimer=null;
 function pageTurnSound(){
  if(!soundEnabled)return;
  try{
-  const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;
-  audioCtx=audioCtx||new Audio();if(audioCtx.state==="suspended")audioCtx.resume();
-  const sr=audioCtx.sampleRate,duration=.46;
-  const buffer=audioCtx.createBuffer(1,Math.ceil(sr*duration),sr);
-  const data=buffer.getChannelData(0);let soft=0;
-  for(let i=0;i<data.length;i++){
-   soft=.77*soft+.23*(Math.random()*2-1);
-   const x=i/data.length,fade=Math.sin(Math.PI*x)**1.4;
-   data[i]=soft*fade*(.75+.25*Math.sin(2*Math.PI*x*8));
-  }
-  const source=audioCtx.createBufferSource();source.buffer=buffer;
-  const filter=audioCtx.createBiquadFilter();filter.type="bandpass";filter.frequency.value=1100;filter.Q.value=.5;
-  const volume=audioCtx.createGain();const t=audioCtx.currentTime;
-  volume.gain.setValueAtTime(.001,t);
-  volume.gain.linearRampToValueAtTime(.105,t+.08);
-  volume.gain.exponentialRampToValueAtTime(.001,t+duration);
-  source.connect(filter);filter.connect(volume);volume.connect(audioCtx.destination);
-  source.start(t);source.stop(t+duration);
- }catch(e){console.debug("Page audio unavailable",e);}
+  if(paperTimer)clearTimeout(paperTimer);
+  paperAudio.pause();paperAudio.currentTime=0;paperAudio.playbackRate=1.8;
+  const playing=paperAudio.play();if(playing?.catch)playing.catch(()=>{});
+  paperTimer=setTimeout(()=>{paperAudio.pause();paperTimer=null;},1540);
+ }catch(e){console.debug("Paper recording unavailable",e);}
 }
+function isPortraitPage(){return window.matchMedia("(max-width:700px) and (orientation:portrait)").matches;}
+function setPageFace(el,number){
+ el.classList.toggle("left",number%2===0);
+ el.classList.toggle("right",number%2!==0);
+}
+function fitPageContent(el){
+ const page=el.querySelector(".entry-layout");if(!page)return;
+ const question=page.querySelector(".page-question");if(!question)return;
+ const note=page.querySelector(".photo-note");
+ const photo=note?.querySelector("img");
+ question.style.removeProperty("font-size");
+ const height=page.clientHeight;
+ if(!height)return;
+ const maxQuestionHeight=height*(note?.31:.43);
+ let size=21;
+ while(question.scrollHeight>maxQuestionHeight&&size>16){
+  size-=1;question.style.setProperty("font-size",size+"px","important");
+ }
+ if(photo){
+  const heading=page.querySelector(".entry-heading");
+  const questionBlock=page.querySelector(".question-block");
+  const reservedForAnswer=height*.38;
+  const available=height-(heading?.offsetHeight||0)-(questionBlock?.scrollHeight||0)-reservedForAnswer-53;
+  const photoHeight=Math.max(58,Math.min(110,available));
+  photo.style.setProperty("height",photoHeight+"px","important");
+ }
+}
+function renderMobileLeaf(pageNumber){
+ setPageFace(left,pageNumber);
+ fillSlot(left,pageNumber);
+ fitPageContent(left);
+}
+let mobileLeaf=-1,wasSingle=isPortraitPage();
 function show(){
- const closed=index<0;
+ const single=isPortraitPage();
+ book.classList.toggle("mobile-reading",single);
+ if(single&&index>=0&&mobileLeaf<0)mobileLeaf=index*2;
+ const closed=single?mobileLeaf<0:index<0;
  book.classList.toggle("cover-mode",closed);
  if(!turning){book.classList.remove("opening","closing");cover.style.display=closed?"flex":"none";}
  left.style.visibility="visible";right.style.visibility="visible";
- if(!closed){fillSlot(left,index*2);fillSlot(right,index*2+1);}
- $("pageInfo").textContent=closed?"Обложка":index===0?"Пролог · День 1":("Дни "+(index*2)+"–"+Math.min(365,index*2+1)+" / 365");
- prev.disabled=turning||closed;next.disabled=turning||index>=182;
+ if(!closed){
+  if(single)renderMobileLeaf(mobileLeaf);
+  else{
+   setPageFace(left,0);setPageFace(right,1);
+   fillSlot(left,index*2);fillSlot(right,index*2+1);
+   fitPageContent(left);fitPageContent(right);
+  }
+ }
+ $("pageInfo").textContent=closed?"Обложка":
+  single?(mobileLeaf===0?"Пролог":"День "+mobileLeaf+" / 365"):
+  index===0?"Пролог · День 1":"Дни "+(index*2)+"–"+Math.min(365,index*2+1)+" / 365";
+ prev.disabled=turning||closed;
+ next.disabled=turning||(single?mobileLeaf>=365:index>=182);
  backCoverBtn.hidden=!closed;backCoverBtn.disabled=turning;
  bookHint.textContent=closed?"Вращай закрытую книгу пальцем · Нажми, чтобы открыть":
   "Листай страницы свайпом влево или вправо";
@@ -871,14 +991,24 @@ function show(){
 }
 function move(delta){
  if(turning)return;
- const target=Math.max(-1,Math.min(182,index+delta));if(target===index)return;
+ const single=isPortraitPage();book.classList.toggle("mobile-reading",single);
+ const targetLeaf=single?Math.max(-1,Math.min(365,mobileLeaf+delta)):null;
+ const target=single?(targetLeaf<0?-1:Math.floor(targetLeaf/2)):
+  Math.max(-1,Math.min(182,index+delta));
+ if(single?targetLeaf===mobileLeaf:target===index)return;
  const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
- if(reduced){index=target;pageTurnSound();show();return;}
- if(index===-1&&target===0){
+ if(reduced){
+  if(single){mobileLeaf=targetLeaf;index=targetLeaf<0?-1:Math.floor(targetLeaf/2);}
+  else index=target;
+  pageTurnSound();show();return;
+ }
+ const currentlyClosed=single?mobileLeaf===-1:index===-1;
+ if(currentlyClosed&&(single?targetLeaf===0:target===0)){
   turning=true;closedScene.hidden=false;
   closedBook3d.style.setProperty("--open-yaw",(coverYaw-155)+"deg");
   closedScene.classList.add("opening");
-  fillSlot(left,0);fillSlot(right,1);
+  if(single)renderMobileLeaf(0);
+  else{fillSlot(left,0);fillSlot(right,1);}
   book.style.visibility="visible";cover.style.display="flex";
   book.classList.remove("closing","opening");
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
@@ -888,37 +1018,54 @@ function move(delta){
   pageTurnSound();
   setTimeout(()=>{
    closedScene.classList.remove("opening");closedScene.hidden=true;
-   index=0;turning=false;show();arrivePages();
+   index=0;if(single)mobileLeaf=0;
+   turning=false;show();arrivePages();
   },1520);
   return;
  }
- if(index===0&&target===-1){
+ if((single?mobileLeaf===0:index===0)&&(single?targetLeaf===-1:target===-1)){
   turning=true;cover.style.display="flex";
   book.classList.remove("opening","closing");
   requestAnimationFrame(()=>requestAnimationFrame(()=>book.classList.add("cover-mode","closing")));
   next.disabled=true;prev.disabled=true;pageTurnSound();
-  setTimeout(()=>{index=-1;turning=false;setCoverYaw(-8);show();},1320);
+  setTimeout(()=>{index=-1;mobileLeaf=-1;turning=false;setCoverYaw(-8);show();},1320);
   return;
  }
  turning=true;show();
- const outgoing=delta>0?index*2+1:index*2;
- const incoming=delta>0?target*2:target*2+1;
+ const outgoing=single?mobileLeaf:(delta>0?index*2+1:index*2);
+ const incoming=single?targetLeaf:(delta>0?target*2:target*2+1);
  const fly=document.createElement("div");fly.className="turn-sheet"+(delta<0?" backwards":"");
  const front=document.createElement("div");front.className="sheet "+(delta>0?"right":"left")+" turn-face turn-front";
  const back=document.createElement("div");back.className="sheet "+(delta>0?"left":"right")+" turn-face turn-back";
+ if(single){setPageFace(front,outgoing);setPageFace(back,incoming);}
  fillSlot(front,outgoing);fillSlot(back,incoming);
  fly.append(front,back);book.append(fly);
  pageTurnSound();
  requestAnimationFrame(()=>requestAnimationFrame(()=>fly.classList.add("turning")));
- setTimeout(()=>{if(turning){fillSlot(left,target*2);fillSlot(right,target*2+1);}},550);
- setTimeout(()=>{fly.remove();index=target;turning=false;show();arrivePages();},1210);
+ setTimeout(()=>{
+  if(!turning)return;
+  if(single)renderMobileLeaf(targetLeaf);
+  else{fillSlot(left,target*2);fillSlot(right,target*2+1);}
+ },550);
+ setTimeout(()=>{
+  fly.remove();
+  if(single){mobileLeaf=targetLeaf;index=Math.floor(targetLeaf/2);}
+  else index=target;
+  turning=false;show();arrivePages();
+ },1210);
 }
 prev.onclick=()=>move(-1);next.onclick=()=>move(1);
 backCoverBtn.onclick=()=>{
  if(turning||index>=0)return;
  setCoverYaw(Math.cos(coverYaw*Math.PI/180)<0?0:180,true);
 };
-
+window.addEventListener("resize",()=>{
+ const single=isPortraitPage();
+ if(single===wasSingle||turning)return;
+ if(single)mobileLeaf=index<0?-1:index*2;
+ else index=mobileLeaf<0?-1:Math.floor(mobileLeaf/2);
+ wasSingle=single;show();
+});
 closedBook3d.addEventListener("keydown",event=>{
  if(event.key==="Enter"||event.key===" "){event.preventDefault();move(1);}
  if(event.key==="ArrowRight"||event.key==="ArrowLeft"){
