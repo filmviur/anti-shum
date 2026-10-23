@@ -8671,6 +8671,19 @@
 }
 .profile-friend-card__hint { color: #a69783; font: 12px/1.4 Georgia,serif; }
 
+
+.profile-polls-card {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 6px; width: 100%; margin-bottom: 28px; padding: 17px 11px;
+    border: 1px solid rgba(201,168,106,.35); border-radius: 5px;
+    background: linear-gradient(135deg,#3b2d1e,#1c1712);
+    text-decoration: none; text-align:center;
+}
+.profile-polls-card:hover, .profile-polls-card:focus-visible { border-color: rgba(232,192,114,.7); }
+.profile-polls-card__title { color:#d6b875; font:600 21px/1.3 "Cormorant Garamond",Georgia,serif; }
+.profile-polls-card__hint { color:#c4b092; font:12px/1.4 Georgia,serif; }
+.profile-polls-card__free { color:#a3cfad; font:600 10px/1.5 Georgia,serif; letter-spacing:.07em; }
+
 </style>
 
 <style id="diary-motion-system">
@@ -9617,6 +9630,15 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 <div class="profile-section-title">МОИ 365 ДНЕЙ В АНТИ-ШУМ</div>
 <a href="./book.html" class="secondary-btn" style="display:block;width:100%;padding:17px;margin-bottom:28px;border:1px solid rgba(201,168,106,.35);border-radius:5px;background:linear-gradient(135deg,#3b2d1e,#1c1712);color:#d6b875;font-family:'Cormorant Garamond',Georgia,serif;font-size:21px;text-align:center;text-decoration:none;">
     📖 Открыть мою книгу
+</a>
+
+
+<!-- Бесплатные опросы о развитии проекта -->
+<div class="profile-section-title">ВОПРОСЫ ПРОЕКТА</div>
+<a href="./polls.html" class="profile-polls-card" aria-label="Вопросы проекта — бесплатные голосования и идеи">
+    <span class="profile-polls-card__title">✦ Вопросы проекта</span>
+    <span class="profile-polls-card__hint">Голосования · ДА / НЕТ / ДРУГОЕ · Предложения идей</span>
+    <span class="profile-polls-card__free">БЕСПЛАТНО ДЛЯ ВСЕХ</span>
 </a>
 
 <!-- Друг проекта: информационная карточка для демо-версии -->
