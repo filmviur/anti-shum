@@ -851,7 +851,7 @@ opacity:.65;pointer-events:none}
 @keyframes closedBookEntrance{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){#closedScene{animation:none}}
 @media(max-width:700px) and (orientation:portrait){
- #book:not(.mobile-reading){width:min(94vw,420px)!important;height:auto!important;min-height:0!important;aspect-ratio:719/995!important;display:block!important}
+ #book:not(.mobile-reading){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;width:min(96vw,940px)!important;height:auto!important;min-height:0!important;aspect-ratio:940/610!important}
 }
 .book .sheet .entry-layout{overflow:hidden!important;position:relative!important}
 .book .sheet .entry-layout .page-flow{
@@ -896,6 +896,33 @@ opacity:.65;pointer-events:none}
  display:block!important;flex:0 0 auto!important;
  min-height:0!important;height:auto!important;max-height:none!important;
  overflow:visible!important;width:100%!important
+}
+
+/* Keep the complete two-leaf book in view at every viewport width.
+   Mobile portrait gets smaller type through fitPageContent(), never a single leaf. */
+@media(max-width:900px){
+ .stage{min-height:0!important;padding:12px 5px 18px!important}
+ #book:not(.mobile-reading){
+  width:min(96vw,940px,calc(80svh * 1.541))!important;
+  height:auto!important;min-height:0!important;aspect-ratio:940/610!important;
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ }
+ #book:not(.mobile-reading) .sheet,
+ #book:not(.mobile-reading) .sheet.left,
+ #book:not(.mobile-reading) .sheet.right{
+  padding:clamp(19px,5.5vw,45px) clamp(14px,4vw,38px) clamp(22px,6.2vw,48px)!important;
+ }
+ #book:not(.mobile-reading) .sheet .entry-layout{padding:0 2px 3px!important}
+ #book:not(.mobile-reading) .sheet .entry-heading{margin:0 auto 5px!important;padding:2px 4px 4px!important}
+ #book:not(.mobile-reading) .sheet .page-kicker{font-size:clamp(16px,4vw,24px)!important}
+ #book:not(.mobile-reading) .sheet .page-date{font-size:clamp(11px,2.7vw,17px)!important}
+ #book:not(.mobile-reading) .sheet .question-label,
+ #book:not(.mobile-reading) .sheet .answer-label{font-size:clamp(12px,2.9vw,17px)!important}
+ #book:not(.mobile-reading) .sheet .page-question{font-size:clamp(13px,3.3vw,19px)!important;line-height:1.12!important}
+ #book:not(.mobile-reading) .sheet .page-answer{font-size:clamp(14px,3.5vw,20px)!important;line-height:1.18!important}
+ #book:not(.mobile-reading) .sheet .photo-note{max-width:66%!important;margin:2px auto 6px!important}
+ #book:not(.mobile-reading) .sheet .photo-note .page-photo{max-height:clamp(45px,12vw,110px)!important}
+ #book:not(.mobile-reading) .book-spine{left:calc(50% - 4px)!important;width:8px!important}
 }
 </style>
 </head>
@@ -1089,7 +1116,7 @@ function pageTurnSound(){
   paperTimer=setTimeout(()=>{paperAudio.pause();paperTimer=null;},1350);
  }catch(e){console.debug("Paper recording unavailable",e);}
 }
-function isPortraitPage(){return window.matchMedia("(max-width:700px) and (orientation:portrait)").matches;}
+function isPortraitPage(){return false;} // Always render both facing pages as a complete book spread.
 function setPageFace(el,number){
  el.classList.toggle("left",number%2===0);
  el.classList.toggle("right",number%2!==0);
@@ -1226,12 +1253,11 @@ backCoverBtn.onclick=()=>{
  if(turning||index>=0)return;
  setCoverYaw(Math.cos(coverYaw*Math.PI/180)<0?0:180,true);
 };
+let resizeFrame=0;
 window.addEventListener("resize",()=>{
- const single=isPortraitPage();
- if(single===wasSingle||turning)return;
- if(single)mobileLeaf=index<0?-1:index*2;
- else index=mobileLeaf<0?-1:Math.floor(mobileLeaf/2);
- wasSingle=single;show();
+ if(turning||index<0)return;
+ cancelAnimationFrame(resizeFrame);
+ resizeFrame=requestAnimationFrame(()=>show());
 });
 closedBook3d.addEventListener("keydown",event=>{
  if(event.key==="Enter"||event.key===" "){event.preventDefault();move(1);}
@@ -1276,54 +1302,74 @@ book.addEventListener("pointercancel",()=>{swipeGesture=null;});
 function canExport(){const end=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate()+365);return Date.now()>=end.getTime();}
 function printBook(){
  if(!canExport()){alert("Готовая книга станет доступна только после 365 дней. Пока можно листать предварительную версию.");return;}
- const frame=document.createElement("iframe");frame.style.cssText="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none";document.body.append(frame);
- const doc=frame.contentDocument;doc.open();doc.write('<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Мои 365 дней в Анти-Шум</title><style>@page{size:A5 portrait;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Georgia,serif;color:#46372a}.print-page{width:148mm;height:210mm;page-break-after:always;break-after:page;background:#f1e6ce;padding:16mm 15mm 19mm;position:relative;border:2mm solid #e0cfad;overflow:hidden}.title{text-align:center;font-size:16pt;color:#896b42}.date{text-align:center;font-size:20pt;margin:7mm 0}.rule{border-top:1px solid #ad9670;margin-bottom:10mm}.question{font-size:14pt;font-weight:bold;line-height:1.2;margin-bottom:5mm;overflow-wrap:anywhere}.answer{font-size:11pt;line-height:1.4;white-space:pre-wrap;overflow-wrap:anywhere}.photo{max-width:100%;max-height:55mm;object-fit:contain;display:block;margin:0 auto 6mm}.foot{position:absolute;bottom:12mm;text-align:center;left:0;right:0;color:#957c56}.empty{text-align:center;color:#ac9577;margin-top:25mm}.book-cover{background:#402719;color:#efd4a3;display:flex;flex-direction:column;align-items:center;justify-content:center;border:8mm double #9d7845;text-align:center}.book-cover img{width:48mm;height:48mm;object-fit:contain}.book-cover h1{font-size:27pt;margin:15mm 0 4mm}@media print{.print-page{-webkit-print-color-adjust:exact;print-color-adjust:exact}} .print-flow{width:100%;height:auto;overflow:visible;transform-origin:top left} </style></head><body></body></html>');doc.close();
- const coverPage=doc.createElement("section");coverPage.className="print-page book-cover";
- const coverImg=doc.createElement("img");coverImg.src=new URL("./icon-512.png",location.href).href;coverPage.append(coverImg);
- const heading=doc.createElement("h1");heading.textContent="Мои 365 дней в Анти-Шум";coverPage.append(heading);
- const sub=doc.createElement("div");sub.textContent="ЛИЧНАЯ КНИГА ВОСПОМИНАНИЙ";coverPage.append(sub);doc.body.append(coverPage);
+ const frame=document.createElement("iframe");
+ frame.style.cssText="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none";
+ document.body.append(frame);
+ const doc=frame.contentDocument;doc.open();
+ doc.write("<!doctype html><html lang=\"ru\"><head><meta charset=\"utf-8\"><title>Мои 365 дней в Анти-Шум — A5</title><style>"+"@import url(\"https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=PT+Serif:wght@400;700&family=Caveat:wght@400;500;600&display=swap\");\n@page{size:A5 portrait;margin:0}\n*{box-sizing:border-box}\nhtml,body{margin:0;padding:0}\nbody{font-family:\"PT Serif\",Georgia,serif;color:#46372a}\n.print-page{position:relative;width:148mm;height:210mm;break-after:page;page-break-after:always;overflow:hidden;background:#eddbbd;padding:27mm 22mm 40mm}\n.print-page:last-child{break-after:auto;page-break-after:auto}\n.print-art{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0}\n.print-cover{padding:0}\n.print-flow{position:relative;z-index:1;width:100%;height:auto;overflow:visible;transform-origin:top left}\n.title{text-align:center;font:600 17pt/1.12 \"Cormorant Garamond\",Georgia,serif;color:#6b442b;letter-spacing:.3pt}\n.date{text-align:center;font:600 19pt/1.15 \"Cormorant Garamond\",Georgia,serif;color:#69472d;margin:2mm 0 3mm}\n.rule{width:56%;height:1px;background:#a27e50;margin:0 auto 5mm}\n.question-label,.answer-label{font:700 10.5pt/1.2 \"PT Serif\",Georgia,serif;color:#775335;margin-bottom:1.5mm}\n.question{font:600 12.2pt/1.27 \"PT Serif\",Georgia,serif;margin-bottom:4mm;overflow-wrap:anywhere;hyphens:auto}\n.answer{font:500 16pt/1.13 \"Caveat\",\"Segoe Print\",cursive;white-space:pre-wrap;overflow-wrap:anywhere;hyphens:auto}\n.photo-wrap{display:table;max-width:74%;margin:0 auto 4mm;background:#fbf0dc;padding:2mm 2mm 3mm;border:1px solid #be9c68;box-shadow:1mm 1.5mm 2.5mm #57422845;transform:rotate(-1deg)}\n.photo{display:block;max-width:100%;max-height:39mm;object-fit:contain}\n.empty{text-align:center;color:#927759;font:italic 13pt/1.6 Georgia,serif;padding-top:19mm}\n@media print{.print-page{-webkit-print-color-adjust:exact;print-color-adjust:exact}}"+"</style></head><body></body></html>");
+ doc.close();
+ const bookAsset=name=>new URL("./"+name,location.href).href;
+ const addArtwork=(page,asset)=>{
+  const art=doc.createElement("img");art.className="print-art";
+  art.alt="";art.src=bookAsset(asset);page.prepend(art);
+ };
+ const addCover=asset=>{
+  const page=doc.createElement("section");page.className="print-page print-cover";
+  addArtwork(page,asset);doc.body.append(page);
+ };
+ addCover("diary-front.webp");
  days.forEach((day,i)=>{
   const page=doc.createElement("section");page.className="print-page";
+  addArtwork(page,i%2===0?"diary-clean-right.webp":"diary-clean-left.webp");
   const flow=doc.createElement("div");flow.className="print-flow";page.append(flow);
-  const append=(tag,cls,value)=>{const el=doc.createElement(tag);el.className=cls;el.textContent=value;flow.append(el)};
+  const append=(tag,cls,value)=>{
+   const el=doc.createElement(tag);el.className=cls;el.textContent=value;flow.append(el);
+  };
   append("div","title","День "+(i+1)+" из 365");
   append("div","date",day.date.getDate()+" "+MONTHS[day.date.getMonth()]+" "+day.date.getFullYear());
   append("div","rule","");
   if(day.answer){
+   append("div","question-label","Вопрос дня");
    append("div","question",day.question||"Вопрос дня");
-   if(day.photo){const img=doc.createElement("img");img.className="photo";img.src=day.photo;flow.append(img);}
+   if(day.photo){
+    const note=doc.createElement("div");note.className="photo-wrap";
+    const img=doc.createElement("img");img.className="photo";img.alt="Фотоответ";img.src=day.photo;
+    note.append(img);flow.append(note);
+   }
+   append("div","answer-label","Мои мысли");
    append("div","answer",day.answer.answer_text||"");
   }else append("div","empty","Эта страница ждёт твоих мыслей…");
-  const foot=doc.createElement("div");foot.className="foot";foot.textContent=String(i+1);page.append(foot);
   doc.body.append(page);
  });
+ addCover("diary-back.webp");
  const images=[...doc.images];
- Promise.all(images.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;})))
+ Promise.all(images.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{
+  img.onload=resolve;img.onerror=resolve;
+ })))
  .then(()=>Promise.resolve(doc.fonts?.ready))
  .then(()=>{
-  // A5 sheets have fixed physical boundaries; fit each full composition before printing.
-  for(const page of doc.querySelectorAll(".print-page:not(.book-cover)")){
+  for(const page of doc.querySelectorAll(".print-page:not(.print-cover)")){
    const flow=page.querySelector(".print-flow");if(!flow)continue;
    const style=frame.contentWindow.getComputedStyle(page);
-   const available=page.clientHeight-(parseFloat(style.paddingTop)||0)-(parseFloat(style.paddingBottom)||0)-6;
+   const available=page.clientHeight-(parseFloat(style.paddingTop)||0)-(parseFloat(style.paddingBottom)||0)-5;
    const measure=scale=>{
     flow.style.width=(100/scale).toFixed(3)+"%";
     flow.style.transform="scale("+scale.toFixed(4)+")";
     return flow.scrollHeight*scale;
    };
    if(measure(1)>available){
-    let low=.5,high=1;
-    if(measure(low)>available){for(let i=0;i<12&&measure(low)>available;i++)low*=.9;}
-    else for(let i=0;i<15;i++){
+    let low=.28,high=1;
+    while(measure(low)>available&&low>.06)low*=.8;
+    for(let i=0;i<18;i++){
      const mid=(low+high)/2;
      if(measure(mid)<=available)low=mid;else high=mid;
     }
-    measure(Math.max(.1,low-.005));
+    measure(Math.max(.05,low-.006));
    }
   }
   frame.contentWindow.focus();frame.contentWindow.print();
   setTimeout(()=>frame.remove(),120000);
- });
+ }).catch(err=>{console.error("Book PDF layout failed",err);frame.remove();});
 }
 print.onclick=printBook;
 try{
