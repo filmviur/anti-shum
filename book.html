@@ -778,6 +778,67 @@ opacity:.65;pointer-events:none}
  .book.mobile-reading .sheet .epilogue-flourish.bottom{width:67px!important;margin:3px auto 1px!important}
  .book.mobile-reading .sheet .epilogue-sign{font-size:12px!important;margin:0!important}
 }
+
+/* Diary refinement: text is kept within the ornament's safe center. */
+.book-3d-pages{
+ background:
+  linear-gradient(0deg,#6a4b2d70 0%,transparent 7%,transparent 93%,#6041257d 100%),
+  linear-gradient(90deg,#694b3180 0%,transparent 19%,#fff5d02b 55%,#7a5433a0 100%),
+  repeating-linear-gradient(90deg,#cfb995 0px,#e7d5b5 1px,#c7ad89 2px,#e0cbaa 3px)!important;
+ background-size:100% 100%!important;
+ box-shadow:inset 0 0 10px #62402199,0 0 0 1px #74523388!important
+}
+.book .sheet .entry-layout{
+ box-sizing:border-box!important;min-width:0!important;
+ overflow:hidden!important
+}
+.book .sheet .page-question,.book .sheet .page-answer{
+ max-width:100%!important;overflow-wrap:anywhere!important;
+ word-break:normal!important;hyphens:auto
+}
+.book .sheet .question-block{
+ max-height:48%!important;overflow-x:hidden!important;
+ overflow-y:auto!important;scrollbar-width:thin
+}
+.book .sheet .entry-layout:has(.photo-note) .question-block{
+ max-height:39%!important
+}
+.book .sheet .answer-block,.book .sheet .entry-layout:has(.photo-note) .answer-block{
+ flex:1 1 0!important;min-height:48px!important;
+ max-height:100%!important;overflow:hidden!important
+}
+.book .sheet .page-answer{
+ flex:1 1 0!important;min-height:0!important;
+ max-height:100%!important;overflow-x:hidden!important;
+ overflow-y:auto!important;overscroll-behavior:contain;
+ padding-bottom:5px!important
+}
+@media(max-width:700px) and (orientation:portrait){
+ .book.mobile-reading .sheet,.book.mobile-reading .sheet.left,.book.mobile-reading .sheet.right,
+ .book.mobile-reading .turn-sheet .turn-face{
+  padding:15.5% 12.5% 17%!important
+ }
+ .book.mobile-reading .turn-sheet{padding:0!important}
+ .book.mobile-reading .sheet .entry-layout{padding:0 3px 5px!important}
+ .book.mobile-reading .sheet .entry-heading{margin-bottom:7px!important}
+ .book.mobile-reading .sheet .question-block{
+  max-height:45%!important;margin-bottom:5px!important
+ }
+ .book.mobile-reading .sheet .entry-layout:has(.photo-note) .question-block{
+  max-height:38%!important;margin-bottom:3px!important
+ }
+ .book.mobile-reading .sheet .answer-block,
+ .book.mobile-reading .sheet .entry-layout:has(.photo-note) .answer-block{
+  min-height:53px!important;margin-top:2px!important
+ }
+ .book.mobile-reading .sheet .page-question{
+  transform:none!important;padding:3px 6px!important
+ }
+ .book.mobile-reading .sheet .photo-note{margin-bottom:5px!important}
+ .book.mobile-reading .sheet .photo-note .page-photo{
+  max-height:82px!important
+ }
+}
 </style>
 </head>
 <body>
@@ -970,15 +1031,15 @@ function setPageFace(el,number){
 function fitPageContent(el){
  const page=el.querySelector(".entry-layout");if(!page)return;
  const question=page.querySelector(".page-question");if(!question)return;
+ const height=page.clientHeight;if(!height)return;
  const note=page.querySelector(".photo-note");
  const photo=note?.querySelector("img");
  question.style.removeProperty("font-size");
- const height=page.clientHeight;
- if(!height)return;
- const maxQuestionHeight=height*(note?.31:.43);
- let size=21;
- while(question.scrollHeight>maxQuestionHeight&&size>16){
-  size-=1;question.style.setProperty("font-size",size+"px","important");
+ const maxQuestionHeight=height*(note?.32:.44);
+ let questionSize=Math.round(parseFloat(getComputedStyle(question).fontSize))||21;
+ while(question.scrollHeight>maxQuestionHeight&&questionSize>16){
+  questionSize--;
+  question.style.setProperty("font-size",questionSize+"px","important");
  }
  if(photo){
   const heading=page.querySelector(".entry-heading");
@@ -986,9 +1047,19 @@ function fitPageContent(el){
   const answerLength=page.querySelector(".page-answer")?.textContent.length||0;
   const reservedForAnswer=Math.min(height*.31,Math.max(70,56+answerLength*.16));
   const available=height-(heading?.offsetHeight||0)-(questionBlock?.scrollHeight||0)-reservedForAnswer-30;
-  const photoHeight=Math.max(68,Math.min(isPortraitPage()?88:98,available));
+  const photoHeight=Math.max(62,Math.min(isPortraitPage()?82:98,available));
   photo.style.setProperty("height",photoHeight+"px","important");
  }
+ const answer=page.querySelector(".page-answer");if(!answer)return;
+ // Long entries keep every character but adapt their handwriting size first.
+ answer.style.removeProperty("font-size");
+ let answerSize=Math.round(parseFloat(getComputedStyle(answer).fontSize))||21;
+ const minimumSize=isPortraitPage()?15:16;
+ while(answer.scrollHeight>answer.clientHeight+2&&answerSize>minimumSize){
+  answerSize--;
+  answer.style.setProperty("font-size",answerSize+"px","important");
+ }
+ // Extremely long answers remain scrollable inside the writing area.
 }
 function renderMobileLeaf(pageNumber){
  setPageFace(left,pageNumber);
