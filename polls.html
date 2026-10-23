@@ -66,9 +66,15 @@ label.field input,label.field textarea{margin-top:6px}
 .hidden{display:none!important}
 footer{text-align:center;color:#9d8e79;font-size:13px;margin:30px 0}
 @media(max-width:600px){header{padding:13px 13px 5px}.logo{font-size:19px}.back{font-size:12px;padding:6px 9px}.hero{padding:25px 18px}.poll-card,.panel,.admin-form{padding:18px}.toolbar{align-items:flex-start}.choice{flex:1 1 100%}.btn{min-height:46px}}
+
+.global-rules-link{position:fixed;z-index:2147480000;left:calc(12px + env(safe-area-inset-left, 0px));bottom:calc(12px + env(safe-area-inset-bottom, 0px));display:inline-flex;align-items:center;min-height:38px;padding:8px 13px;border:1px solid rgba(216,174,103,.62);border-radius:22px;background:rgba(30,22,16,.96);color:#e7c994;box-shadow:0 3px 16px rgba(0,0,0,.35);font:600 13px/1 Georgia,serif;text-decoration:none}
+.global-rules-link:hover{background:#392a1c}
+.global-rules-link:focus-visible{outline:2px solid #f0cb87;outline-offset:3px}
+
 </style>
 </head>
 <body>
+<a class="global-rules-link" href="./rules.html" aria-label="Правила сайта">§ Правила</a>
 <header><a href="./index.html" class="logo">АНТИ-ШУМ</a><a class="back" href="./index.html">← Вернуться в профиль</a></header>
 <main>
 <div class="hero">
