@@ -6579,6 +6579,20 @@
     color:#e0c38d;margin:0 0 16px;
 }
 .install-guide-panel p{font:15px/1.7 Georgia,serif;color:#c4b29a;margin:0 0 23px}
+.install-guide-steps{
+    margin:0 0 18px;padding:16px 17px;
+    background:rgba(14,11,9,.6);border:1px solid rgba(201,168,106,.3);
+    border-radius:5px;text-align:left;
+}
+.install-guide-steps-title{
+    margin:0 0 10px;color:#e0c38d;
+    font:600 15px/1.4 Georgia,serif;
+}
+.install-guide-steps ol{
+    margin:0;padding-left:21px;color:#d5c3a8;
+    font:14px/1.65 Georgia,serif;
+}
+.install-guide-steps li+li{margin-top:9px}
 .install-guide-buttons{display:flex;flex-direction:column;gap:10px}
 .install-guide-buttons button{width:100%;min-height:44px}
 .install-guide-buttons .secondary-btn{
@@ -9083,6 +9097,7 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
         <div class="install-guide-ornament" aria-hidden="true">✦</div>
         <h2 id="installGuideTitle">Пусть «Анти-Шум» будет рядом</h2>
         <p id="installGuideText">Добавь «Анти-Шум» на главный экран телефона, чтобы возвращаться в своё тихое пространство одним касанием.</p>
+        <div id="installGuideSteps" class="install-guide-steps hidden" aria-live="polite"></div>
         <div class="install-guide-buttons">
             <button id="installGuideInstallBtn" class="primary-btn" type="button">Добавить на главный экран</button>
             <button id="installGuideDismissBtn" class="secondary-btn" type="button">Не сейчас</button>
@@ -21311,12 +21326,13 @@ if ("serviceWorker" in navigator) {
 var deferredInstallPrompt = null;
 const installGuideOverlay = document.getElementById("installGuideOverlay");
 const installGuideText = document.getElementById("installGuideText");
+const installGuideSteps = document.getElementById("installGuideSteps");
 const installGuideInstallBtn = document.getElementById("installGuideInstallBtn");
 const installGuideDismissBtn = document.getElementById("installGuideDismissBtn");
 const installDismissBtn = document.getElementById("installDismissBtn");
 const openInstallGuideFromProfileBtn = document.getElementById("openInstallGuideFromProfileBtn");
-const INSTALL_SHOWN_KEY = "anti_shum_install_guide_seen_v1";
-const INSTALL_DISMISSED_KEY = "anti_shum_install_guide_dismissed_v1";
+const INSTALL_SHOWN_KEY = "anti_shum_install_guide_seen_v2";
+const INSTALL_DISMISSED_KEY = "anti_shum_install_guide_dismissed_v2";
 let installGuidePreviousFocus = null;
 
 function getInstallFlag(key) {
@@ -21337,29 +21353,65 @@ function getInstallDetails() {
     const isAndroid = /android/i.test(ua);
     if (deferredInstallPrompt) {
         return {
-            available: true, direct: true,
-            text: "Добавь «Анти-Шум» на главный экран, чтобы открывать его одним касанием — как отдельное приложение."
+            available: true,
+            direct: true,
+            text: "Добавь «Анти-Шум» на главный экран, чтобы открывать его одним касанием — как отдельное приложение.",
+            steps: []
         };
     }
     if (isIOS) {
         const safari = /safari/i.test(ua) && !/crios|fxios|edgios|opios/i.test(ua);
         return {
-            available: true, direct: false,
-            text: safari
-                ? "В Safari нажми «Поделиться» и выбери «На экран Домой». После этого «Анти-Шум» появится среди приложений."
-                : "Открой «Анти-Шум» в Safari, нажми «Поделиться» и выбери «На экран Домой»."
+            available: true,
+            direct: false,
+            text: "На iPhone сайт добавляется через меню Safari. Нажми «Показать шаги установки» — это займёт меньше минуты.",
+            stepsTitle: "Как добавить «Анти-Шум» на iPhone",
+            steps: [
+                safari
+                    ? "Оставь эту страницу открытой в Safari."
+                    : "Открой эту страницу в Safari — при необходимости скопируй ссылку из текущего браузера.",
+                "Нажми «Поделиться» (квадрат со стрелкой вверх). Иногда сначала нужно открыть меню страницы.",
+                "Прокрути список и выбери «На экран Домой». Если пункта нет, открой «Изменить действия» и добавь его.",
+                "Если есть переключатель «Открывать как веб-приложение», включи его. Нажми «Добавить»."
+            ]
         };
     }
     if (isAndroid) {
         return {
             available: true, direct: false,
-            text: "Открой меню браузера ⋮ и выбери «Установить приложение» или «Добавить на главный экран». Если такого пункта нет, попробуй открыть сайт в Chrome."
+            text: "Открой меню браузера и выбери установку приложения. Нажми «Показать шаги установки» для подсказки.",
+            stepsTitle: "Как добавить на Android",
+            steps: [
+                "Открой «Анти-Шум» в Chrome.",
+                "Нажми меню ⋮ и выбери «Установить приложение» или «Добавить на главный экран».",
+                "Подтверди установку — значок появится среди приложений."
+            ]
         };
     }
     return {
         available: true, direct: false,
-        text: "Если браузер поддерживает установку, открой его меню и выбери «Установить приложение» или «Добавить на главный экран». На телефоне удобнее открыть сайт в Safari или Chrome."
+        text: "В браузере можно добавить сайт на главный экран. Нажми «Показать шаги установки» для подсказки.",
+        stepsTitle: "Как установить",
+        steps: [
+            "Открой меню браузера.",
+            "Найди пункт «Установить приложение» или «Добавить на главный экран».",
+            "Если такого пункта нет, открой сайт на iPhone в Safari или на Android в Chrome."
+        ]
     };
+}
+function renderInstallSteps(details) {
+    installGuideSteps.replaceChildren();
+    if (!details.steps || !details.steps.length) return;
+    const heading = document.createElement("div");
+    heading.className = "install-guide-steps-title";
+    heading.textContent = details.stepsTitle || "Как установить";
+    const list = document.createElement("ol");
+    details.steps.forEach(function(step) {
+        const item = document.createElement("li");
+        item.textContent = step;
+        list.appendChild(item);
+    });
+    installGuideSteps.append(heading, list);
 }
 function hideInstallGuide() {
     installGuideOverlay.classList.add("hidden");
@@ -21375,17 +21427,25 @@ function dismissInstallGuide() {
     installCard.classList.add("hidden");
     hideInstallGuide();
 }
-function openInstallGuide(force) {
+function openInstallGuide(force, expandSteps = false) {
     const details = getInstallDetails();
     if (isAntiShumInstalled() || !details.available) return;
     if (!force && (getInstallFlag(INSTALL_SHOWN_KEY) ||
                    getInstallFlag(INSTALL_DISMISSED_KEY))) return;
     installGuidePreviousFocus = document.activeElement;
     installGuideText.textContent = details.text;
-    installGuideInstallBtn.classList.toggle("hidden", !details.direct);
+    renderInstallSteps(details);
+    const stepsVisible = !details.direct && expandSteps;
+    installGuideSteps.classList.toggle("hidden", !stepsVisible);
+    installGuideInstallBtn.classList.remove("hidden");
+    installGuideInstallBtn.textContent = details.direct
+        ? "Добавить на главный экран"
+        : stepsVisible ? "Скрыть шаги" : "Показать шаги установки";
+    installGuideInstallBtn.setAttribute("aria-controls", "installGuideSteps");
+    installGuideInstallBtn.setAttribute("aria-expanded", String(stepsVisible));
     if (!force) setInstallFlag(INSTALL_SHOWN_KEY);
     installGuideOverlay.classList.remove("hidden");
-    (details.direct ? installGuideInstallBtn : installGuideDismissBtn).focus();
+    installGuideInstallBtn.focus();
 }
 function showInstallOption() {
     const details = getInstallDetails();
@@ -21397,7 +21457,10 @@ function showInstallOption() {
         return;
     }
     installText.textContent = details.text;
-    installBtn.classList.toggle("hidden", !details.direct);
+    installBtn.classList.remove("hidden");
+    installBtn.textContent = details.direct
+        ? "Добавить на экран"
+        : "Как добавить на экран";
     const authVisible = !authScreen.classList.contains("hidden");
     installCard.classList.toggle("hidden",
         !authVisible || getInstallFlag(INSTALL_DISMISSED_KEY));
@@ -21408,7 +21471,7 @@ function showInstallOption() {
 }
 async function requestAntiShumInstallation() {
     if (!deferredInstallPrompt) {
-        showInstallOption();
+        openInstallGuide(true, true);
         return;
     }
     const prompt = deferredInstallPrompt;
@@ -21433,8 +21496,25 @@ window.addEventListener("appinstalled", function() {
     dismissInstallGuide();
     showInstallOption();
 });
-installBtn.addEventListener("click", requestAntiShumInstallation);
-installGuideInstallBtn.addEventListener("click", requestAntiShumInstallation);
+installBtn.addEventListener("click", function() {
+    if (getInstallDetails().direct) {
+        requestAntiShumInstallation();
+    } else {
+        openInstallGuide(true, true);
+    }
+});
+installGuideInstallBtn.addEventListener("click", function() {
+    if (getInstallDetails().direct) {
+        requestAntiShumInstallation();
+        return;
+    }
+    const expandSteps = installGuideSteps.classList.contains("hidden");
+    installGuideSteps.classList.toggle("hidden", !expandSteps);
+    installGuideInstallBtn.textContent = expandSteps
+        ? "Скрыть шаги"
+        : "Показать шаги установки";
+    installGuideInstallBtn.setAttribute("aria-expanded", String(expandSteps));
+});
 installDismissBtn.addEventListener("click", dismissInstallGuide);
 installGuideDismissBtn.addEventListener("click", dismissInstallGuide);
 openInstallGuideFromProfileBtn.addEventListener("click", function() {
