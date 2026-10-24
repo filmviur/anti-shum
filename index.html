@@ -7646,6 +7646,18 @@
 
 /* Текст объявления */
 
+/* A private welcome has the same calm style as ordinary announcements. */
+.user-announcement-title {
+    color: #e9cb92;
+    font-family: Georgia, serif;
+    font-size: 17px;
+    margin-bottom: 8px;
+}
+.user-announcement-item.is-personal {
+    border-color: rgba(214, 184, 117, 0.42);
+    background: rgba(201, 168, 106, 0.075);
+}
+
 .user-announcement-body {
     color: #e6d8c1;
 
@@ -12792,6 +12804,8 @@ supabaseClient.auth.onAuthStateChange(
         if (previousUserId !== newUserId) {
 
             stopAnnouncementsRealtime();
+            stopSiteRealtime();
+            stopAccountSupportRealtime();
 
             setAnnouncementsUnread(false);
 
@@ -13247,27 +13261,6 @@ appScreen.classList.add("hidden");
     
    
     /* =========================
-       ПРОВЕРКА НОВЫХ ОБЪЯВЛЕНИЙ
-       И ПОДКЛЮЧЕНИЕ REALTIME
-    ========================= */
-
-    try {
-
-        await checkUnreadAnnouncements();
-
-        startAnnouncementsRealtime();
-
-    } catch (error) {
-
-        console.error(
-            "Announcements initialization error:",
-            error
-        );
-
-    }
-
-
-    /* =========================
        ОТКРЫВАЕМ ПРИЛОЖЕНИЕ
     ========================= */
 
@@ -13286,6 +13279,18 @@ appScreen.classList.add("hidden");
     ========================= */
 
     await loadProfile();
+
+    // A personal welcome is created only once per account and is visible
+    // only to that account; the admin does not receive user announcements.
+    if (!isCurrentUserAdmin) {
+        await ensurePersonalWelcome();
+        await checkUnreadAnnouncements();
+        startAnnouncementsRealtime();
+    }
+
+    // One channel covers all other live sections. Dedicated support and
+    // project-question channels remain responsible for their own dialogs.
+    startSiteRealtime();
 
 
     /* =========================
@@ -16256,13 +16261,13 @@ function startAdminSupportListRealtime() {
         return;
     }
 
-    // Подписываемся на новые сообщения поддержки.
+    // Подписываемся на новые сообщения и изменения прочтения.
     adminSupportListRealtimeChannel = supabaseClient
         .channel("admin-support-list")
         .on(
             "postgres_changes",
             {
-                event: "INSERT",
+                event: "*",
                 schema: "public",
                 table: "support_messages"
             },
@@ -16281,7 +16286,15 @@ function startAdminSupportListRealtime() {
                 }
             }
         )
-        .subscribe();
+        .subscribe(status => {
+            if (status === "SUBSCRIBED") {
+                const section = document.querySelector('[data-admin-content="support"]');
+                if (section && !section.classList.contains("hidden"))
+                    loadAdminSupportConversations();
+            }
+            if (status === "CHANNEL_ERROR" || status === "TIMED_OUT")
+                console.warn("Admin support list Realtime:", status);
+        });
 }
 
 
@@ -20300,7 +20313,13 @@ async function loadSupportMessages() {
 
 async function startSupportRealtime() {
     const guestConversationId = getGuestSupportConversationId();
-    if (!currentUser && !guestConversationId) return;
+    if (!currentUser && !guestConversationId) {
+        if (supportRealtimeChannel) {
+            await supabaseClient.removeChannel(supportRealtimeChannel);
+            supportRealtimeChannel = null;
+        }
+        return;
+    }
 
     if (supportRealtimeChannel) {
         await supabaseClient.removeChannel(supportRealtimeChannel);
@@ -20329,6 +20348,11 @@ async function startSupportRealtime() {
             }
         })
         .subscribe(status => {
+            if (status === "SUBSCRIBED") {
+                if (!supportModal.classList.contains("hidden")) {
+                    loadSupportMessages().then(markSupportMessagesAsRead);
+                } else checkSupportNotifications();
+            }
             if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
                 console.warn("Поддержка: Realtime " + status);
             }
@@ -20765,56 +20789,198 @@ function setAnnouncementsUnread(hasUnread) {
    ПРОВЕРКА НЕПРОЧИТАННЫХ ОБЪЯВЛЕНИЙ
 ========================================================= */
 
-async function checkUnreadAnnouncements() {
-
+/* This row is created when the verified account first opens the site.
+   A unique constraint prevents repeated congratulatory messages. */
+async function ensurePersonalWelcome() {
     const userId = currentUser?.id;
+    if (!userId || isCurrentUserAdmin) return;
 
-    if (!userId) {
+    const { error } = await supabaseClient
+        .from("personal_announcements")
+        .upsert(
+            { user_id: userId, kind: "welcome" },
+            { onConflict: "user_id,kind", ignoreDuplicates: true }
+        );
+
+    if (error) console.error("Personal welcome creation failed:", error);
+}
+
+let announcementsUnreadRequest = 0;
+async function checkUnreadAnnouncements() {
+    const userId = currentUser?.id;
+    const request = ++announcementsUnreadRequest;
+    if (!userId || isCurrentUserAdmin) {
         setAnnouncementsUnread(false);
         return;
     }
 
     try {
+        const [globalResult, personalResult] = await Promise.all([
+            supabaseClient.from("announcements")
+                .select("created_at").order("created_at", { ascending: false }).limit(1),
+            supabaseClient.from("personal_announcements")
+                .select("id").eq("user_id", userId).is("read_at", null).limit(1)
+        ]);
 
-        const { data, error } = await supabaseClient
-            .from("announcements")
-            .select("created_at")
-            .order("created_at", { ascending: false })
-            .limit(1);
+        if (globalResult.error) throw globalResult.error;
+        if (personalResult.error) throw personalResult.error;
+        if (currentUser?.id !== userId || request !== announcementsUnreadRequest) return;
 
-        if (error) {
-            throw error;
-        }
-
-        // За время запроса пользователь мог выйти.
-        if (currentUser?.id !== userId) {
-            return;
-        }
-
-        if (!data || data.length === 0) {
-            setAnnouncementsUnread(false);
-            return;
-        }
-
+        const latestGlobal = globalResult.data?.[0]?.created_at;
         const readKey = getAnnouncementsReadKey();
-
-        const lastRead = localStorage.getItem(readKey);
-
-        const latestAnnouncement = data[0].created_at;
-
-        setAnnouncementsUnread(
-            !lastRead || latestAnnouncement > lastRead
-        );
-
+        const lastRead = readKey ? localStorage.getItem(readKey) : null;
+        const globalUnread = Boolean(latestGlobal && (!lastRead || latestGlobal > lastRead));
+        const personalUnread = Boolean(personalResult.data?.length);
+        setAnnouncementsUnread(globalUnread || personalUnread);
     } catch (error) {
-
-        console.error(
-            "Unread announcements check error:",
-            error
-        );
-
+        console.error("Unread announcements check error:", error);
     }
 }
+
+
+/* =========================================================
+   SHARED REALTIME FOR ACTIVE SECTIONS
+   Reconnect and return from background re-query the database,
+   so a missed websocket event cannot leave permanent stale UI.
+========================================================= */
+
+let siteRealtimeChannel = null;
+let siteRealtimeUserId = null;
+const siteRefreshTimers = new Map();
+
+function scheduleSiteRefresh(key, callback, delay = 320) {
+    clearTimeout(siteRefreshTimers.get(key));
+    siteRefreshTimers.set(key, setTimeout(() => {
+        siteRefreshTimers.delete(key);
+        if (!currentUser) return;
+        Promise.resolve().then(callback).catch(error =>
+            console.warn("Realtime refresh (" + key + "):", error));
+    }, delay));
+}
+
+function stopSiteRealtime() {
+    if (siteRealtimeChannel) {
+        supabaseClient.removeChannel(siteRealtimeChannel);
+        siteRealtimeChannel = null;
+    }
+    siteRealtimeUserId = null;
+    siteRefreshTimers.forEach(timer => clearTimeout(timer));
+    siteRefreshTimers.clear();
+}
+
+function stopAccountSupportRealtime() {
+    if (supportRealtimeChannel) {
+        supabaseClient.removeChannel(supportRealtimeChannel);
+        supportRealtimeChannel = null;
+    }
+    if (adminSupportListRealtimeChannel) {
+        supabaseClient.removeChannel(adminSupportListRealtimeChannel);
+        adminSupportListRealtimeChannel = null;
+    }
+    if (adminSupportRealtimeChannel) {
+        supabaseClient.removeChannel(adminSupportRealtimeChannel);
+        adminSupportRealtimeChannel = null;
+        adminSupportRealtimeConversationKey = null;
+    }
+}
+
+function refreshVisibleSiteState() {
+    if (!currentUser || document.hidden) return;
+    checkSupportNotifications();
+    if (!isCurrentUserAdmin) checkUnreadAnnouncements();
+    if (!feedView.classList.contains("hidden"))
+        scheduleSiteRefresh("feed", loadFeed, 450);
+    if (!profileView.classList.contains("hidden"))
+        scheduleSiteRefresh("profile", async () => {
+            await loadProfile();
+            await loadOwnAnswers();
+        }, 450);
+    if (!announcementsModal.classList.contains("hidden") && !isCurrentUserAdmin)
+        scheduleSiteRefresh("announcements", openAnnouncementsModal, 450);
+    if (isCurrentUserAdmin && !adminView.classList.contains("hidden")) {
+        const active = [...adminSections].find(section => !section.classList.contains("hidden"));
+        const name = active?.dataset.adminContent;
+        if (name === "moderation") scheduleSiteRefresh("moderation", loadAdminModeration, 450);
+        if (name === "appeals") scheduleSiteRefresh("appeals", loadAdminAppeals, 450);
+        if (name === "support") scheduleSiteRefresh("support-list", loadAdminSupportConversations, 450);
+        if (name === "announcements") scheduleSiteRefresh("admin-announcements", loadAdminAnnouncements, 450);
+        document.dispatchEvent(new CustomEvent("anti-shum:realtime", {detail:{table:"reconnect"}}));
+    }
+}
+
+function startSiteRealtime() {
+    const userId = currentUser?.id;
+    if (!userId) return;
+    if (siteRealtimeChannel && siteRealtimeUserId === userId &&
+        siteRealtimeChannel.state !== "closed") return;
+    stopSiteRealtime();
+    siteRealtimeUserId = userId;
+
+    const channel = supabaseClient.channel("site-live-" + userId);
+    const handle = (table, payload) => {
+        if (currentUser?.id !== userId) return;
+        const visibleFeed = !feedView.classList.contains("hidden");
+        if ((table === "answers" || table === "reactions") && visibleFeed) {
+            const id = payload.new?.question_id || payload.old?.question_id;
+            if (table === "reactions" || !id || id === currentQuestionId)
+                scheduleSiteRefresh("feed", loadFeed, 650);
+        }
+        if (table === "answers") {
+            const owner = payload.new?.user_id || payload.old?.user_id;
+            if (owner === userId) {
+                if (!profileView.classList.contains("hidden"))
+                    scheduleSiteRefresh("own-answers", loadOwnAnswers);
+                if (typeof window.antiShumRefreshTimeCapsule === "function")
+                    scheduleSiteRefresh("time-capsule", window.antiShumRefreshTimeCapsule, 550);
+            }
+        }
+        if (table === "questions" && !questionView.classList.contains("hidden")) {
+            // Never discard an unfinished answer while an admin edits a question.
+            const draft = document.getElementById("answerInput");
+            if (!draft?.value?.trim())
+                scheduleSiteRefresh("question", loadTodayQuestionAndState, 400);
+        }
+        if (table === "users" &&
+            (payload.new?.id === userId || payload.old?.id === userId)) {
+            if (payload.new?.is_blocked === true)
+                scheduleSiteRefresh("account-block", () => runUserInitialization(userId), 40);
+            else if (!profileView.classList.contains("hidden"))
+                scheduleSiteRefresh("profile", loadProfile);
+        }
+        if (isCurrentUserAdmin && !adminView.classList.contains("hidden")) {
+            const active = [...adminSections].find(section => !section.classList.contains("hidden"));
+            const name = active?.dataset.adminContent;
+            if (name === "moderation" && (table === "answers" || table === "reports"))
+                scheduleSiteRefresh("moderation", loadAdminModeration, 520);
+            if (name === "appeals" && table === "block_appeals")
+                scheduleSiteRefresh("appeals", loadAdminAppeals, 520);
+            if (name === "announcements" && table === "announcements")
+                scheduleSiteRefresh("admin-announcements", loadAdminAnnouncements, 520);
+        }
+        if (isCurrentUserAdmin)
+            document.dispatchEvent(new CustomEvent("anti-shum:realtime", {detail:{table}}));
+    };
+
+    const tables = ["answers", "reactions", "reports", "questions", "users", "block_appeals"];
+    if (isCurrentUserAdmin) tables.push("announcements");
+    for (const table of tables) {
+        channel.on("postgres_changes",
+            {event:"*",schema:"public",table},
+            payload => handle(table,payload));
+    }
+    siteRealtimeChannel = channel;
+    channel.subscribe(status => {
+        if (siteRealtimeChannel !== channel) return;
+        if (status === "SUBSCRIBED") refreshVisibleSiteState();
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT")
+            console.warn("Site Realtime:", status);
+    });
+}
+
+document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) refreshVisibleSiteState();
+});
+window.addEventListener("online", refreshVisibleSiteState);
 
 
 /* =========================================================
@@ -20840,70 +21006,35 @@ function stopAnnouncementsRealtime() {
 
 
 function startAnnouncementsRealtime() {
-
-    if (!currentUser) {
-        return;
-    }
-
+    if (!currentUser || isCurrentUserAdmin) return;
     const userId = currentUser.id;
-
-    // Не создаём повторную подписку.
-    if (
-        announcementsRealtimeChannel &&
-        announcementsRealtimeUserId === userId
-    ) {
-        return;
-    }
-
-    // Удаляем подписку предыдущего пользователя.
+    if (announcementsRealtimeChannel &&
+        announcementsRealtimeUserId === userId &&
+        announcementsRealtimeChannel.state !== "closed") return;
     stopAnnouncementsRealtime();
-
     announcementsRealtimeUserId = userId;
 
-    announcementsRealtimeChannel = supabaseClient
-        .channel("announcements-live-" + userId)
-        .on(
-            "postgres_changes",
-            {
-                event: "INSERT",
-                schema: "public",
-                table: "announcements"
-            },
-            function(payload) {
-
-                if (currentUser?.id !== userId) {
-                    return;
-                }
-
-                console.log(
-                    "Получено новое объявление:",
-                    payload.new
-                );
-
-                // Обновляем золотистый индикатор.
-                checkUnreadAnnouncements();
-            }
-        )
-        .subscribe(function(status) {
-
-            if (status === "CHANNEL_ERROR") {
-
-                console.error(
-                    "Ошибка Realtime объявлений"
-                );
-
-            }
-
-            if (status === "TIMED_OUT") {
-
-                console.warn(
-                    "Превышено время подключения Realtime"
-                );
-
-            }
-        });
+    const channel = supabaseClient.channel("announcements-live-" + userId);
+    const refresh = () => {
+        if (currentUser?.id !== userId) return;
+        checkUnreadAnnouncements();
+        if (!announcementsModal.classList.contains("hidden")) {
+            scheduleSiteRefresh("announcements", openAnnouncementsModal, 350);
+        }
+    };
+    channel.on("postgres_changes",
+        { event: "INSERT", schema: "public", table: "announcements" }, refresh);
+    channel.on("postgres_changes",
+        { event: "*", schema: "public", table: "personal_announcements",
+          filter: "user_id=eq." + userId }, refresh);
+    announcementsRealtimeChannel = channel;
+    channel.subscribe(status => {
+        if (announcementsRealtimeChannel !== channel) return;
+        if (status === "SUBSCRIBED") refresh();
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT")
+            console.warn("Announcements Realtime:", status);
+    });
 }
-
 
 
 /* =========================================================
@@ -20911,103 +21042,80 @@ function startAnnouncementsRealtime() {
 ========================================================= */
 
 async function openAnnouncementsModal() {
-
-    if (!announcementsModal || !userAnnouncementsList) {
-        return;
-    }
-
+    if (!announcementsModal || !userAnnouncementsList || !currentUser) return;
+    const userId = currentUser.id;
     announcementsModal.classList.remove("hidden");
-
-    userAnnouncementsList.textContent =
-        "Загрузка объявлений...";
+    userAnnouncementsList.textContent = "Загрузка объявлений...";
 
     try {
+        const [globalResult, personalResult] = await Promise.all([
+            supabaseClient.from("announcements")
+                .select("id, title, body, created_at")
+                .order("created_at", { ascending: false }),
+            supabaseClient.from("personal_announcements")
+                .select("id, title, body, created_at, read_at")
+                .eq("user_id", userId).order("created_at", { ascending: false })
+        ]);
+        if (globalResult.error) throw globalResult.error;
+        if (personalResult.error) throw personalResult.error;
+        if (currentUser?.id !== userId) return;
 
-        const { data, error } = await supabaseClient
-            .from("announcements")
-            .select("id, body, created_at")
-            .order("created_at", { ascending: false });
-
-        if (error) {
-            throw error;
-        }
-
+        const globalItems = (globalResult.data || []).map(item => ({...item, personal: false}));
+        const personalItems = (personalResult.data || []).map(item => ({...item, personal: true}));
+        const items = [...globalItems, ...personalItems]
+            .sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
         userAnnouncementsList.replaceChildren();
 
-        if (!data || data.length === 0) {
-
-            userAnnouncementsList.textContent =
-                "Пока нет опубликованных объявлений.";
-
-            setAnnouncementsUnread(false);
-
-            return;
+        if (!items.length) {
+            userAnnouncementsList.textContent = "Пока нет опубликованных объявлений.";
         }
 
-        data.forEach(function(announcement) {
-
+        items.forEach(announcement => {
             const card = document.createElement("div");
-            card.className = "user-announcement-item";
-
+            card.className = "user-announcement-item" +
+                (announcement.personal ? " is-personal" : "");
             const date = document.createElement("div");
             date.className = "user-announcement-date";
-
-            date.textContent = new Date(
-                announcement.created_at
-            ).toLocaleString("ru-RU", {
-                timeZone: "Europe/Kyiv",
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit"
-            });
-
+            date.textContent = new Date(announcement.created_at)
+                .toLocaleString("ru-RU", {
+                    timeZone: "Europe/Kyiv", day: "2-digit",
+                    month: "long", year: "numeric",
+                    hour: "2-digit", minute: "2-digit"
+                });
+            card.appendChild(date);
+            if (announcement.title) {
+                const heading = document.createElement("div");
+                heading.className = "user-announcement-title";
+                heading.textContent = announcement.title;
+                card.appendChild(heading);
+            }
             const body = document.createElement("div");
             body.className = "user-announcement-body";
             body.textContent = announcement.body;
-
-            card.append(date, body);
+            card.appendChild(body);
             userAnnouncementsList.appendChild(card);
-
         });
 
-        /*
-            После успешного отображения объявлений
-            запоминаем дату самой новой публикации.
-        */
-
+        // Only mark announcements as read after they have been rendered.
+        const latestGlobal = globalItems[0]?.created_at;
         const readKey = getAnnouncementsReadKey();
-
-        if (readKey) {
-
-            const latestAnnouncement = data[0].created_at;
-
-            const previousRead = localStorage.getItem(readKey);
-
-            if (
-                !previousRead ||
-                latestAnnouncement > previousRead
-            ) {
-                localStorage.setItem(
-                    readKey,
-                    latestAnnouncement
-                );
-            }
-
-            setAnnouncementsUnread(false);
+        if (readKey && latestGlobal) {
+            const lastRead = localStorage.getItem(readKey);
+            if (!lastRead || latestGlobal > lastRead)
+                localStorage.setItem(readKey, latestGlobal);
         }
-
+        if (personalItems.some(item => !item.read_at)) {
+            const { error } = await supabaseClient
+                .from("personal_announcements")
+                .update({ read_at: new Date().toISOString() })
+                .eq("user_id", userId).is("read_at", null);
+            if (error) console.warn("Welcome read status:", error);
+        }
+        if (currentUser?.id === userId) await checkUnreadAnnouncements();
     } catch (error) {
-
-        console.error(
-            "User announcements load error:",
-            error
-        );
-
-        userAnnouncementsList.textContent =
-            "Не удалось загрузить объявления.";
-
+        console.error("User announcements load error:", error);
+        if (currentUser?.id === userId)
+            userAnnouncementsList.textContent = "Не удалось загрузить объявления.";
     }
 }
 
@@ -22175,6 +22283,9 @@ restoreSession();
         updateTree();
     });
     backBtn.addEventListener("click", closeCapsule);
+    window.antiShumRefreshTimeCapsule = () => {
+        if (!overlay.classList.contains("hidden")) updateTree();
+    };
 })();
 </script>
 
@@ -22397,6 +22508,19 @@ async function loadStats(){
  $("ashStatTime").textContent="Обновлено: "+new Date().toLocaleString("ru-RU",{timeZone:"Europe/Kyiv",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
 }
 $("ashReloadStats").addEventListener("click",loadStats);
+let workspaceRealtimeTimer = null;
+document.addEventListener("anti-shum:realtime", event => {
+ if(!currentUser || document.hidden || adminView.classList.contains("hidden"))return;
+ const active=document.querySelector(".admin-nav-btn.active")?.dataset.adminSection;
+ const table=event.detail?.table;
+ clearTimeout(workspaceRealtimeTimer);
+ if(active==="questions" && (table==="questions"||table==="reconnect"))
+  workspaceRealtimeTimer=setTimeout(loadDaily,550);
+ if(active==="users" && (table==="users"||table==="reconnect"))
+  workspaceRealtimeTimer=setTimeout(loadPeople,550);
+ if(active==="stats" && ["answers","reactions","reports","questions","users","reconnect"].includes(table))
+  workspaceRealtimeTimer=setTimeout(loadStats,550);
+});
 document.querySelectorAll(".admin-nav-btn").forEach(b=>b.addEventListener("click",()=>{
  if(b.dataset.adminSection==="questions")loadDaily();
  if(b.dataset.adminSection==="users")loadPeople();
