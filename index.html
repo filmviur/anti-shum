@@ -2405,12 +2405,40 @@
     color: #d9b56f;
 }
 
-.reaction-btn.active::before {
+.reaction-btn.active::before,
+.reaction-btn.selected::before {
     content: "✦";
-
     color: #d9b56f;
-
     font-size: 9px;
+}
+.reaction-btn.selected{color:#d9b56f}
+.reaction-btn{position:relative;isolation:isolate}
+@keyframes ashReactionGoldenPulse {
+    0%{transform:scale(.88);color:#b39f81}
+    44%{transform:scale(1.12);color:#f1d399;text-shadow:0 0 14px rgba(226,177,97,.52)}
+    100%{transform:scale(1);color:#d9b56f;text-shadow:none}
+}
+@keyframes ashReactionSpark {
+    0%{opacity:0;transform:translate(-50%,-45%) scale(.5) rotate(-12deg)}
+    40%{opacity:1;transform:translate(-50%,-140%) scale(1.25) rotate(5deg)}
+    100%{opacity:0;transform:translate(-50%,-220%) scale(.85) rotate(18deg)}
+}
+.reaction-btn.reaction-confirming{
+    animation:ashReactionGoldenPulse 440ms ease-out both
+}
+.reaction-btn.reaction-confirming::after{
+    content:"✧";position:absolute;left:50%;top:0;
+    color:#e8c583;pointer-events:none;
+    text-shadow:0 0 12px rgba(230,186,113,.4);
+    animation:ashReactionSpark 480ms ease-out both;
+}
+.reaction-btn.reaction-releasing{animation:ashReactionGoldenPulse 350ms ease-out reverse}
+@media(prefers-reduced-motion:reduce){
+    .reaction-btn.reaction-confirming,
+    .reaction-btn.reaction-releasing,
+    .reaction-btn.reaction-confirming::after{
+        animation:none!important
+    }
 }
 
 
@@ -15043,7 +15071,7 @@ function createReactionButton(
     if (selected) {
 
         button.classList.add(
-            "selected"
+            "selected", "active"
         );
     }
 
@@ -15064,8 +15092,14 @@ function createReactionButton(
                 return;
             }
 
-            button.disabled =
-                true;
+            const wasSelected = button.classList.contains("selected");
+            const useMotion = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            button.disabled = true;
+            if (useMotion) {
+                button.classList.add(wasSelected
+                    ? "reaction-releasing"
+                    : "reaction-confirming");
+            }
 
             try {
 
@@ -15074,6 +15108,9 @@ function createReactionButton(
                     reactionType
                 );
 
+                if (useMotion) {
+                    await new Promise(resolve => window.setTimeout(resolve, 410));
+                }
                 await loadFeed();
 
             } catch (error) {
