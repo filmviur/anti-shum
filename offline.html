@@ -40,6 +40,12 @@ button{display:block;width:100%;min-height:46px;padding:11px 18px;margin:15px 0 
 @media(max-width:480px){.card{padding:16px 17px}.scene{width:min(275px,100%)}h1{font-size:29px}}
 @media(max-height:660px){.scene{width:min(205px,100%)}.card{padding:12px 17px}}
 @media(prefers-reduced-motion:reduce){.card,.scene:before,.scene:after,.scene img,.reconnected .scene img,.reconnected .scene:before{animation:none!important}}
+
+/* An offline launch is a single stationary viewport. Only the card may
+   scroll, and only on screens too short to display all its content. */
+html { height: 100%; overflow: hidden; overscroll-behavior: none; }
+body { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; overscroll-behavior: none; }
+.card { max-height: 100%; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; }
 </style>
 </head>
 <body>
