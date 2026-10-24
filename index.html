@@ -6579,6 +6579,16 @@
     color:#e0c38d;margin:0 0 16px;
 }
 .install-guide-panel p{font:15px/1.7 Georgia,serif;color:#c4b29a;margin:0 0 23px}
+.install-guide-browser-choice{display:flex;gap:10px;margin:0 0 15px}
+.install-guide-browser-choice button{
+    flex:1;min-height:42px;padding:9px 10px;cursor:pointer;
+    border:1px solid rgba(201,168,106,.28);border-radius:4px;
+    color:#c8b394;background:rgba(14,11,9,.35);
+    font:600 14px Georgia,serif;
+}
+.install-guide-browser-choice button[aria-pressed="true"]{
+    border-color:#c8a467;color:#f0d9a8;background:rgba(155,115,62,.22);
+}
 .install-guide-steps{
     margin:0 0 18px;padding:16px 17px;
     background:rgba(14,11,9,.6);border:1px solid rgba(201,168,106,.3);
@@ -9097,6 +9107,10 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
         <div class="install-guide-ornament" aria-hidden="true">✦</div>
         <h2 id="installGuideTitle">Пусть «Анти-Шум» будет рядом</h2>
         <p id="installGuideText">Добавь «Анти-Шум» на главный экран телефона, чтобы возвращаться в своё тихое пространство одним касанием.</p>
+        <div id="installGuideBrowserChoice" class="install-guide-browser-choice hidden" aria-label="Выбери браузер на iPhone">
+            <button id="installGuideSafariBtn" type="button" aria-pressed="false">Safari</button>
+            <button id="installGuideChromeBtn" type="button" aria-pressed="false">Chrome</button>
+        </div>
         <div id="installGuideSteps" class="install-guide-steps hidden" aria-live="polite"></div>
         <div class="install-guide-buttons">
             <button id="installGuideInstallBtn" class="primary-btn" type="button">Добавить на главный экран</button>
@@ -12656,7 +12670,7 @@ authForm.addEventListener(
                         options: {
                             // После подтверждения email возвращаемся в корень PWA,
                             // а не на Site URL по умолчанию (он может вести на 404).
-                            emailRedirectTo: new URL("./", window.location.href).href,
+                            emailRedirectTo: "https://filmviur.github.io/anti-shum/",
                             data: {
                                 display_name: displayName,
                                 // Marks a newly registered account for its personal greeting.
@@ -21330,13 +21344,17 @@ var deferredInstallPrompt = null;
 const installGuideOverlay = document.getElementById("installGuideOverlay");
 const installGuideText = document.getElementById("installGuideText");
 const installGuideSteps = document.getElementById("installGuideSteps");
+const installGuideBrowserChoice = document.getElementById("installGuideBrowserChoice");
+const installGuideSafariBtn = document.getElementById("installGuideSafariBtn");
+const installGuideChromeBtn = document.getElementById("installGuideChromeBtn");
 const installGuideInstallBtn = document.getElementById("installGuideInstallBtn");
 const installGuideDismissBtn = document.getElementById("installGuideDismissBtn");
 const installDismissBtn = document.getElementById("installDismissBtn");
 const openInstallGuideFromProfileBtn = document.getElementById("openInstallGuideFromProfileBtn");
-const INSTALL_SHOWN_KEY = "anti_shum_install_guide_seen_v2";
-const INSTALL_DISMISSED_KEY = "anti_shum_install_guide_dismissed_v2";
+const INSTALL_SHOWN_KEY = "anti_shum_install_guide_seen_v3";
+const INSTALL_DISMISSED_KEY = "anti_shum_install_guide_dismissed_v3";
 let installGuidePreviousFocus = null;
+let selectedIosInstallBrowser = null;
 
 function getInstallFlag(key) {
     try { return localStorage.getItem(key) === "1"; }
@@ -21363,20 +21381,30 @@ function getInstallDetails() {
         };
     }
     if (isIOS) {
-        const safari = /safari/i.test(ua) && !/crios|fxios|edgios|opios/i.test(ua);
+        const browser = selectedIosInstallBrowser ||
+            (/crios/i.test(ua) ? "chrome" : "safari");
+        const chrome = browser === "chrome";
         return {
             available: true,
             direct: false,
-            text: "На iPhone сайт добавляется через меню Safari. Нажми «Показать шаги установки» — это займёт меньше минуты.",
-            stepsTitle: "Как добавить «Анти-Шум» на iPhone",
-            steps: [
-                safari
-                    ? "Оставь эту страницу открытой в Safari."
-                    : "Открой эту страницу в Safari — при необходимости скопируй ссылку из текущего браузера.",
-                "Нажми «Поделиться» (квадрат со стрелкой вверх). Иногда сначала нужно открыть меню страницы.",
-                "Прокрути список и выбери «На экран Домой». Если пункта нет, открой «Изменить действия» и добавь его.",
-                "Если есть переключатель «Открывать как веб-приложение», включи его. Нажми «Добавить»."
-            ]
+            iosBrowser: browser,
+            text: chrome
+                ? "В Chrome нажми «Поделиться» справа от адресной строки → «Добавить на главный экран» → «Добавить»."
+                : "В Safari нажми «Поделиться» → «На экран Домой» → «Добавить». Если пункта нет, его можно включить.",
+            stepsTitle: chrome ? "Установка через Chrome" : "Установка через Safari",
+            steps: chrome
+                ? [
+                    "Открой «Анти-Шум» в Chrome на iPhone.",
+                    "Нажми «Поделиться» справа от адресной строки (значок со стрелкой вверх).",
+                    "В списке действий выбери «Добавить на главный экран».",
+                    "Проверь название и нажми «Добавить». Значок появится на экране iPhone."
+                ]
+                : [
+                    "Открой «Анти-Шум» в Safari на iPhone.",
+                    "Нажми «Поделиться» (квадрат со стрелкой вверх). Иногда сначала нужно открыть меню страницы.",
+                    "Прокрути список до «На экран Домой». Если пункта нет, открой «Изменить действия» и добавь его.",
+                    "Если есть переключатель «Открывать как веб-приложение», включи его. Нажми «Добавить»."
+                ]
         };
     }
     if (isAndroid) {
@@ -21430,14 +21458,13 @@ function dismissInstallGuide() {
     installCard.classList.add("hidden");
     hideInstallGuide();
 }
-function openInstallGuide(force, expandSteps = false) {
-    const details = getInstallDetails();
-    if (isAntiShumInstalled() || !details.available) return;
-    if (!force && (getInstallFlag(INSTALL_SHOWN_KEY) ||
-                   getInstallFlag(INSTALL_DISMISSED_KEY))) return;
-    installGuidePreviousFocus = document.activeElement;
+function populateInstallGuide(details, expandSteps) {
     installGuideText.textContent = details.text;
     renderInstallSteps(details);
+    const iosBrowser = details.iosBrowser || null;
+    installGuideBrowserChoice.classList.toggle("hidden", !iosBrowser);
+    installGuideSafariBtn.setAttribute("aria-pressed", String(iosBrowser === "safari"));
+    installGuideChromeBtn.setAttribute("aria-pressed", String(iosBrowser === "chrome"));
     const stepsVisible = !details.direct && expandSteps;
     installGuideSteps.classList.toggle("hidden", !stepsVisible);
     installGuideInstallBtn.classList.remove("hidden");
@@ -21446,9 +21473,23 @@ function openInstallGuide(force, expandSteps = false) {
         : stepsVisible ? "Скрыть шаги" : "Показать шаги установки";
     installGuideInstallBtn.setAttribute("aria-controls", "installGuideSteps");
     installGuideInstallBtn.setAttribute("aria-expanded", String(stepsVisible));
+}
+function openInstallGuide(force, expandSteps = false) {
+    const details = getInstallDetails();
+    if (isAntiShumInstalled() || !details.available) return;
+    if (!force && (getInstallFlag(INSTALL_SHOWN_KEY) ||
+                   getInstallFlag(INSTALL_DISMISSED_KEY))) return;
+    installGuidePreviousFocus = document.activeElement;
+    populateInstallGuide(details, expandSteps);
     if (!force) setInstallFlag(INSTALL_SHOWN_KEY);
     installGuideOverlay.classList.remove("hidden");
     installGuideInstallBtn.focus();
+}
+function selectIosInstallBrowser(browser) {
+    selectedIosInstallBrowser = browser;
+    const details = getInstallDetails();
+    populateInstallGuide(details, true);
+    installText.textContent = details.text;
 }
 function showInstallOption() {
     const details = getInstallDetails();
@@ -21498,6 +21539,12 @@ window.addEventListener("appinstalled", function() {
     deferredInstallPrompt = null;
     dismissInstallGuide();
     showInstallOption();
+});
+installGuideSafariBtn.addEventListener("click", function() {
+    selectIosInstallBrowser("safari");
+});
+installGuideChromeBtn.addEventListener("click", function() {
+    selectIosInstallBrowser("chrome");
 });
 installBtn.addEventListener("click", function() {
     if (getInstallDetails().direct) {
