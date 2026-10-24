@@ -8754,6 +8754,25 @@
 @media(max-width:730px){.ash-columns{grid-template-columns:1fr}.ash-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.ash-card{padding:17px}.ash-toolbar input{flex-basis:100%}}
 @media(max-width:365px){.ash-stats{grid-template-columns:1fr}}
 
+
+/* Вопросы проекта доступны из любого состояния, включая закрытую карточку. */
+.project-questions-quick{
+ display:inline-flex;align-items:center;justify-content:center;gap:5px;
+ min-height:39px;padding:8px 12px;border-radius:21px;text-decoration:none;
+ color:#ddbc7b;border:1px solid rgba(203,161,94,.45);
+ background:rgba(29,22,18,.94);font:600 13px/1.1 Georgia,serif;
+ white-space:nowrap;box-shadow:0 3px 13px rgba(0,0,0,.19)
+}
+.project-questions-quick:hover{background:#423020}
+.project-questions-quick:focus-visible{outline:2px solid #e7c994;outline-offset:3px}
+#appScreen.admin-account #profilePollsArea,
+#appScreen.admin-account #projectQuestionsQuickLink{display:none!important}
+@media(max-width:600px){
+ #appScreen .app-global-actions{flex-wrap:wrap}
+ .project-questions-quick{font-size:12px;min-height:36px;padding:8px 10px}
+}
+@media(max-width:370px){.project-questions-quick span{display:none}.project-questions-quick{min-width:38px;font-size:20px}}
+
 </style>
 
 <style id="diary-motion-system">
@@ -9289,6 +9308,10 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 <main id="appScreen" class="hidden">
 
     <div class="app-global-actions">
+        <a id="projectQuestionsQuickLink" href="./polls.html" class="project-questions-quick"
+           title="Вопросы проекта — голосования, идеи и результаты"
+           aria-label="Вопросы проекта: голосования, идеи и результаты">✦ <span>Вопросы проекта</span></a>
+
 
         <!-- Уведомления -->
 
@@ -9712,12 +9735,14 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 
 
 <!-- Бесплатные опросы о развитии проекта -->
+<div id="profilePollsArea">
 <div class="profile-section-title">ВОПРОСЫ ПРОЕКТА</div>
 <a href="./polls.html" class="profile-polls-card" aria-label="Вопросы проекта — бесплатные голосования и идеи">
     <span class="profile-polls-card__title">✦ Вопросы проекта</span>
     <span class="profile-polls-card__hint">Голосования · ДА / НЕТ / ДРУГОЕ · Предложения идей</span>
     <span class="profile-polls-card__free">БЕСПЛАТНО ДЛЯ ВСЕХ</span>
 </a>
+</div>
 
 <!-- Друг проекта: информационная карточка для демо-версии -->
 <div class="profile-section-title">ДРУГ ПРОЕКТА</div>
@@ -10330,7 +10355,7 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
  <div class="admin-section-title">ВОПРОСЫ</div>
  <div class="ash-tabs">
   <button id="ashDailyTab" class="ash-btn active" type="button">Вопросы дня</button>
-  <button id="ashPollsTab" class="ash-btn" type="button">Вопросы проекта · Голосования</button>
+  <button id="ashPollsTab" class="ash-btn" type="button">Вопросы проекта</button>
  </div>
  <div id="ashDailyPane">
   <p class="ash-help">Каждый вопрос открывается в 20:00 по Киеву. Подготовь вопросы для дней 1–365. После появления первого ответа редактирование вопроса блокируется, чтобы сохранить историю книги.</p>
@@ -10350,7 +10375,7 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
   </div>
  </div>
  <div id="ashPollsPane" class="hidden">
-  <p class="ash-help">Здесь можно создавать голосования с ответами ДА / НЕТ / ДРУГОЕ, публиковать их с уведомлением, смотреть результаты и принимать предложения участников.</p>
+  <p class="ash-help">Три подраздела: голосования, сбор идей в закрытом окне сообщений и публикация результатов. Каждый подраздел может отправить уведомление.</p>
   <iframe id="ashPollsFrame" class="ash-polls-frame" title="Управление голосованиями" loading="lazy" referrerpolicy="same-origin"></iframe>
   <p class="ash-muted"><a href="./polls.html" target="_blank" rel="noopener">Посмотреть страницу голосований для пользователей ↗</a></p>
  </div>
@@ -19837,133 +19862,6 @@ adminModerationCloseBtn.addEventListener(
 
 
 /* =========================================================
-   SUPPORT REALTIME
-========================================================= */
-
-async function startSupportRealtime() {
-
-    if (!currentUser) {
-        return;
-    }
-
-
-    /*
-        Если старая подписка уже существует,
-        сначала удаляем её.
-    */
-
-    if (supportRealtimeChannel) {
-
-        try {
-
-            await supabaseClient.removeChannel(
-                supportRealtimeChannel
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Support Realtime remove error:",
-                error
-            );
-        }
-
-
-        supportRealtimeChannel = null;
-    }
-
-
-    /*
-        Слушаем новые сообщения поддержки
-        только для текущего пользователя.
-    */
-
-    supportRealtimeChannel =
-        supabaseClient
-            .channel(
-                `support-${currentUser.id}`
-            )
-            .on(
-                "postgres_changes",
-                {
-                    event: "INSERT",
-                    schema: "public",
-                    table: "support_messages",
-                    filter:
-                        `user_id=eq.${currentUser.id}`
-                },
-                async function(payload) {
-
-                    const message =
-                        payload.new;
-
-
-                    if (!message) {
-                        return;
-                    }
-
-
-                    /*
-                        Если пришёл новый ответ
-                        от администратора.
-                    */
-
-                    if (
-                        message.is_from_admin === true
-                    ) {
-
-                        /*
-                            Если окно поддержки
-                            сейчас закрыто —
-                            показываем золотую точку.
-                        */
-
-                        if (
-                            supportModal.classList.contains(
-                                "hidden"
-                            )
-                        ) {
-
-                            supportNotificationBadge
-                                ?.classList
-                                .remove(
-                                    "hidden"
-                                );
-
-                        } else {
-
-                            /*
-                                Если пользователь уже
-                                смотрит переписку —
-                                сразу обновляем сообщения
-                                и считаем ответ прочитанным.
-                            */
-
-                            await loadSupportMessages();
-
-                            await markSupportMessagesAsRead();
-                        }
-                    }
-                }
-            )
-            .subscribe(
-                function(status) {
-
-                    if (
-                        status ===
-                        "SUBSCRIBED"
-                    ) {
-
-                        console.log(
-                            "Анти-Шум: Support Realtime подключён."
-                        );
-                    }
-                }
-            );
-}
-    
-
-/* =========================================================
    SUPPORT
 ========================================================= */
 
@@ -20057,59 +19955,18 @@ async function checkSupportNotifications() {
 */
 
 async function markSupportMessagesAsRead() {
-
-    const guestConversationId =
-        getGuestSupportConversationId();
-
-    if (!currentUser && !guestConversationId) {
-        return;
-    }
-
+    if (!currentUser && !getGuestSupportConversationId()) return;
     try {
-
-        let query =
-            supabaseClient
-                .from("support_messages")
-                .update({
-                    is_read: true
-                })
-                .eq("is_from_admin", true)
-                .eq("is_read", false);
-
-        if (currentUser) {
-
-            query = query.eq(
-                "user_id",
-                currentUser.id
-            );
-
-        } else {
-
-            query = query.eq(
-                "guest_conversation_id",
-                guestConversationId
-            );
-        }
-
-        const { error } = await query;
-
-        if (error) {
-            throw error;
-        }
-
-        supportNotificationBadge
-            ?.classList
-            .add("hidden");
-
+        // Сервер изменяет только is_read и только у ответов,
+        // принадлежащих текущей сессии. Состояние переживает обновление страницы.
+        const { error } = await supabaseClient.rpc("mark_my_support_replies_read");
+        if (error) throw error;
+        await checkSupportNotifications();
     } catch (error) {
-
-        console.error(
-            "Support read error:",
-            error
-        );
+        console.error("Support read error:", error);
+        // При ошибке оставляем индикатор: сообщение реально не прочитано в БД.
     }
 }
-
 
 /* Закрытые медиа доступны только участнику переписки и администратору.
    Ссылка выдаётся на ограниченное время после проверки RLS. */
@@ -20242,36 +20099,43 @@ async function loadSupportMessages() {
     }
 }
 
-function startSupportRealtime() {
+async function startSupportRealtime() {
     const guestConversationId = getGuestSupportConversationId();
-
     if (!currentUser && !guestConversationId) return;
 
     if (supportRealtimeChannel) {
-        supabaseClient.removeChannel(supportRealtimeChannel);
+        await supabaseClient.removeChannel(supportRealtimeChannel);
+        supportRealtimeChannel = null;
     }
 
     const filter = currentUser
-        ? `user_id=eq.${currentUser.id}`
-        : `guest_conversation_id=eq.${guestConversationId}`;
+        ? "user_id=eq." + currentUser.id
+        : "guest_conversation_id=eq." + guestConversationId;
 
+    // Одна подписка: новая реплика, изменение статуса прочтения,
+    // синхронизация открытой переписки и индикатора.
     supportRealtimeChannel = supabaseClient
         .channel("support-chat-" + (currentUser?.id || guestConversationId))
-        .on(
-            "postgres_changes",
-            {
-                event: "INSERT",
-                schema: "public",
-                table: "support_messages",
-                filter
-            },
-            () => {
-                loadSupportMessages();
+        .on("postgres_changes", {
+            event: "*",
+            schema: "public",
+            table: "support_messages",
+            filter
+        }, async () => {
+            if (!supportModal.classList.contains("hidden")) {
+                await loadSupportMessages();
+                await markSupportMessagesAsRead();
+            } else {
+                await checkSupportNotifications();
             }
-        )
-        .subscribe();
+        })
+        .subscribe(status => {
+            if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+                console.warn("Поддержка: Realtime " + status);
+            }
+        });
 }
-    
+
 /*
     Открытие поддержки зарегистрированным пользователем.
 */
