@@ -101,6 +101,14 @@ body.admin-embedded .poll-card{margin:12px 0}
 .section-icon{font-size:22px;margin-right:5px}
 .empty-state{text-align:center;padding:31px 18px;color:#b7a48b}
 .topic-count{font-size:13px;color:#cbb18c}
+.project-updates{margin:14px 0 8px;padding:17px 20px;border:1px solid rgba(229,187,115,.5);border-radius:11px;background:rgba(103,71,37,.17)}
+.project-updates h2{font-size:25px;margin:0 0 5px}
+.project-updates p{font-size:13px;color:#bba990;margin:0 0 12px}
+.project-updates-list{display:flex;flex-direction:column;gap:8px}
+.project-update-link{display:flex;gap:9px;align-items:center;justify-content:space-between;text-align:left;width:100%;border:1px solid rgba(208,171,114,.24);border-radius:7px;background:rgba(18,13,10,.65);color:#e7d0aa;padding:10px 12px}
+.project-update-link:hover{background:#44301c}
+.project-update-link small{color:#bda984;white-space:nowrap}
+@media(max-width:600px){.project-updates{padding:15px}.project-update-link{align-items:flex-start;flex-direction:column;gap:3px}}
 .admin-actions{margin-top:13px}
 @media(max-width:600px){.section-tabs{gap:5px}.section-tab{font-size:12px;padding:11px 4px}.chat-bubble{max-width:100%}}
 
@@ -118,6 +126,11 @@ body.admin-embedded .poll-card{margin:12px 0}
 </div>
 <div id="status" class="message" role="status" aria-live="polite">Открываем вопросы проекта…</div>
 <div id="app" class="hidden">
+<section id="projectUpdates" class="project-updates hidden" aria-label="Новые вопросы и результаты проекта">
+ <h2>✦ Новое в «Вопросах проекта»</h2>
+ <p>Здесь появляются сообщения о голосованиях, сборе идей и результатах. Общие объявления — отдельно.</p>
+ <div id="projectUpdatesList" class="project-updates-list"></div>
+</section>
 <nav class="section-tabs" aria-label="Разделы вопросов проекта">
  <button class="section-tab active" type="button" data-section="vote">✓ Голосования</button>
  <button class="section-tab" type="button" data-section="ideas">✦ Ваши идеи</button>
@@ -246,9 +259,39 @@ async function load(){
   if(p.error||v.error||i.error)throw p.error||v.error||i.error;
   polls=p.data||[];votes=v.data||[];ideas=i.data||[];
   render();
+  renderProjectUpdates();
   message("Раздел обновлён. Новые сообщения и вопросы появляются автоматически.");
  }catch(e){console.error(e);message("Не удалось загрузить вопросы проекта: "+e.message,true)}
  finally{loadInProgress=false;if(loadAgain){loadAgain=false;load()}}
+}
+
+function renderProjectUpdates() {
+ const container=$("projectUpdates"),list=$("projectUpdatesList");
+ if(!user || admin || ADMIN_EMBEDDED){container.classList.add("hidden");return}
+ const latest=polls.filter(p=>p.published_at&&(p.status==="published"||p.status==="closed"))
+   .sort((a,b)=>new Date(b.published_at)-new Date(a.published_at)).slice(0,4);
+ list.replaceChildren();
+ container.classList.toggle("hidden",!latest.length);
+ if(!latest.length)return;
+ const labels={vote:"Голосование",ideas:"Идеи участников",result:"Результаты"};
+ for(const p of latest){
+  const button=node("button","project-update-link");
+  button.type="button";
+  button.appendChild(node("span","",labels[p.kind] + ": " + p.title));
+  button.appendChild(node("small","",timeLabel(p.published_at)));
+  button.addEventListener("click",()=>{
+   changeSection(p.kind||"vote");
+   const card=[...pollList.querySelectorAll(".poll-card")].find(el=>el.dataset.pollId===p.id);
+   if(card)card.scrollIntoView({behavior:"smooth",block:"center"});
+  });
+  list.appendChild(button);
+ }
+ try{
+  const key="anti_shum_project_updates_seen_"+user.id;
+  const newest=latest[0].published_at;
+  const old=localStorage.getItem(key);
+  if(!old||newest>old)localStorage.setItem(key,newest);
+ }catch(error){console.warn("Unable to mark project updates seen",error)}
 }
 function render(){
  pollList.replaceChildren();
@@ -260,6 +303,7 @@ function render(){
  }
  for(const p of displayed){
   const card=node("article","poll-card"),meta=node("div","poll-meta");
+  card.dataset.pollId=p.id;
   meta.appendChild(node("span","tag",p.status==="draft"?"Черновик":isOpen(p)?"Опубликовано":"Закрыто"));
   meta.appendChild(node("span","",timeLabel(p.published_at||p.created_at)));
   card.appendChild(meta);
@@ -397,18 +441,6 @@ function renderAdminControls(p,card){
  }
  card.appendChild(wrap);
 }
-async function announceEntry(p){
- const titles={vote:"Новое голосование",ideas:"Нужны ваши идеи",result:"Итоги от «Анти-Шума»"};
- const bodies={
-  vote:"Новый вопрос проекта: "+p.title+". Выбери ДА, НЕТ или ДРУГОЕ.",
-  ideas:"Поделись своей идеей: "+p.title,
-  result:"Опубликованы результаты: "+p.title
- };
- const kind=p.kind||"vote";
- const r=await supabaseClient.from("announcements").insert({title:titles[kind],body:bodies[kind],created_by:user.id});
- if(r.error){console.warn("Project announcement failed",r.error);return false}
- return true;
-}
 async function createEntry(kind,state){
  if(!admin)return;
  const prefix=kind==="vote"?"vote":kind==="ideas"?"ideas":"result";
@@ -423,9 +455,8 @@ async function createEntry(kind,state){
    published_at:state==="published"?new Date().toISOString():null
   }).select("id,title,kind").single();
   if(r.error)throw r.error;
-  const notified=state!=="published"||await announceEntry(r.data);
   form.reset();await load();
-  message(state==="draft"?"Черновик сохранён.":notified?"Опубликовано! Уведомление создано.":"Опубликовано, но уведомление создать не удалось.");
+  message(state==="draft"?"Черновик сохранён.":"Опубликовано! Новое сообщение появилось в «Вопросах проекта».");
  }catch(e){message("Не удалось сохранить: "+e.message,true)}finally{buttons.forEach(b=>b.disabled=false)}
 }
 async function changeStatus(p,state){
@@ -434,9 +465,8 @@ async function changeStatus(p,state){
   status:state,published_at:state==="published"?new Date().toISOString():p.published_at
  }).eq("id",p.id);
  if(r.error){message("Не удалось изменить статус: "+r.error.message,true);return}
- const notified=state!=="published"||await announceEntry(p);
  await load();
- message(state==="published"?(notified?"Опубликовано с уведомлением.":"Опубликовано, но уведомление не создано."):"Приём ответов закрыт.");
+ message(state==="published"?"Опубликовано! Уведомление доступно в «Вопросах проекта».":"Приём ответов закрыт.");
 }
 async function moderateIdea(id,newStatus){
  if(!admin)return;
