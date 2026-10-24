@@ -21182,7 +21182,10 @@ function getInstallDetails() {
             text: "Открой меню браузера ⋮ и выбери «Установить приложение» или «Добавить на главный экран». Если такого пункта нет, попробуй открыть сайт в Chrome."
         };
     }
-    return { available: false, direct: false, text: "" };
+    return {
+        available: true, direct: false,
+        text: "Если браузер поддерживает установку, открой его меню и выбери «Установить приложение» или «Добавить на главный экран». На телефоне удобнее открыть сайт в Safari или Chrome."
+    };
 }
 function hideInstallGuide() {
     installGuideOverlay.classList.add("hidden");
