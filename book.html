@@ -1036,6 +1036,7 @@ const book=$("book"),cover=$("cover"),left=$("leftPage"),right=$("rightPage");
 const prev=$("prevBtn"),next=$("nextBtn"),print=$("printBtn");
 let userId="",seen=new Set(),newWriting=new Set(),audioCtx=null;
 let index=-1,turning=false,bookReady=false,days=[],bookEntries=[],novemberTreeStage=0,photoUrls=new Map(),startDate=new Date(2026,9,1);
+let bookQuestionById=new Map(),bookRealtimeChannel=null,bookSyncRequest=0,bookSyncTimer=null;
 const MONTHS=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
 const pad=n=>String(n).padStart(2,"0");
 const key=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
@@ -1489,6 +1490,70 @@ function printBook(){
  }).catch(err=>{console.error("Book PDF layout failed",err);frame.remove();});
 }
 print.onclick=printBook;
+/* Keep the book and its November summary current when an answer is
+   saved from another device, without interrupting the current page. */
+async function syncBookFromServer(){
+ if(!userId||!bookReady)return;
+ const targetUser=userId,request=++bookSyncRequest;
+ const result=await client.from("answers")
+  .select("id,question_id,answer_text,photo_url,created_at")
+  .eq("user_id",targetUser).order("created_at",{ascending:true});
+ if(result.error){console.warn("Book Realtime refresh:",result.error);return}
+ if(request!==bookSyncRequest||userId!==targetUser)return;
+ const answers=new Map();
+ for(const a of result.data||[]){
+  const date=new Date(a.created_at);if(Number.isNaN(date.getTime()))continue;
+  const q=bookQuestionById.get(String(a.question_id));
+  let dayKey=key(date);
+  if(date.getFullYear()===2026&&date.getMonth()===9&&q&&Number(q.day)>=1&&Number(q.day)<=31)
+   dayKey="2026-10-"+pad(Number(q.day));
+  answers.set(dayKey,{answer:a,question:q?.question||""});
+ }
+ const imageUpdates=[];
+ days.forEach((day,i)=>{
+  const item=answers.get(key(day.date));
+  const previousId=day.answer?.id;
+  day.answer=item?.answer||null;
+  day.question=item?.question||"";
+  if(day.answer && previousId!==day.answer.id && !seen.has(i+1))
+   newWriting.add(i+1);
+  day.photo=null;
+  if(day.answer?.photo_url){
+   imageUpdates.push(client.storage.from("answer-photos")
+    .createSignedUrl(day.answer.photo_url,3600).then(({data})=>{
+     if(data?.signedUrl)day.photo=data.signedUrl;
+    }));
+  }
+ });
+ await Promise.all(imageUpdates);
+ if(request!==bookSyncRequest||userId!==targetUser)return;
+ novemberTreeStage=Math.min(30,[...answers.keys()].filter(d=>d.startsWith("2026-11-")).length);
+ const count=days.filter(d=>d.answer).length;
+ $("progress").textContent="Заполнено "+count+" из 365 страниц · Книга создаётся вместе с тобой";
+ if(!turning)show();
+}
+function scheduleBookSync(){
+ clearTimeout(bookSyncTimer);
+ bookSyncTimer=setTimeout(()=>{syncBookFromServer().catch(console.error)},320);
+}
+function connectBookRealtime(){
+ if(!userId)return;
+ if(bookRealtimeChannel)client.removeChannel(bookRealtimeChannel);
+ const channel=client.channel("book-answers-"+userId)
+  .on("postgres_changes",
+      {event:"*",schema:"public",table:"answers",filter:"user_id=eq."+userId},
+      scheduleBookSync);
+ bookRealtimeChannel=channel;
+ channel.subscribe(s=>{
+  if(s==="SUBSCRIBED")scheduleBookSync();
+  if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")console.warn("Book Realtime:",s);
+ });
+}
+document.addEventListener("visibilitychange",()=>{
+ if(!document.hidden)scheduleBookSync();
+});
+window.addEventListener("online",scheduleBookSync);
+
 try{
  const {data:{user},error:authError}=await client.auth.getUser();
  if(authError||!user)throw Error("Чтобы открыть личную книгу, войди в аккаунт Анти-Шум.");
@@ -1496,10 +1561,11 @@ try{
  try{seen=new Set(JSON.parse(localStorage.getItem("antiShumBookSeen:"+userId)||"[]"));}catch(e){seen=new Set();}
  const [qs,as]=await Promise.all([
   client.from("questions").select("id,day,question"),
-  client.from("answers").select("question_id,answer_text,photo_url,created_at").eq("user_id",user.id).order("created_at",{ascending:true})
+  client.from("answers").select("id,question_id,answer_text,photo_url,created_at").eq("user_id",user.id).order("created_at",{ascending:true})
  ]);
  if(qs.error)throw qs.error;if(as.error)throw as.error;
  const questions=new Map((qs.data||[]).map(q=>[String(q.id),q]));
+ bookQuestionById=questions;
  const answers=new Map();
  for(const a of as.data||[]){
   const date=new Date(a.created_at);if(isNaN(date))continue;
@@ -1536,6 +1602,7 @@ try{
  print.title=canExport()?"Печатная книга A5":"Доступно после завершения 365 дней";
  bookReady=true;
  show();
+ connectBookRealtime();
 }catch(err){$("loading").textContent=err.message||"Не удалось загрузить книгу";console.error("Book loading error:",err);}
 })();
 </script>
