@@ -6527,6 +6527,41 @@
 /* =========================
    INSTALL
 ========================= */
+.install-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.install-actions .secondary-btn{flex:1 1 auto}
+.install-guide-overlay{
+    position:fixed;inset:0;z-index:9500;display:flex;
+    align-items:center;justify-content:center;padding:20px;
+    background:rgba(11,10,13,.83);backdrop-filter:blur(6px);
+    overflow-y:auto;
+}
+.install-guide-panel{
+    width:min(430px,100%);max-height:calc(100dvh - 40px);
+    overflow-y:auto;padding:32px 26px;
+    border:1px solid rgba(201,168,106,.45);border-radius:7px;
+    background:linear-gradient(155deg,#34281d,#16120f 82%);
+    box-shadow:0 20px 80px rgba(0,0,0,.68),inset 0 1px 0 rgba(255,220,160,.09);
+    text-align:center;
+}
+.install-guide-ornament{font:30px Georgia,serif;color:#ceb076;margin-bottom:10px}
+.install-guide-panel h2{
+    font:600 31px/1.12 "Cormorant Garamond",Georgia,serif;
+    color:#e0c38d;margin:0 0 16px;
+}
+.install-guide-panel p{font:15px/1.7 Georgia,serif;color:#c4b29a;margin:0 0 23px}
+.install-guide-buttons{display:flex;flex-direction:column;gap:10px}
+.install-guide-buttons button{width:100%;min-height:44px}
+.install-guide-buttons .secondary-btn{
+    border:1px solid rgba(201,168,106,.26);
+    color:#c9b188;background:transparent;border-radius:4px;
+}
+.profile-install-button{
+    display:block;width:100%;padding:15px;margin:0 0 26px;
+    border:1px solid rgba(201,168,106,.29);border-radius:5px;
+    color:#d7b97b;background:linear-gradient(135deg,#372a1d,#1b1712);
+    font:600 19px "Cormorant Garamond",Georgia,serif;
+}
+@media(max-width:560px){.install-guide-panel{padding:28px 20px}.install-guide-panel h2{font-size:28px}}
 
 .install-card {
     position: relative;
@@ -8973,19 +9008,43 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
                 его как отдельное приложение.
             </div>
 
-            <button
-                id="installBtn"
-                class="secondary-btn"
-                type="button"
-            >
-                Добавить на экран
-            </button>
+            <div class="install-actions">
+                <button
+                    id="installBtn"
+                    class="secondary-btn"
+                    type="button"
+                >
+                    Добавить на экран
+                </button>
+                <button
+                    id="installDismissBtn"
+                    class="secondary-btn"
+                    type="button"
+                >
+                    Не сейчас
+                </button>
+            </div>
 
         </div>
 
     </div>
 
 </section>
+
+<!-- Предложение установки после первого успешного входа -->
+<div id="installGuideOverlay" class="install-guide-overlay hidden"
+     role="dialog" aria-modal="true" aria-labelledby="installGuideTitle"
+     aria-describedby="installGuideText">
+    <div class="install-guide-panel">
+        <div class="install-guide-ornament" aria-hidden="true">✦</div>
+        <h2 id="installGuideTitle">Пусть «Анти-Шум» будет рядом</h2>
+        <p id="installGuideText">Добавь «Анти-Шум» на главный экран телефона, чтобы возвращаться в своё тихое пространство одним касанием.</p>
+        <div class="install-guide-buttons">
+            <button id="installGuideInstallBtn" class="primary-btn" type="button">Добавить на главный экран</button>
+            <button id="installGuideDismissBtn" class="secondary-btn" type="button">Не сейчас</button>
+        </div>
+    </div>
+</div>
 
 
 <!-- =========================
@@ -9777,6 +9836,12 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
     </div>
     <p id="inviteFriendStatus" role="status" aria-live="polite"></p>
 </div>
+
+<!-- Установку всегда можно найти здесь, даже после «Не сейчас» -->
+<div class="profile-section-title">УСТАНОВКА ПРИЛОЖЕНИЯ</div>
+<button id="openInstallGuideFromProfileBtn" class="profile-install-button hidden" type="button">
+    📱 Добавить «Анти-Шум» на главный экран
+</button>
 
 <!-- Лента собственных ответов скрыта в профиле. Архив и книга сохраняются. -->
 <div id="ownAnswers" hidden style="display:none!important"></div>
@@ -12660,6 +12725,10 @@ function showAuthScreen() {
     bootScreen.classList.add("hidden");
     authScreen.classList.remove("hidden");
     appScreen.classList.add("hidden");
+    // Отложено до завершения начальной инициализации PWA-обработчиков.
+    requestAnimationFrame(function() {
+        showInstallOption();
+    });
 }
 
 
@@ -15620,6 +15689,7 @@ async function openProfile() {
     await loadProfile();
 
     await loadOwnAnswers();
+    showInstallOption();
 }
 
 
@@ -21065,119 +21135,144 @@ if ("serviceWorker" in navigator) {
 ========================================================= */
 
 var deferredInstallPrompt = null;
+const installGuideOverlay = document.getElementById("installGuideOverlay");
+const installGuideText = document.getElementById("installGuideText");
+const installGuideInstallBtn = document.getElementById("installGuideInstallBtn");
+const installGuideDismissBtn = document.getElementById("installGuideDismissBtn");
+const installDismissBtn = document.getElementById("installDismissBtn");
+const openInstallGuideFromProfileBtn = document.getElementById("openInstallGuideFromProfileBtn");
+const INSTALL_SHOWN_KEY = "anti_shum_install_guide_seen_v1";
+const INSTALL_DISMISSED_KEY = "anti_shum_install_guide_dismissed_v1";
+let installGuidePreviousFocus = null;
 
-window.addEventListener(
-    "beforeinstallprompt",
-    function(event) {
-
-        event.preventDefault();
-
-        deferredInstallPrompt =
-            event;
-
-        console.log(
-            "Анти-Шум: установка PWA доступна"
-        );
-
-        showInstallOption();
-    }
-);
-
-
-window.addEventListener(
-    "appinstalled",
-    function() {
-
-        deferredInstallPrompt =
-            null;
-
-        installCard.classList.add(
-            "hidden"
-        );
-    }
-);
-
-
-function showInstallOption() {
-
-    if (!currentUser) {
-        return;
-    }
-
-    const standalone =
-        window.matchMedia(
-            "(display-mode: standalone)"
-        ).matches ||
+function getInstallFlag(key) {
+    try { return localStorage.getItem(key) === "1"; }
+    catch (_) { return false; }
+}
+function setInstallFlag(key) {
+    try { localStorage.setItem(key, "1"); } catch (_) {}
+}
+function isAntiShumInstalled() {
+    return window.matchMedia("(display-mode: standalone)").matches ||
         window.navigator.standalone === true;
-
-    if (standalone) {
-        return;
-    }
-
+}
+function getInstallDetails() {
+    const ua = navigator.userAgent || "";
+    const isIOS = /iphone|ipad|ipod/i.test(ua) ||
+        (/macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+    const isAndroid = /android/i.test(ua);
     if (deferredInstallPrompt) {
-
-        installText.textContent =
-            "Добавь «Анти-Шум» на главный экран " +
-            "и открывай его как отдельное приложение.";
-
-        installBtn.textContent =
-            "Добавить на экран";
-
-        installBtn.classList.remove(
-            "hidden"
-        );
-
-        installCard.classList.remove(
-            "hidden"
-        );
-
+        return {
+            available: true, direct: true,
+            text: "Добавь «Анти-Шум» на главный экран, чтобы открывать его одним касанием — как отдельное приложение."
+        };
+    }
+    if (isIOS) {
+        const safari = /safari/i.test(ua) && !/crios|fxios|edgios|opios/i.test(ua);
+        return {
+            available: true, direct: false,
+            text: safari
+                ? "В Safari нажми «Поделиться» и выбери «На экран Домой». После этого «Анти-Шум» появится среди приложений."
+                : "Открой «Анти-Шум» в Safari, нажми «Поделиться» и выбери «На экран Домой»."
+        };
+    }
+    if (isAndroid) {
+        return {
+            available: true, direct: false,
+            text: "Открой меню браузера ⋮ и выбери «Установить приложение» или «Добавить на главный экран». Если такого пункта нет, попробуй открыть сайт в Chrome."
+        };
+    }
+    return { available: false, direct: false, text: "" };
+}
+function hideInstallGuide() {
+    installGuideOverlay.classList.add("hidden");
+    if (installGuidePreviousFocus &&
+        installGuidePreviousFocus.isConnected &&
+        !installGuidePreviousFocus.closest(".hidden")) {
+        installGuidePreviousFocus.focus();
+    }
+    installGuidePreviousFocus = null;
+}
+function dismissInstallGuide() {
+    setInstallFlag(INSTALL_DISMISSED_KEY);
+    installCard.classList.add("hidden");
+    hideInstallGuide();
+}
+function openInstallGuide(force) {
+    const details = getInstallDetails();
+    if (isAntiShumInstalled() || !details.available) return;
+    if (!force && (getInstallFlag(INSTALL_SHOWN_KEY) ||
+                   getInstallFlag(INSTALL_DISMISSED_KEY))) return;
+    installGuidePreviousFocus = document.activeElement;
+    installGuideText.textContent = details.text;
+    installGuideInstallBtn.classList.toggle("hidden", !details.direct);
+    if (!force) setInstallFlag(INSTALL_SHOWN_KEY);
+    installGuideOverlay.classList.remove("hidden");
+    (details.direct ? installGuideInstallBtn : installGuideDismissBtn).focus();
+}
+function showInstallOption() {
+    const details = getInstallDetails();
+    const available = !isAntiShumInstalled() && details.available;
+    openInstallGuideFromProfileBtn.classList.toggle("hidden", !available);
+    if (!available) {
+        installCard.classList.add("hidden");
+        hideInstallGuide();
         return;
     }
-
-    const isIOS =
-        /iphone|ipad|ipod/i.test(
-            navigator.userAgent
-        );
-
-    if (isIOS) {
-
-        installText.textContent =
-            "В Safari нажми «Поделиться» → " +
-            "«На экран Домой».";
-
-        installBtn.classList.add(
-            "hidden"
-        );
-
-        installCard.classList.remove(
-            "hidden"
-        );
+    installText.textContent = details.text;
+    installBtn.classList.toggle("hidden", !details.direct);
+    const authVisible = !authScreen.classList.contains("hidden");
+    installCard.classList.toggle("hidden",
+        !authVisible || getInstallFlag(INSTALL_DISMISSED_KEY));
+    // После первого входа карточка видна даже при закрытом «Вопросе дня».
+    if (currentUser && !appScreen.classList.contains("hidden")) {
+        openInstallGuide(false);
     }
 }
-
-
-installBtn.addEventListener(
-    "click",
-    async function() {
-
-        if (!deferredInstallPrompt) {
-            return;
-        }
-
-        deferredInstallPrompt.prompt();
-
-        await deferredInstallPrompt.userChoice;
-
-        deferredInstallPrompt =
-            null;
-
-        installCard.classList.add(
-            "hidden"
-        );
+async function requestAntiShumInstallation() {
+    if (!deferredInstallPrompt) {
+        showInstallOption();
+        return;
     }
-);
+    const prompt = deferredInstallPrompt;
+    deferredInstallPrompt = null;
+    try {
+        await prompt.prompt();
+        await prompt.userChoice;
+        // После ответа браузер не разрешает повторно использовать этот prompt.
+        dismissInstallGuide();
+    } catch (error) {
+        console.warn("Анти-Шум: не удалось вызвать установку", error);
+        showInstallOption();
+    }
+}
+window.addEventListener("beforeinstallprompt", function(event) {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    showInstallOption();
+});
+window.addEventListener("appinstalled", function() {
+    deferredInstallPrompt = null;
+    dismissInstallGuide();
+    showInstallOption();
+});
+installBtn.addEventListener("click", requestAntiShumInstallation);
+installGuideInstallBtn.addEventListener("click", requestAntiShumInstallation);
+installDismissBtn.addEventListener("click", dismissInstallGuide);
+installGuideDismissBtn.addEventListener("click", dismissInstallGuide);
+openInstallGuideFromProfileBtn.addEventListener("click", function() {
+    openInstallGuide(true);
+});
+installGuideOverlay.addEventListener("click", function(event) {
+    if (event.target === installGuideOverlay) dismissInstallGuide();
+});
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Escape" &&
+        !installGuideOverlay.classList.contains("hidden")) {
+        dismissInstallGuide();
+    }
+});
 
-    
 /* =========================================================
    BLOCK APPEAL — CHARACTER COUNTER
 ========================================================= */
