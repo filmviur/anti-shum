@@ -8903,7 +8903,68 @@
     background:linear-gradient(148deg,#3c2b1c,#17120e 82%);
     box-shadow:0 20px 65px rgba(0,0,0,.6);
 }
-.network-offline-ornament{font:32px Georgia,serif;color:#d4b47b;margin-bottom:8px}
+
+/* The user's lighthouse is the focus of the connection screen. */
+.network-offline-overlay{overflow-y:auto;transition:opacity .45s ease}
+.network-offline-card{max-height:calc(100dvh - 36px);overflow-y:auto;animation:networkCardArrive .62s ease-out both}
+.network-lighthouse-scene{
+    position:relative;isolation:isolate;width:min(340px,100%);margin:-10px auto 7px;
+    aspect-ratio:4/3;pointer-events:none;
+}
+.network-lighthouse-scene::before{
+    content:"";position:absolute;z-index:0;left:35%;top:15%;width:42%;height:52%;
+    border-radius:50%;background:radial-gradient(circle,rgba(255,198,84,.44),rgba(255,181,76,.09) 52%,transparent 75%);
+    filter:blur(15px);animation:lighthouseGlow 3.8s ease-in-out infinite;
+}
+.network-lighthouse-scene::after{
+    content:"";position:absolute;z-index:2;left:20%;bottom:5%;width:65%;height:18%;
+    background:radial-gradient(ellipse,rgba(255,179,76,.25),transparent 69%);
+    animation:lighthouseSea 4.3s ease-in-out infinite;mix-blend-mode:screen;
+}
+.network-lighthouse-image{
+    position:relative;z-index:1;width:100%;height:100%;object-fit:contain;
+    filter:brightness(.82) saturate(.88) drop-shadow(0 8px 16px rgba(0,0,0,.22));
+    animation:lighthouseDrift 6s ease-in-out infinite;transition:filter 1s ease;
+}
+.network-recovery-status{min-height:21px;font:13px/1.5 Georgia,serif;color:#c8a976;margin:0 0 11px}
+.network-offline-overlay.is-reconnected .network-lighthouse-image{
+    filter:brightness(1.2) saturate(1.13) drop-shadow(0 0 18px rgba(255,197,96,.5));
+    animation:lighthouseWake 1.35s ease-out both;
+}
+.network-offline-overlay.is-reconnected .network-lighthouse-scene::before{
+    animation:lighthouseFlare 1.35s ease-out both;
+}
+.network-offline-overlay.is-reconnected .network-lighthouse-scene::after{
+    animation:lighthouseSeaWake 1.35s ease-out both;
+}
+.network-offline-overlay.is-reconnected .network-offline-card{border-color:rgba(249,204,122,.76)}
+.network-offline-overlay.is-reconnected button{visibility:hidden}
+@keyframes networkCardArrive{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes lighthouseDrift{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes lighthouseGlow{0%,100%{opacity:.45;transform:scale(.94)}50%{opacity:.95;transform:scale(1.13)}}
+@keyframes lighthouseSea{0%,100%{opacity:.37;transform:translateX(-3px)}50%{opacity:.85;transform:translateX(4px)}}
+@keyframes lighthouseWake{0%{transform:translateY(-2px) scale(.98);filter:brightness(.82)}55%{transform:translateY(-5px) scale(1.03);filter:brightness(1.32) drop-shadow(0 0 25px rgba(255,191,70,.66))}100%{transform:none;filter:brightness(1.12)}}
+@keyframes lighthouseFlare{0%{opacity:.55;transform:scale(.9)}55%{opacity:1;transform:scale(1.7)}100%{opacity:.8;transform:scale(1.25)}}
+@keyframes lighthouseSeaWake{0%{opacity:.25}55%{opacity:1}100%{opacity:.8}}
+@media(max-width:560px){
+    .network-lighthouse-scene{width:min(275px,100%);margin:-12px auto 2px}
+    .network-offline-card{padding:19px 17px 12px}
+    .network-offline-card h2{margin-bottom:10px}
+    .network-offline-card p{margin-bottom:12px}
+}
+@media(max-height:680px){
+    .network-lighthouse-scene{width:min(205px,100%)}
+    .network-offline-card{padding-top:13px;padding-bottom:12px}
+}
+@media(prefers-reduced-motion:reduce){
+    .network-lighthouse-scene::before,.network-lighthouse-scene::after,.network-lighthouse-image,
+    .network-offline-card,.network-offline-overlay.is-reconnected .network-lighthouse-image,
+    .network-offline-overlay.is-reconnected .network-lighthouse-scene::before,
+    .network-offline-overlay.is-reconnected .network-lighthouse-scene::after{
+        animation:none!important;transition:none!important
+    }
+}
+
 .network-offline-card h2{font:600 32px/1.15 "Cormorant Garamond",Georgia,serif;color:#e6c88f;margin:0 0 16px}
 .network-offline-card p{font:15px/1.65 Georgia,serif;color:#cfbba0;margin:0 0 19px}
 .network-offline-card button{
@@ -9485,7 +9546,11 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 <div id="networkOfflineOverlay" class="network-offline-overlay hidden"
      role="dialog" aria-modal="true" aria-labelledby="networkOfflineTitle">
     <div class="network-offline-card">
-        <div class="network-offline-ornament" aria-hidden="true">✦</div>
+        <div class="network-lighthouse-scene" aria-hidden="true">
+            <img class="network-lighthouse-image" src="./offline-lighthouse.webp"
+                 alt="" width="800" height="600" decoding="async">
+        </div>
+        <p class="network-recovery-status" id="networkRecoveryStatus" role="status" aria-live="polite">Свет маяка ждёт возвращения связи…</p>
         <h2 id="networkOfflineTitle">Тишина без связи</h2>
         <p>Интернет ненадолго исчез. Если ты уже пишешь ответ, текст сохранится на этом устройстве.</p>
         <p>Когда соединение вернётся, «Анти-Шум» продолжит работу. Отправить мысль можно только при наличии сети.</p>
@@ -21154,7 +21219,7 @@ function startSiteRealtime() {
 document.addEventListener("visibilitychange", () => {
     if (!document.hidden) refreshVisibleSiteState();
 });
-window.addEventListener("online", refreshVisibleSiteState);
+// Reconnect refresh is done only after confirming the server is reachable.
 window.addEventListener("pageshow", event => {
     if (event.persisted) refreshVisibleSiteState();
 });
@@ -21418,46 +21483,104 @@ document.addEventListener(
 
 
 /* =========================================================
-   OFFLINE / ONLINE
+   OFFLINE / ONLINE — lighthouse + confirmed reconnect
 ========================================================= */
 
 const networkOfflineOverlay = document.getElementById("networkOfflineOverlay");
 const networkOfflineBadge = document.getElementById("networkOfflineBadge");
 const offlineTryAgainBtn = document.getElementById("offlineTryAgainBtn");
 const offlineKeepWritingBtn = document.getElementById("offlineKeepWritingBtn");
+const networkOfflineTitle = document.getElementById("networkOfflineTitle");
+const networkRecoveryStatus = document.getElementById("networkRecoveryStatus");
 let offlineOverlayMinimized = false;
+let networkLost = !navigator.onLine;
+let networkChecking = false;
+let networkRecoveryTimer = null;
+let networkProbeVersion = 0;
 
 function syncNetworkStatus() {
-    const offline = !navigator.onLine;
+    const offline = networkLost || !navigator.onLine;
     networkOfflineOverlay.classList.toggle("hidden", !offline || offlineOverlayMinimized);
     networkOfflineBadge.classList.toggle("hidden", !offline || !offlineOverlayMinimized);
-    if (offline) saveAnswerDraft();
+    if (offline) {
+        networkOfflineOverlay.classList.remove("is-reconnected");
+        networkOfflineTitle.textContent = "Тишина без связи";
+        networkRecoveryStatus.textContent = "Свет маяка ждёт возвращения связи…";
+        saveAnswerDraft();
+    }
 }
-window.addEventListener("offline", function() {
+
+async function confirmRealConnection() {
+    if (!navigator.onLine || networkChecking) return;
+    networkChecking = true;
+    const version = ++networkProbeVersion;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4500);
+    try {
+        // This is not a navigation: the service worker cannot return its offline fallback.
+        const response = await fetch("./offline.html?connection_check=" + Date.now(), {
+            cache: "no-store",
+            signal: controller.signal
+        });
+        if (!response.ok || !navigator.onLine || version !== networkProbeVersion) {
+            throw new Error("No live connection");
+        }
+        clearTimeout(networkRecoveryTimer);
+        networkLost = false;
+        offlineOverlayMinimized = false;
+        networkOfflineBadge.classList.add("hidden");
+        networkOfflineOverlay.classList.remove("hidden");
+        networkOfflineOverlay.classList.add("is-reconnected");
+        networkOfflineTitle.textContent = "Связь восстановлена ✨";
+        networkRecoveryStatus.textContent = "Маяк снова светит. Возвращаемся к твоим мыслям…";
+        networkRecoveryTimer = setTimeout(() => {
+            if (networkLost || !navigator.onLine) return;
+            networkOfflineOverlay.classList.remove("is-reconnected");
+            networkOfflineOverlay.classList.add("hidden");
+            refreshVisibleSiteState();
+        }, 1450);
+    } catch (error) {
+        if (version === networkProbeVersion) {
+            networkLost = true;
+            syncNetworkStatus();
+            networkRecoveryStatus.textContent =
+                "Сигнал появился, но интернет пока недоступен. Продолжаем ждать…";
+        }
+    } finally {
+        clearTimeout(timeout);
+        networkChecking = false;
+    }
+}
+
+window.addEventListener("offline", () => {
+    ++networkProbeVersion;
+    clearTimeout(networkRecoveryTimer);
+    networkLost = true;
     offlineOverlayMinimized = false;
     syncNetworkStatus();
 });
-window.addEventListener("online", function() {
-    offlineOverlayMinimized = false;
-    syncNetworkStatus();
-    // Существующий online-слушатель обновляет видимые разделы.
+window.addEventListener("online", () => {
+    // Confirm that the website can actually be reached before showing the light animation.
+    confirmRealConnection();
 });
-offlineKeepWritingBtn.addEventListener("click", function() {
+offlineKeepWritingBtn.addEventListener("click", () => {
     offlineOverlayMinimized = true;
     syncNetworkStatus();
 });
-networkOfflineBadge.addEventListener("click", function() {
+networkOfflineBadge.addEventListener("click", () => {
     offlineOverlayMinimized = false;
     syncNetworkStatus();
 });
-offlineTryAgainBtn.addEventListener("click", function() {
-    if (navigator.onLine) {
-        offlineOverlayMinimized = false;
-        syncNetworkStatus();
-        refreshVisibleSiteState();
-    } else {
-        saveAnswerDraft();
-    }
+offlineTryAgainBtn.addEventListener("click", () => {
+    saveAnswerDraft();
+    confirmRealConnection();
+});
+// Connectivity may return while the page is in the background without an "online" event.
+setInterval(() => {
+    if (networkLost && navigator.onLine && !document.hidden) confirmRealConnection();
+}, 6500);
+document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && networkLost && navigator.onLine) confirmRealConnection();
 });
 syncNetworkStatus();
 

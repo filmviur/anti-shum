@@ -1,11 +1,11 @@
 
-const CACHE_NAME = "anti-shum-offline-v1";
+const CACHE_NAME = "anti-shum-offline-v2-lighthouse";
 
 // Кэшируем только безопасную страницу отсутствия связи, не личные данные.
 self.addEventListener("install", event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then(cache => cache.add("./offline.html"))
+            .then(cache => cache.addAll(["./offline.html", "./offline-lighthouse.webp"]))
             .then(() => self.skipWaiting())
     );
 });
