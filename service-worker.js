@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "anti-shum-offline-v2-lighthouse";
+const CACHE_NAME = "anti-shum-offline-v3-scroll-fix";
 
 // Кэшируем только безопасную страницу отсутствия связи, не личные данные.
 self.addEventListener("install", event => {
