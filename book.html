@@ -1036,6 +1036,7 @@ const book=$("book"),cover=$("cover"),left=$("leftPage"),right=$("rightPage");
 const prev=$("prevBtn"),next=$("nextBtn"),print=$("printBtn");
 let userId="",seen=new Set(),newWriting=new Set(),audioCtx=null;
 let index=-1,turning=false,bookReady=false,days=[],bookEntries=[],novemberTreeStage=0,photoUrls=new Map(),startDate=new Date(2026,9,1);
+let isBookAdmin=false; // Set from the protected admin RPC.
 let bookQuestionById=new Map(),bookRealtimeChannel=null,bookSyncRequest=0,bookSyncTimer=null;
 const MONTHS=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
 const pad=n=>String(n).padStart(2,"0");
@@ -1400,7 +1401,11 @@ book.addEventListener("pointerup",event=>{
 });
 book.addEventListener("pointercancel",()=>{swipeGesture=null;});
 
-function canExport(){const end=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate()+365);return Date.now()>=end.getTime();}
+function canExport(){
+  if(isBookAdmin)return true;
+  const end=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate()+365);
+  return Date.now()>=end.getTime();
+}
 function printBook(){
  if(!canExport()){alert("Готовая книга станет доступна только после 365 дней. Пока можно листать предварительную версию.");return;}
  const frame=document.createElement("iframe");
@@ -1558,6 +1563,10 @@ try{
  const {data:{user},error:authError}=await client.auth.getUser();
  if(authError||!user)throw Error("Чтобы открыть личную книгу, войди в аккаунт Анти-Шум.");
  userId=user.id;
+ // Privilege check happens on the server using the protected is_admin flag.
+ const {data:adminStatus,error:adminStatusError}=await client.rpc("is_anti_shum_admin");
+ if(adminStatusError)console.warn("Book admin check:",adminStatusError);
+ isBookAdmin=!adminStatusError&&adminStatus===true;
  try{seen=new Set(JSON.parse(localStorage.getItem("antiShumBookSeen:"+userId)||"[]"));}catch(e){seen=new Set();}
  const [qs,as]=await Promise.all([
   client.from("questions").select("id,day,question"),
