@@ -1027,7 +1027,7 @@ opacity:.65;pointer-events:none}
  </div>
  <div class="book-nav-hint" id="bookHint">Поверни книгу пальцем · Нажми, чтобы открыть</div>
 </nav>
-<p class="notice">Книга наполняется автоматически из твоих ответов. Незаполненные дни сохраняют своё место. После 365 дней можно будет сохранить готовую книгу в PDF через системное окно печати. Фотографии доступны при действующей авторизации.</p>
+<p class="notice">Книга начинается с даты регистрации. Пропущенные после неё дни сохраняют своё место. Через 365 дней твоего личного пути можно сохранить книгу в PDF. Фотографии доступны при действующей авторизации.</p>
 <script>
 (async function(){
 const client=window.supabase.createClient("https://mkyendzqoohqcwnycuys.supabase.co","sb_publishable_wscrhaPifbezRTe4rWs-Wg_j0kGqktT",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:"anti-shum-auth"}});
@@ -1035,12 +1035,23 @@ const $=id=>document.getElementById(id);
 const book=$("book"),cover=$("cover"),left=$("leftPage"),right=$("rightPage");
 const prev=$("prevBtn"),next=$("nextBtn"),print=$("printBtn");
 let userId="",seen=new Set(),newWriting=new Set(),audioCtx=null;
-let index=-1,turning=false,bookReady=false,days=[],bookEntries=[],novemberTreeStage=0,photoUrls=new Map(),startDate=new Date(2026,9,1);
+let index=-1,turning=false,bookReady=false,days=[],bookEntries=[],novemberTreeStage=0,photoUrls=new Map(),startDate=null;
 let isBookAdmin=false; // Set from the protected admin RPC.
 let bookQuestionById=new Map(),bookRealtimeChannel=null,bookSyncRequest=0,bookSyncTimer=null;
 const MONTHS=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
 const pad=n=>String(n).padStart(2,"0");
 const key=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const kyivDay=v=>{
+ const values=Object.fromEntries(new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Kyiv",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date(v)).map(p=>[p.type,p.value]));
+ return values.year+"-"+values.month+"-"+values.day;
+};
+const dateFromDay=v=>{const [y,m,d]=v.split("-").map(Number);return new Date(y,m-1,d);};
+const nextYear=()=>new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate()+365);
+function bookAnswerDay(a,q){
+ const actual=kyivDay(a.created_at);
+ const selected=actual.startsWith("2026-10-")&&q&&q.day>=1&&q.day<=31?"2026-10-"+pad(Number(q.day)):actual;
+ return startDate&&selected<key(startDate)?actual:selected;
+}
 const text=(tag,cls,value)=>{const el=document.createElement(tag);el.className=cls;el.textContent=value;return el};
 function buildNovemberTreeArt(ownerDocument){
  const scene=ownerDocument.createElement("div");scene.className="november-tree-art";
@@ -1401,11 +1412,7 @@ book.addEventListener("pointerup",event=>{
 });
 book.addEventListener("pointercancel",()=>{swipeGesture=null;});
 
-function canExport(){
-  if(isBookAdmin)return true;
-  const end=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate()+365);
-  return Date.now()>=end.getTime();
-}
+function canExport(){return Boolean(startDate)&&(isBookAdmin||kyivDay(Date.now())>=key(nextYear()));}
 function printBook(){
  if(!canExport()){alert("Готовая книга станет доступна только после 365 дней. Пока можно листать предварительную версию.");return;}
  const frame=document.createElement("iframe");
@@ -1507,11 +1514,8 @@ async function syncBookFromServer(){
  if(request!==bookSyncRequest||userId!==targetUser)return;
  const answers=new Map();
  for(const a of result.data||[]){
-  const date=new Date(a.created_at);if(Number.isNaN(date.getTime()))continue;
   const q=bookQuestionById.get(String(a.question_id));
-  let dayKey=key(date);
-  if(date.getFullYear()===2026&&date.getMonth()===9&&q&&Number(q.day)>=1&&Number(q.day)<=31)
-   dayKey="2026-10-"+pad(Number(q.day));
+  const dayKey=bookAnswerDay(a,q);
   answers.set(dayKey,{answer:a,question:q?.question||""});
  }
  const imageUpdates=[];
@@ -1532,9 +1536,9 @@ async function syncBookFromServer(){
  });
  await Promise.all(imageUpdates);
  if(request!==bookSyncRequest||userId!==targetUser)return;
- novemberTreeStage=Math.min(30,[...answers.keys()].filter(d=>d.startsWith("2026-11-")).length);
+ novemberTreeStage=Math.min(30,days.filter(d=>key(d.date).startsWith("2026-11-")&&d.answer).length);
  const count=days.filter(d=>d.answer).length;
- $("progress").textContent="Заполнено "+count+" из 365 страниц · Книга создаётся вместе с тобой";
+ $("progress").textContent="Начало: "+startDate.toLocaleDateString("ru-RU")+" · Заполнено "+count+" из 365 дней";
  if(!turning)show();
 }
 function scheduleBookSync(){
@@ -1563,6 +1567,7 @@ try{
  const {data:{user},error:authError}=await client.auth.getUser();
  if(authError||!user)throw Error("Чтобы открыть личную книгу, войди в аккаунт Анти-Шум.");
  userId=user.id;
+ startDate=dateFromDay(kyivDay(user.created_at));
  // Privilege check happens on the server using the protected is_admin flag.
  const {data:adminStatus,error:adminStatusError}=await client.rpc("is_anti_shum_admin");
  if(adminStatusError)console.warn("Book admin check:",adminStatusError);
@@ -1577,11 +1582,8 @@ try{
  bookQuestionById=questions;
  const answers=new Map();
  for(const a of as.data||[]){
-  const date=new Date(a.created_at);if(isNaN(date))continue;
   const q=questions.get(String(a.question_id));
-  let dayKey=key(date);
-  if(date.getFullYear()===2026&&date.getMonth()===9&&q&&Number(q.day)>=1&&Number(q.day)<=31)
-   dayKey="2026-10-"+pad(Number(q.day));
+  const dayKey=bookAnswerDay(a,q);
   answers.set(dayKey,{answer:a,question:q?.question||""});
  }
  for(let i=0;i<365;i++){
@@ -1590,7 +1592,7 @@ try{
  }
  // The November recap is a separate page after November 30, without
  // altering October pages or the original 365 day numbers.
- novemberTreeStage=Math.min(30,[...answers.keys()].filter(day=>day.startsWith("2026-11-")).length);
+ novemberTreeStage=Math.min(30,days.filter(day=>key(day.date).startsWith("2026-11-")&&day.answer).length);
  bookEntries=days.map((day,i)=>({type:"day",day,number:i+1}));
  const novemberLastDay=days.findIndex(day=>key(day.date)==="2026-11-30");
  if(novemberLastDay>=0)bookEntries.splice(novemberLastDay+1,0,{type:"novemberTree"});
@@ -1602,10 +1604,10 @@ try{
  }));
  days.forEach((day,i)=>{if(day.answer&&!seen.has(i+1))newWriting.add(i+1);});
  const count=days.filter(d=>d.answer).length;
- $("progress").textContent="Заполнено "+count+" из 365 страниц · Книга создаётся вместе с тобой";
+ $("progress").textContent="Начало: "+startDate.toLocaleDateString("ru-RU")+" · Заполнено "+count+" из 365 дней";
  // Keep the loading row's space so the cover does not shift when ready.
  $("loading").style.visibility="hidden";
- const end=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate()+365);
+ const end=nextYear();
  print.disabled=!canExport();
  print.textContent=canExport()?"Сохранить книгу в PDF":"PDF после "+end.toLocaleDateString("ru-RU");
  print.title=canExport()?"Печатная книга A5":"Доступно после завершения 365 дней";
