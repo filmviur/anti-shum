@@ -8983,6 +8983,38 @@
     margin:7px 0 12px;color:#bda579;font:13px/1.5 Georgia,serif;
 }
 @media(max-width:560px){.network-offline-card{padding:28px 19px}.network-offline-card h2{font-size:28px}}
+
+/* Keep fixed, short screens stationary; scroll only when content truly exceeds
+   the viewport. Background pages must not scroll through a dialog. */
+html, body { overscroll-behavior-y: none; }
+html:has(#closedView:not(.hidden)),
+body:has(#closedView:not(.hidden)),
+html:has(#networkOfflineOverlay:not(.hidden)),
+body:has(#networkOfflineOverlay:not(.hidden)) {
+    height: 100%;
+    overflow: hidden;
+}
+#closedView {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+.network-offline-overlay {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+.network-offline-card {
+    max-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
 </style>
 
 <style id="diary-motion-system">
