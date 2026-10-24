@@ -460,9 +460,14 @@ function connectRealtime(){
   realtimeChannel.on("postgres_changes",{event:"*",schema:"public",table},scheduleRealtimeRefresh);
  }
  realtimeChannel.subscribe(s=>{
+  if(s==="SUBSCRIBED")scheduleRealtimeRefresh();
   if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")console.warn("Project questions realtime: "+s);
  });
 }
+window.addEventListener("online",scheduleRealtimeRefresh);
+document.addEventListener("visibilitychange",()=>{
+ if(!document.hidden)scheduleRealtimeRefresh();
+});
 function notifyEmbeddedHeight(){
  if(!ADMIN_EMBEDDED||window.parent===window)return;
  requestAnimationFrame(()=>{
