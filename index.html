@@ -12654,6 +12654,9 @@ authForm.addEventListener(
                         email,
                         password,
                         options: {
+                            // После подтверждения email возвращаемся в корень PWA,
+                            // а не на Site URL по умолчанию (он может вести на 404).
+                            emailRedirectTo: new URL("./", window.location.href).href,
                             data: {
                                 display_name: displayName,
                                 // Marks a newly registered account for its personal greeting.
