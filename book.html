@@ -968,6 +968,14 @@ opacity:.65;pointer-events:none}
 .global-rules-link { position:fixed; z-index:2147480000; left:calc(12px + env(safe-area-inset-left, 0px)); bottom:calc(12px + env(safe-area-inset-bottom, 0px)); display:inline-flex; align-items:center; min-height:38px; padding:8px 13px; border:1px solid rgba(216,174,103,.62); border-radius:22px; background:rgba(30,22,16,.96); color:#e7c994; box-shadow:0 3px 16px rgba(0,0,0,.35); font:600 13px/1 Georgia,serif; text-decoration:none; }
 .global-rules-link:hover { background:#392a1c; }
 .global-rules-link:focus-visible { outline:2px solid #f0cb87; outline-offset:3px; }
+/* November recap: the same personal tree appears in the book and printed PDF. */
+#book .november-tree-page .page-flow{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;height:100%;padding:6px 12px}
+#book .november-tree-kicker{font:italic 17px "Cormorant Garamond",serif;color:#775132}
+#book .november-tree-heading{font:600 clamp(23px,3vw,37px)/1.1 "Cormorant Garamond",serif;color:#654125}
+#book .november-tree-caption{font:15px "PT Serif",serif;color:#795939}
+#book .november-tree-art{position:relative;width:min(91%,320px);aspect-ratio:1;flex-shrink:0}
+#book .november-tree-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+#book .november-tree-note{font:italic clamp(14px,1.7vw,19px)/1.3 "Cormorant Garamond",serif;color:#694a31;max-width:90%}
 </style>
 </head>
 <body>
@@ -1027,11 +1035,46 @@ const $=id=>document.getElementById(id);
 const book=$("book"),cover=$("cover"),left=$("leftPage"),right=$("rightPage");
 const prev=$("prevBtn"),next=$("nextBtn"),print=$("printBtn");
 let userId="",seen=new Set(),newWriting=new Set(),audioCtx=null;
-let index=-1,turning=false,bookReady=false,days=[],photoUrls=new Map(),startDate=new Date(2026,9,1);
+let index=-1,turning=false,bookReady=false,days=[],bookEntries=[],novemberTreeStage=0,photoUrls=new Map(),startDate=new Date(2026,9,1);
 const MONTHS=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
 const pad=n=>String(n).padStart(2,"0");
 const key=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const text=(tag,cls,value)=>{const el=document.createElement(tag);el.className=cls;el.textContent=value;return el};
+function buildNovemberTreeArt(ownerDocument){
+ const scene=ownerDocument.createElement("div");scene.className="november-tree-art";
+ const folder=new URL("./capsule-assets/november/",location.href).href;
+ const addImage=(filename,alt)=>{
+  const img=ownerDocument.createElement("img");
+  img.src=folder+filename;img.alt=alt;img.loading="eager";img.decoding="async";
+  scene.append(img);
+ };
+ if(novemberTreeStage===30){
+  addImage("tree-final.png","Твоё дерево ноября после 30 ответов");
+ }else{
+  addImage("tree-base.png","Пейзаж и дерево ноября");
+  if(novemberTreeStage>0)
+   addImage("tree-overlay-"+pad(novemberTreeStage)+".png","");
+ }
+ return scene;
+}
+function buildNovemberTreePage(){
+ const page=document.createElement("div");page.className="entry-layout november-tree-page";
+ const flow=document.createElement("div");flow.className="page-flow";
+ flow.append(
+  text("div","november-tree-kicker","Капсула времени"),
+  text("div","november-tree-heading","Моё дерево ноября"),
+  text("div","november-tree-caption",novemberTreeStage+" из 30 дней с ответами")
+ );
+ flow.append(buildNovemberTreeArt(document));
+ flow.append(text("div","november-tree-note","Каждая прожитая и записанная мысль стала частью этого дерева."));
+ page.append(flow);
+ return page;
+}
+function fillNovemberTree(el){
+ const ornament=document.createElement("div");ornament.className="page-ornament";
+ ornament.setAttribute("aria-hidden","true");
+ el.replaceChildren(ornament,buildNovemberTreePage());
+}
 function buildPage(day,number){
  const page=document.createElement("div");page.className="entry-layout";
  const heading=document.createElement("div");heading.className="entry-heading";
@@ -1095,7 +1138,9 @@ function penSound(){
 function revealWriting(){
  if(index<0||window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
  let changed=false;
- for(const [element,n] of (isPortraitPage()?[[left,mobileLeaf]]:[[left,index*2],[right,index*2+1]])){
+ for(const [element,pageNumber] of (isPortraitPage()?[[left,mobileLeaf]]:[[left,index*2],[right,index*2+1]])){
+  const entry=bookEntries[pageNumber-1];
+  const n=entry?.type==="day"?entry.number:-1;
   if(!newWriting.has(n))continue;
   const written=element.querySelector('[data-fresh="1"]');if(!written)continue;
   written.classList.add("writing");newWriting.delete(n);seen.add(n);changed=true;
@@ -1107,7 +1152,10 @@ function revealWriting(){
 }
 function fillSlot(el,pageNumber){
  if(pageNumber===0){fillEpilogue(el);return;}
- const day=days[pageNumber-1];if(day)fill(el,day,pageNumber);else el.replaceChildren();
+ const entry=bookEntries[pageNumber-1];
+ if(entry?.type==="novemberTree"){fillNovemberTree(el);return;}
+ if(entry?.type==="day")fill(el,entry.day,entry.number);
+ else el.replaceChildren();
 }
 function fillEpilogue(el){
  const frame=document.createElement("div");frame.className="epilogue-page";
@@ -1212,11 +1260,16 @@ function show(){
    fitPageContent(left);fitPageContent(right);
   }
  }
+ const pageLabel=pageNumber=>{
+  if(pageNumber===0)return "Пролог";
+  const entry=bookEntries[pageNumber-1];
+  return entry?.type==="novemberTree"?"Итог ноября":entry?.type==="day"?"День "+entry.number:"";
+ };
  $("pageInfo").textContent=closed?"Обложка":
-  single?(mobileLeaf===0?"Пролог":"День "+mobileLeaf+" / 365"):
-  index===0?"Пролог · День 1":"Дни "+(index*2)+"–"+Math.min(365,index*2+1)+" / 365";
+  (single?pageLabel(mobileLeaf):
+   [pageLabel(index*2),pageLabel(index*2+1)].filter(Boolean).join(" · "))+" / 365 дней";
  prev.disabled=turning||closed;
- next.disabled=turning||(single?mobileLeaf>=365:index>=182);
+ next.disabled=turning||(single?mobileLeaf>=bookEntries.length:index>=Math.floor(bookEntries.length/2));
  backCoverBtn.hidden=!closed;backCoverBtn.disabled=turning;
  bookHint.textContent=closed?"Вращай закрытую книгу пальцем · Нажми, чтобы открыть":
   "Листай страницы свайпом влево или вправо";
@@ -1229,9 +1282,9 @@ function show(){
 function move(delta){
  if(!bookReady||turning)return;
  const single=isPortraitPage();book.classList.toggle("mobile-reading",single);
- const targetLeaf=single?Math.max(-1,Math.min(365,mobileLeaf+delta)):null;
+ const targetLeaf=single?Math.max(-1,Math.min(bookEntries.length,mobileLeaf+delta)):null;
  const target=single?(targetLeaf<0?-1:Math.floor(targetLeaf/2)):
-  Math.max(-1,Math.min(182,index+delta));
+  Math.max(-1,Math.min(Math.floor(bookEntries.length/2),index+delta));
  if(single?targetLeaf===mobileLeaf:target===index)return;
  const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
  if(reduced){
@@ -1353,7 +1406,7 @@ function printBook(){
  frame.style.cssText="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none";
  document.body.append(frame);
  const doc=frame.contentDocument;doc.open();
- doc.write("<!doctype html><html lang=\"ru\"><head><meta charset=\"utf-8\"><title>Мои 365 дней в Анти-Шум — A5</title><style>"+"@import url(\"https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=PT+Serif:wght@400;700&family=Caveat:wght@400;500;600&display=swap\");\n@page{size:A5 portrait;margin:0}\n*{box-sizing:border-box}\nhtml,body{margin:0;padding:0}\nbody{font-family:\"PT Serif\",Georgia,serif;color:#46372a}\n.print-page{position:relative;width:148mm;height:210mm;break-after:page;page-break-after:always;overflow:hidden;background:#eddbbd;padding:27mm 22mm 40mm}\n.print-page:last-child{break-after:auto;page-break-after:auto}\n.print-art{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0}\n.print-cover{padding:0}\n.print-flow{position:relative;z-index:1;width:100%;height:auto;overflow:visible;transform-origin:top left}\n.title{text-align:center;font:600 17pt/1.12 \"Cormorant Garamond\",Georgia,serif;color:#6b442b;letter-spacing:.3pt}\n.date{text-align:center;font:600 19pt/1.15 \"Cormorant Garamond\",Georgia,serif;color:#69472d;margin:2mm 0 3mm}\n.rule{width:56%;height:1px;background:#a27e50;margin:0 auto 5mm}\n.question-label,.answer-label{font:700 10.5pt/1.2 \"PT Serif\",Georgia,serif;color:#775335;margin-bottom:1.5mm}\n.question{font:600 12.2pt/1.27 \"PT Serif\",Georgia,serif;margin-bottom:4mm;overflow-wrap:anywhere;hyphens:auto}\n.answer{font:500 16pt/1.13 \"Caveat\",\"Segoe Print\",cursive;white-space:pre-wrap;overflow-wrap:anywhere;hyphens:auto}\n.photo-wrap{display:table;max-width:74%;margin:0 auto 4mm;background:#fbf0dc;padding:2mm 2mm 3mm;border:1px solid #be9c68;box-shadow:1mm 1.5mm 2.5mm #57422845;transform:rotate(-1deg)}\n.photo{display:block;max-width:100%;max-height:39mm;object-fit:contain}\n.empty{text-align:center;color:#927759;font:italic 13pt/1.6 Georgia,serif;padding-top:19mm}\n@media print{.print-page{-webkit-print-color-adjust:exact;print-color-adjust:exact}}"+"</style></head><body></body></html>");
+ doc.write("<!doctype html><html lang=\"ru\"><head><meta charset=\"utf-8\"><title>Мои 365 дней в Анти-Шум — A5</title><style>"+"@import url(\"https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=PT+Serif:wght@400;700&family=Caveat:wght@400;500;600&display=swap\");\n@page{size:A5 portrait;margin:0}\n*{box-sizing:border-box}\nhtml,body{margin:0;padding:0}\nbody{font-family:\"PT Serif\",Georgia,serif;color:#46372a}\n.print-page{position:relative;width:148mm;height:210mm;break-after:page;page-break-after:always;overflow:hidden;background:#eddbbd;padding:27mm 22mm 40mm}\n.print-page:last-child{break-after:auto;page-break-after:auto}\n.print-art{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0}\n.print-cover{padding:0}\n.print-flow{position:relative;z-index:1;width:100%;height:auto;overflow:visible;transform-origin:top left}\n.title{text-align:center;font:600 17pt/1.12 \"Cormorant Garamond\",Georgia,serif;color:#6b442b;letter-spacing:.3pt}\n.date{text-align:center;font:600 19pt/1.15 \"Cormorant Garamond\",Georgia,serif;color:#69472d;margin:2mm 0 3mm}\n.rule{width:56%;height:1px;background:#a27e50;margin:0 auto 5mm}\n.question-label,.answer-label{font:700 10.5pt/1.2 \"PT Serif\",Georgia,serif;color:#775335;margin-bottom:1.5mm}\n.question{font:600 12.2pt/1.27 \"PT Serif\",Georgia,serif;margin-bottom:4mm;overflow-wrap:anywhere;hyphens:auto}\n.answer{font:500 16pt/1.13 \"Caveat\",\"Segoe Print\",cursive;white-space:pre-wrap;overflow-wrap:anywhere;hyphens:auto}\n.photo-wrap{display:table;max-width:74%;margin:0 auto 4mm;background:#fbf0dc;padding:2mm 2mm 3mm;border:1px solid #be9c68;box-shadow:1mm 1.5mm 2.5mm #57422845;transform:rotate(-1deg)}\n.photo{display:block;max-width:100%;max-height:39mm;object-fit:contain}\n.empty{text-align:center;color:#927759;font:italic 13pt/1.6 Georgia,serif;padding-top:19mm}\n.print-november-tree .print-flow{text-align:center}\n.november-print-kicker{font:italic 15pt Georgia,serif;color:#8a6a45;margin:0 auto 4mm}\n.november-print-title{font:600 22pt \"Cormorant Garamond\",Georgia,serif;color:#674427}\n.november-print-count{font:11pt Georgia,serif;color:#896847;margin:3mm auto 6mm}\n.november-tree-art{position:relative;width:100%;max-width:115mm;aspect-ratio:1;margin:0 auto}\n.november-tree-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}\n.november-print-note{font:italic 13pt \"Cormorant Garamond\",Georgia,serif;color:#775536;margin:6mm auto}\n@media print{.print-page{-webkit-print-color-adjust:exact;print-color-adjust:exact}}"+"</style></head><body></body></html>");
  doc.close();
  const bookAsset=name=>new URL("./"+name,location.href).href;
  const addArtwork=(page,asset)=>{
@@ -1365,14 +1418,31 @@ function printBook(){
   addArtwork(page,asset);doc.body.append(page);
  };
  addCover("diary-front.webp");
- days.forEach((day,i)=>{
+ bookEntries.forEach((entry,i)=>{
+  if(entry.type==="novemberTree"){
+   const page=doc.createElement("section");page.className="print-page print-november-tree";
+   addArtwork(page,"diary-clean-right.webp");
+   const flow=doc.createElement("div");flow.className="print-flow";page.append(flow);
+   for(const [className,value] of [
+    ["november-print-kicker","Капсула времени"],
+    ["november-print-title","Моё дерево ноября"],
+    ["november-print-count",novemberTreeStage+" из 30 дней с ответами"]
+   ]){
+    const el=doc.createElement("div");el.className=className;el.textContent=value;flow.append(el);
+   }
+   flow.append(buildNovemberTreeArt(doc));
+   const note=doc.createElement("div");note.className="november-print-note";
+   note.textContent="Каждая прожитая и записанная мысль стала частью этого дерева.";flow.append(note);
+   doc.body.append(page);return;
+  }
+  const day=entry.day;
   const page=doc.createElement("section");page.className="print-page";
   addArtwork(page,i%2===0?"diary-clean-right.webp":"diary-clean-left.webp");
   const flow=doc.createElement("div");flow.className="print-flow";page.append(flow);
   const append=(tag,cls,value)=>{
    const el=doc.createElement(tag);el.className=cls;el.textContent=value;flow.append(el);
   };
-  append("div","title","День "+(i+1)+" из 365");
+  append("div","title","День "+entry.number+" из 365");
   append("div","date",day.date.getDate()+" "+MONTHS[day.date.getMonth()]+" "+day.date.getFullYear());
   append("div","rule","");
   if(day.answer){
@@ -1443,6 +1513,12 @@ try{
   const date=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate()+i);
   const data=answers.get(key(date));days.push({date,answer:data?.answer||null,question:data?.question||"",photo:null});
  }
+ // The November recap is a separate page after November 30, without
+ // altering October pages or the original 365 day numbers.
+ novemberTreeStage=Math.min(30,[...answers.keys()].filter(day=>day.startsWith("2026-11-")).length);
+ bookEntries=days.map((day,i)=>({type:"day",day,number:i+1}));
+ const novemberLastDay=days.findIndex(day=>key(day.date)==="2026-11-30");
+ if(novemberLastDay>=0)bookEntries.splice(novemberLastDay+1,0,{type:"novemberTree"});
  // Resolve only actual user photos; no photos are embedded for other accounts.
  await Promise.all(days.map(async day=>{
   if(!day.answer?.photo_url)return;
