@@ -5,7 +5,7 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     >
 
     <title>Анти-Шум</title>
@@ -17,6 +17,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Анти-Шум">
+<link rel="apple-touch-icon" href="./icon-512.png">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.0/dist/tus.min.js"></script>
@@ -8854,6 +8856,8 @@
  white-space:nowrap;box-shadow:0 3px 13px rgba(0,0,0,.19)
 }
 .project-questions-quick:hover{background:#423020}
+.project-questions-dot{width:9px;height:9px;border-radius:50%;flex:0 0 9px;background:#f1bf71;box-shadow:0 0 0 3px rgba(241,191,113,.15)}
+.project-questions-dot.hidden{display:none!important}
 .project-questions-quick:focus-visible{outline:2px solid #e7c994;outline-offset:3px}
 #appScreen.admin-account #profilePollsArea,
 #appScreen.admin-account #projectQuestionsQuickLink{display:none!important}
@@ -8861,7 +8865,7 @@
  #appScreen .app-global-actions{flex-wrap:wrap}
  .project-questions-quick{font-size:12px;min-height:36px;padding:8px 10px}
 }
-@media(max-width:370px){.project-questions-quick span{display:none}.project-questions-quick{min-width:38px;font-size:20px}}
+@media(max-width:370px){.project-questions-quick span:not(.project-questions-dot){display:none}.project-questions-quick{min-width:38px;font-size:20px}}
 
 </style>
 
@@ -9424,7 +9428,7 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
     <div class="app-global-actions">
         <a id="projectQuestionsQuickLink" href="./polls.html" class="project-questions-quick"
            title="Вопросы проекта — голосования, идеи и результаты"
-           aria-label="Вопросы проекта: голосования, идеи и результаты">✦ <span>Вопросы проекта</span></a>
+           aria-label="Вопросы проекта: голосования, идеи и результаты">✦ <span>Вопросы проекта</span><span id="projectQuestionsUnreadDot" class="project-questions-dot hidden" aria-label="Есть новые вопросы проекта"></span></a>
 
 
         <!-- Уведомления -->
@@ -11689,6 +11693,7 @@ async function loadAdminAnnouncements() {
         const { data, error } = await supabaseClient
             .from("announcements")
             .select("id, body, created_at")
+            .eq("origin", "admin")
             .order("created_at", { ascending: false });
 
         if (error) throw error;
@@ -12809,6 +12814,7 @@ supabaseClient.auth.onAuthStateChange(
             stopAccountSupportRealtime();
 
             setAnnouncementsUnread(false);
+            document.getElementById("projectQuestionsUnreadDot")?.classList.add("hidden");
 
             appInitializedUserId = null;
 
@@ -12824,6 +12830,7 @@ supabaseClient.auth.onAuthStateChange(
             stopAnnouncementsRealtime();
 
             setAnnouncementsUnread(false);
+            document.getElementById("projectQuestionsUnreadDot")?.classList.add("hidden");
 
             appInitializedUserId = null;
 
@@ -12846,6 +12853,7 @@ supabaseClient.auth.onAuthStateChange(
             stopAnnouncementsRealtime();
 
             setAnnouncementsUnread(false);
+            document.getElementById("projectQuestionsUnreadDot")?.classList.add("hidden");
 
             appInitializedUserId = null;
 
@@ -13286,6 +13294,7 @@ appScreen.classList.add("hidden");
     if (!isCurrentUserAdmin) {
         await ensurePersonalWelcome();
         await checkUnreadAnnouncements();
+        await checkUnreadProjectQuestions();
         startAnnouncementsRealtime();
     }
 
@@ -15057,87 +15066,68 @@ const reaction3 =
 }
 
 
-function createReactionButton(
-    text,
-    answerId,
-    reactionType,
-    count,
-    selected
-) {
-
-    const button =
-        document.createElement("button");
-
-    button.type =
-        "button";
-
-    button.className =
-        "reaction-btn";
-
-    if (selected) {
-
-        button.classList.add(
-            "selected", "active"
-        );
+async function refreshReactionButtons(answerId = null) {
+    const allButtons = [...document.querySelectorAll(".reaction-btn[data-answer-id]")];
+    const buttons = answerId
+        ? allButtons.filter(button => button.dataset.answerId === String(answerId))
+        : allButtons;
+    if (!buttons.length || !currentUser) return;
+    const ids = [...new Set(buttons.map(button => button.dataset.answerId))];
+    const {data,error} = await supabaseClient.from("reactions")
+        .select("answer_id,user_id,reaction_type").in("answer_id", ids);
+    if (error) throw error;
+    if (!currentUser) return;
+    const currentId = currentUser.id;
+    const byAnswer = new Map();
+    for (const reaction of data || []) {
+        if (!byAnswer.has(reaction.answer_id)) byAnswer.set(reaction.answer_id, []);
+        byAnswer.get(reaction.answer_id).push(reaction);
     }
+    for (const button of buttons) {
+        if (!button.isConnected) continue;
+        const reactions = byAnswer.get(button.dataset.answerId) || [];
+        const type = button.dataset.reactionType;
+        const count = reactions.filter(item => item.reaction_type === type).length;
+        const selected = reactions.some(item =>
+            item.user_id === currentId && item.reaction_type === type);
+        button.classList.toggle("selected", selected);
+        button.classList.toggle("active", selected);
+        button.textContent = count ? button.dataset.reactionLabel + " " + count
+            : button.dataset.reactionLabel;
+    }
+}
 
-    button.textContent =
-        count > 0
-            ? `${text} ${count}`
-            : text;
+function createReactionButton(text, answerId, reactionType, count, selected) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "reaction-btn";
+    button.dataset.answerId = String(answerId);
+    button.dataset.reactionType = reactionType;
+    button.dataset.reactionLabel = text;
+    if (selected) button.classList.add("selected", "active");
+    button.textContent = count > 0 ? `${text} ${count}` : text;
 
-    button.addEventListener(
-        "click",
-        async function() {
-
-            if (
-                !currentUser ||
-                !answerId ||
-                !reactionType
-            ) {
-                return;
-            }
-
-            const wasSelected = button.classList.contains("selected");
-            const useMotion = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-            button.disabled = true;
-            if (useMotion) {
-                button.classList.add(wasSelected
-                    ? "reaction-releasing"
-                    : "reaction-confirming");
-            }
-
-            try {
-
-                await toggleReaction(
-                    answerId,
-                    reactionType
-                );
-
-                if (useMotion) {
-                    await new Promise(resolve => window.setTimeout(resolve, 410));
-                }
-                await loadFeed();
-
-            } catch (error) {
-
-                console.error(
-                    "Reaction error:",
-                    error
-                );
-
-               showNotice(
-    "Не удалось сохранить реакцию."
-);
-
-} finally {
-
-                button.disabled =
-                    false;
-            }
+    button.addEventListener("click", async function() {
+        if (!currentUser || !answerId || !reactionType || button.disabled) return;
+        const siblings = [...button.parentElement.querySelectorAll(".reaction-btn")];
+        const wasSelected = button.classList.contains("selected");
+        const useMotion = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        siblings.forEach(item => item.disabled = true);
+        if (useMotion)
+            button.classList.add(wasSelected ? "reaction-releasing" : "reaction-confirming");
+        try {
+            await toggleReaction(answerId, reactionType);
+            await refreshReactionButtons(answerId);
+            if (useMotion) await new Promise(resolve => window.setTimeout(resolve, 410));
+        } catch (error) {
+            console.error("Reaction error:", error);
+            showNotice("Не удалось сохранить реакцию.");
+            try { await refreshReactionButtons(answerId); } catch (_) {}
+        } finally {
+            button.classList.remove("reaction-confirming", "reaction-releasing");
+            siblings.forEach(item => item.disabled = false);
         }
-    );
-
+    });
     return button;
 }
 
@@ -20819,7 +20809,7 @@ async function checkUnreadAnnouncements() {
     try {
         const [globalResult, personalResult] = await Promise.all([
             supabaseClient.from("announcements")
-                .select("created_at").order("created_at", { ascending: false }).limit(1),
+                .select("created_at").eq("origin", "admin").order("created_at", { ascending: false }).limit(1),
             supabaseClient.from("personal_announcements")
                 .select("id").eq("user_id", userId).is("read_at", null).limit(1)
         ]);
@@ -20839,6 +20829,30 @@ async function checkUnreadAnnouncements() {
     }
 }
 
+
+
+/* Only published project questions create project-update indicators;
+   announcements remain reserved for messages written by the admin. */
+let projectQuestionsUnreadRequest = 0;
+async function checkUnreadProjectQuestions() {
+    const dot = document.getElementById("projectQuestionsUnreadDot");
+    if (!dot) return;
+    const userId = currentUser?.id;
+    const ticket = ++projectQuestionsUnreadRequest;
+    if (!userId || isCurrentUserAdmin) { dot.classList.add("hidden"); return; }
+    try {
+        const {data,error} = await supabaseClient.from("project_polls")
+            .select("published_at")
+            .in("status",["published","closed"])
+            .not("published_at","is",null)
+            .order("published_at",{ascending:false}).limit(1);
+        if (error) throw error;
+        if (currentUser?.id !== userId || ticket !== projectQuestionsUnreadRequest) return;
+        const latest = data?.[0]?.published_at;
+        const seen = localStorage.getItem("anti_shum_project_updates_seen_" + userId);
+        dot.classList.toggle("hidden", !latest || Boolean(seen && latest <= seen));
+    } catch (error) { console.warn("Project updates unread check:",error); }
+}
 
 /* =========================================================
    SHARED REALTIME FOR ACTIVE SECTIONS
@@ -20889,7 +20903,10 @@ function stopAccountSupportRealtime() {
 function refreshVisibleSiteState() {
     if (!currentUser || document.hidden) return;
     checkSupportNotifications();
-    if (!isCurrentUserAdmin) checkUnreadAnnouncements();
+    if (!isCurrentUserAdmin) {
+        checkUnreadAnnouncements();
+        checkUnreadProjectQuestions();
+    }
     if (!feedView.classList.contains("hidden"))
         scheduleSiteRefresh("feed", loadFeed, 450);
     if (!profileView.classList.contains("hidden"))
@@ -20922,11 +20939,17 @@ function startSiteRealtime() {
     const handle = (table, payload) => {
         if (currentUser?.id !== userId) return;
         const visibleFeed = !feedView.classList.contains("hidden");
-        if ((table === "answers" || table === "reactions") && visibleFeed) {
+        if (table === "answers" && visibleFeed) {
             const id = payload.new?.question_id || payload.old?.question_id;
-            if (table === "reactions" || !id || id === currentQuestionId)
+            if (!id || id === currentQuestionId)
                 scheduleSiteRefresh("feed", loadFeed, 650);
         }
+        if (table === "reactions" && visibleFeed) {
+            const id = payload.new?.answer_id || payload.old?.answer_id || null;
+            scheduleSiteRefresh("reactions", () => refreshReactionButtons(id), 160);
+        }
+        if (table === "project_polls" && !isCurrentUserAdmin)
+            scheduleSiteRefresh("project-updates",checkUnreadProjectQuestions,180);
         if (table === "answers") {
             const owner = payload.new?.user_id || payload.old?.user_id;
             if (owner === userId) {
@@ -20963,7 +20986,7 @@ function startSiteRealtime() {
             document.dispatchEvent(new CustomEvent("anti-shum:realtime", {detail:{table}}));
     };
 
-    const tables = ["answers", "reactions", "reports", "questions", "users", "block_appeals"];
+    const tables = ["answers", "reactions", "reports", "questions", "users", "block_appeals", "project_polls"];
     if (isCurrentUserAdmin) tables.push("announcements");
     for (const table of tables) {
         channel.on("postgres_changes",
@@ -21053,6 +21076,7 @@ async function openAnnouncementsModal() {
         const [globalResult, personalResult] = await Promise.all([
             supabaseClient.from("announcements")
                 .select("id, title, body, created_at")
+                .eq("origin", "admin")
                 .order("created_at", { ascending: false }),
             supabaseClient.from("personal_announcements")
                 .select("id, title, body, created_at, read_at")
