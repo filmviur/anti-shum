@@ -8891,6 +8891,37 @@
 }
 @media(max-width:370px){.project-questions-quick span:not(.project-questions-dot){display:none}.project-questions-quick{min-width:38px;font-size:20px}}
 
+
+/* Offline pause in the journal's visual language */
+.network-offline-overlay{
+    position:fixed;inset:0;z-index:10050;display:flex;align-items:center;justify-content:center;
+    background:rgba(10,9,9,.89);backdrop-filter:blur(8px);padding:22px;
+}
+.network-offline-card{
+    width:min(430px,100%);padding:32px 25px;text-align:center;
+    border:1px solid rgba(201,168,106,.45);border-radius:8px;
+    background:linear-gradient(148deg,#3c2b1c,#17120e 82%);
+    box-shadow:0 20px 65px rgba(0,0,0,.6);
+}
+.network-offline-ornament{font:32px Georgia,serif;color:#d4b47b;margin-bottom:8px}
+.network-offline-card h2{font:600 32px/1.15 "Cormorant Garamond",Georgia,serif;color:#e6c88f;margin:0 0 16px}
+.network-offline-card p{font:15px/1.65 Georgia,serif;color:#cfbba0;margin:0 0 19px}
+.network-offline-card button{
+    min-height:44px;width:100%;margin:5px 0;padding:10px 18px;
+    border:1px solid rgba(217,178,111,.48);border-radius:5px;
+    background:#493320;color:#f1d5a0;font-weight:600;
+}
+.network-offline-card button.secondary{background:transparent;color:#c1a67c}
+.network-offline-badge{
+    position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:12px;z-index:10050;
+    padding:11px 15px;border:1px solid rgba(219,175,103,.55);border-radius:22px;
+    color:#efcf9b;background:#322419;box-shadow:0 8px 25px rgba(0,0,0,.4);
+    font:600 13px Georgia,serif;
+}
+.answer-draft-status{
+    margin:7px 0 12px;color:#bda579;font:13px/1.5 Georgia,serif;
+}
+@media(max-width:560px){.network-offline-card{padding:28px 19px}.network-offline-card h2{font-size:28px}}
 </style>
 
 <style id="diary-motion-system">
@@ -9450,6 +9481,22 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 
 
 
+<!-- При потере связи мысль остаётся на устройстве. -->
+<div id="networkOfflineOverlay" class="network-offline-overlay hidden"
+     role="dialog" aria-modal="true" aria-labelledby="networkOfflineTitle">
+    <div class="network-offline-card">
+        <div class="network-offline-ornament" aria-hidden="true">✦</div>
+        <h2 id="networkOfflineTitle">Тишина без связи</h2>
+        <p>Интернет ненадолго исчез. Если ты уже пишешь ответ, текст сохранится на этом устройстве.</p>
+        <p>Когда соединение вернётся, «Анти-Шум» продолжит работу. Отправить мысль можно только при наличии сети.</p>
+        <button id="offlineTryAgainBtn" type="button">Проверить соединение</button>
+        <button id="offlineKeepWritingBtn" class="secondary" type="button">Продолжить писать</button>
+    </div>
+</div>
+<button id="networkOfflineBadge" class="network-offline-badge hidden" type="button">
+    ✦ Нет соединения · Подробнее
+</button>
+
 <!-- MAIN APP -->
 
 <main id="appScreen" class="hidden">
@@ -9624,6 +9671,7 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
                 maxlength="500"
                 placeholder="Изложи свою мысль..."
             ></textarea>
+            <div id="answerDraftStatus" class="answer-draft-status hidden" role="status" aria-live="polite"></div>
 
             <button
                 id="sendAnswerBtn"
@@ -13732,6 +13780,9 @@ async function loadTodayQuestionAndState() {
         currentAnswer =
             ownAnswer || null;
 
+        if (ownAnswer) clearAnswerDraft();
+        else restoreAnswerDraft();
+
         /*
             Администратор:
             без ограничения времени.
@@ -13842,9 +13893,67 @@ async function getOwnAnswerForQuestion(
    ANSWER FORM
 ========================================================= */
 
+// Текстовый черновик сохраняется только на устройстве владельца.
+const answerDraftStatus = document.getElementById("answerDraftStatus");
+const ANSWER_DRAFT_MAX_AGE_MS = 48 * 60 * 60 * 1000;
+function getAnswerDraftKey() {
+    if (!currentUser?.id || !currentQuestionId) return null;
+    return "anti_shum_answer_draft_v1_" + currentUser.id + "_" + currentQuestionId;
+}
+function updateAnswerDraftStatus(message) {
+    answerDraftStatus.textContent = message || "";
+    answerDraftStatus.classList.toggle("hidden", !message);
+}
+function saveAnswerDraft() {
+    const key = getAnswerDraftKey();
+    if (!key) return;
+    const text = answerInput.value;
+    try {
+        if (text.trim()) {
+            localStorage.setItem(key, JSON.stringify({ text, updatedAt: Date.now() }));
+            updateAnswerDraftStatus(navigator.onLine
+                ? "Черновик сохранён на этом устройстве."
+                : "Нет интернета · Черновик сохранён на устройстве.");
+        } else {
+            localStorage.removeItem(key);
+            updateAnswerDraftStatus("");
+        }
+    } catch (error) {
+        console.warn("Не удалось сохранить черновик:", error);
+        updateAnswerDraftStatus("Не удалось сохранить черновик на устройстве.");
+    }
+}
+function restoreAnswerDraft() {
+    const key = getAnswerDraftKey();
+    if (!key) return;
+    try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return;
+        const draft = JSON.parse(raw);
+        if (!draft || typeof draft.text !== "string" ||
+            !Number.isFinite(draft.updatedAt) ||
+            Date.now() - draft.updatedAt > ANSWER_DRAFT_MAX_AGE_MS) {
+            localStorage.removeItem(key);
+            return;
+        }
+        answerInput.value = draft.text.slice(0, MAX_ANSWER_LENGTH);
+        answerCounter.textContent = answerInput.value.length + " / " + MAX_ANSWER_LENGTH;
+        updateSendButton();
+        updateAnswerDraftStatus("Твой черновик восстановлен с этого устройства.");
+    } catch (error) {
+        console.warn("Не удалось восстановить черновик:", error);
+    }
+}
+function clearAnswerDraft() {
+    const key = getAnswerDraftKey();
+    try { if (key) localStorage.removeItem(key); } catch (_) {}
+    updateAnswerDraftStatus("");
+}
+
 function resetAnswerForm() {
 
     answerInput.value = "";
+    updateAnswerDraftStatus("");
 
     answerCounter.textContent =
         "0 / 500";
@@ -13886,6 +13995,7 @@ answerInput.addEventListener(
             `${length} / ${MAX_ANSWER_LENGTH}`;
 
         updateSendButton();
+        saveAnswerDraft();
     }
 );
 
@@ -14234,6 +14344,11 @@ if (
 
 const text =
     answerInput.value.trim();
+    if (!navigator.onLine) {
+        saveAnswerDraft();
+        showNotice("Нет соединения. Твоя мысль сохранена на устройстве. Попробуй отправить её после восстановления сети.");
+        return;
+    }
     const hasPhoto =
         selectedPhotoFile &&
         selectedPhotoConfirmed;
@@ -14270,6 +14385,7 @@ try {
 
             currentAnswer =
                 existingAnswer;
+            clearAnswerDraft();
 
             const endAt = getTodaySessionEnd();
 
@@ -14357,6 +14473,7 @@ try {
 
         currentAnswer =
             data;
+        clearAnswerDraft();
 
 
         /*
@@ -21299,6 +21416,50 @@ document.addEventListener(
     }
 );
 
+
+/* =========================================================
+   OFFLINE / ONLINE
+========================================================= */
+
+const networkOfflineOverlay = document.getElementById("networkOfflineOverlay");
+const networkOfflineBadge = document.getElementById("networkOfflineBadge");
+const offlineTryAgainBtn = document.getElementById("offlineTryAgainBtn");
+const offlineKeepWritingBtn = document.getElementById("offlineKeepWritingBtn");
+let offlineOverlayMinimized = false;
+
+function syncNetworkStatus() {
+    const offline = !navigator.onLine;
+    networkOfflineOverlay.classList.toggle("hidden", !offline || offlineOverlayMinimized);
+    networkOfflineBadge.classList.toggle("hidden", !offline || !offlineOverlayMinimized);
+    if (offline) saveAnswerDraft();
+}
+window.addEventListener("offline", function() {
+    offlineOverlayMinimized = false;
+    syncNetworkStatus();
+});
+window.addEventListener("online", function() {
+    offlineOverlayMinimized = false;
+    syncNetworkStatus();
+    // Существующий online-слушатель обновляет видимые разделы.
+});
+offlineKeepWritingBtn.addEventListener("click", function() {
+    offlineOverlayMinimized = true;
+    syncNetworkStatus();
+});
+networkOfflineBadge.addEventListener("click", function() {
+    offlineOverlayMinimized = false;
+    syncNetworkStatus();
+});
+offlineTryAgainBtn.addEventListener("click", function() {
+    if (navigator.onLine) {
+        offlineOverlayMinimized = false;
+        syncNetworkStatus();
+        refreshVisibleSiteState();
+    } else {
+        saveAnswerDraft();
+    }
+});
+syncNetworkStatus();
 
 /* =========================================================
    PWA
