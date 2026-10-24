@@ -21997,10 +21997,14 @@ restoreSession();
             asset.src = src;
         });
         const storageKey = "antiShumCapsuleSeen:" + currentUser.id + ":" + key;
-        let previousStage = stage;
+        // On the first visit reveal the newest leaf instead of showing the
+        // completed stage instantly. Later visits animate from the last seen one.
+        let previousStage = Math.max(0, stage - 1);
         try {
             const saved = localStorage.getItem(storageKey);
-            if (saved !== null) previousStage = Math.max(0, Math.min(stage, Number(saved) || 0));
+            if (saved !== null && Number.isFinite(Number(saved))) {
+                previousStage = Math.max(0, Math.min(stage, Math.floor(Number(saved))));
+            }
         } catch (_) {}
         const shouldAnimate = previousStage < stage &&
             !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -22039,7 +22043,13 @@ restoreSession();
                     }, 2800);
                 }
             }
-            try { localStorage.setItem(storageKey, String(stage)); } catch (_) {}
+            // A visit counts as seen only once its animation has finished.
+            const rememberGrowth = () => {
+                if (version !== imageVersion || activeTreeMonth !== key || overlay.classList.contains("hidden")) return;
+                try { localStorage.setItem(storageKey, String(stage)); } catch (_) {}
+            };
+            if (shouldAnimate) setTimeout(rememberGrowth, 2800);
+            else rememberGrowth();
             displayedCount = stage;
         } catch (err) {
             if (version !== imageVersion || activeTreeMonth !== key) return;
