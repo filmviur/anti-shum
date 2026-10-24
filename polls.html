@@ -321,50 +321,88 @@ function render(){
  }
  notifyEmbeddedHeight();
 }
+// Черновики голосований и идей переживают обновления Realtime и потерю сети.
+function projectDraftKey(p,kind){
+ if(!user?.id||!p?.id)return null;
+ return "anti_shum_project_draft_v1_"+user.id+"_"+p.id+"_"+kind;
+}
+function readProjectDraft(p,kind){
+ const key=projectDraftKey(p,kind);
+ if(!key)return null;
+ try{
+  const raw=localStorage.getItem(key);
+  if(!raw)return null;
+  const data=JSON.parse(raw);
+  if(!data||!Number.isFinite(data.updatedAt)||Date.now()-data.updatedAt>7*86400000){
+   localStorage.removeItem(key);return null;
+  }
+  return data;
+ }catch(e){console.warn("Draft restore:",e);return null}
+}
+function writeProjectDraft(p,kind,data){
+ const key=projectDraftKey(p,kind);
+ if(!key)return;
+ try{localStorage.setItem(key,JSON.stringify({...data,updatedAt:Date.now()}))}
+ catch(e){console.warn("Draft save:",e)}
+}
+function clearProjectDraft(p,kind){
+ const key=projectDraftKey(p,kind);
+ try{if(key)localStorage.removeItem(key)}catch(_){}
+}
 function renderVote(p,card){
  const myVote=votes.find(v=>v.poll_id===p.id&&v.user_id===user.id);
  if(myVote){
+  clearProjectDraft(p,"vote");
   const done=completionCard("Вы проголосовали");
   done.appendChild(node("p","muted","Ваш выбор: "+labelChoice(myVote.choice)+"."));
   if(myVote.choice==="other"&&myVote.other_text)done.appendChild(node("p","muted","Ваше предложение: "+myVote.other_text));
-  card.appendChild(done);
-  return;
+  card.appendChild(done);return;
  }
- if(!isOpen(p)){
-  card.appendChild(node("p","muted","Голосование завершено."));return;
- }
+ if(!isOpen(p)){card.appendChild(node("p","muted","Голосование завершено."));return}
  const choices=node("div","choice-row"),otherBox=node("div","other-entry hidden");
  const otherLabel=node("label","","Твой вариант ответа");
  const otherText=document.createElement("textarea");
  otherText.maxLength=500;otherText.rows=3;otherText.placeholder="Напиши своё предложение (5–500 символов)";
  otherBox.append(otherLabel,otherText);
- let selected=null;
+ const old=readProjectDraft(p,"vote");
+ let selected=["yes","no","other"].includes(old?.selected)?old.selected:null;
+ if(typeof old?.text==="string")otherText.value=old.text.slice(0,500);
+ function saveVoteDraft(){
+  if(!selected&&!otherText.value.trim()){clearProjectDraft(p,"vote");return}
+  writeProjectDraft(p,"vote",{selected,text:otherText.value});
+ }
  ["yes","no","other"].forEach(val=>{
   const label=node("label","choice");
   const input=document.createElement("input");
   input.type="radio";input.name="vote-"+p.id;input.value=val;
+  if(selected===val)input.checked=true;
   input.addEventListener("change",()=>{
    selected=val;otherBox.classList.toggle("hidden",val!=="other");
+   saveVoteDraft();
    if(val==="other")otherText.focus();
   });
   label.append(input,document.createTextNode(labelChoice(val)));
   choices.appendChild(label);
  });
+ otherBox.classList.toggle("hidden",selected!=="other");
+ otherText.addEventListener("input",saveVoteDraft);
  card.append(choices,otherBox);
- card.appendChild(node("p","muted","Ваш голос можно отправить только один раз. Таймера нет."));
+ card.appendChild(node("p","muted","Ваш голос можно отправить только один раз. Таймера нет. Черновик сохраняется на устройстве."));
  const send=smallButton("Отдать голос");
  send.addEventListener("click",async()=>{
   if(!selected){message("Выбери ДА, НЕТ или ДРУГОЕ.",true);return}
   const other=otherText.value.trim();
   if(selected==="other"&&(other.length<5||other.length>500)){message("Напиши свой вариант ответа — от 5 до 500 символов.",true);otherText.focus();return}
+  if(!navigator.onLine){message("Нет соединения. Твой выбор сохранён на устройстве.",true);return}
   send.disabled=true;
   const r=await supabaseClient.from("project_poll_votes").insert({
    poll_id:p.id,user_id:user.id,choice:selected,other_text:selected==="other"?other:null
   });
   if(r.error){
-   if(r.error.code==="23505"){await load();message("Ваш голос уже был учтён.");return}
+   if(r.error.code==="23505"){clearProjectDraft(p,"vote");await load();message("Ваш голос уже был учтён.");return}
    message(r.error.message,true);send.disabled=false;return;
   }
+  clearProjectDraft(p,"vote");
   votes.push({poll_id:p.id,user_id:user.id,choice:selected,other_text:selected==="other"?other:null});
   render();
   await load();message("Вы проголосовали. Спасибо за ваш ответ!");
@@ -374,6 +412,7 @@ function renderVote(p,card){
 function renderIdea(p,card){
  const myIdea=ideas.find(i=>i.poll_id===p.id&&i.user_id===user.id);
  if(myIdea){
+  clearProjectDraft(p,"idea");
   const done=completionCard("Вы ответили");
   done.appendChild(node("p","muted","Ваш ответ: "+myIdea.idea_text));
   done.appendChild(node("p","muted","Ответ виден только вам и администрации."));
@@ -385,17 +424,26 @@ function renderIdea(p,card){
  area.appendChild(node("p","muted","Напиши мысль своими словами — только администрация прочитает её. Один ответ на вопрос, без таймера. Изменить его после отправки нельзя."));
  const text=document.createElement("textarea");
  text.maxLength=500;text.rows=4;text.placeholder="Я предлагаю… (5–500 символов)";
+ const saved=readProjectDraft(p,"idea");
+ if(typeof saved?.text==="string")text.value=saved.text.slice(0,500);
+ text.addEventListener("input",()=>{
+  if(text.value.trim())writeProjectDraft(p,"idea",{text:text.value});
+  else clearProjectDraft(p,"idea");
+ });
  area.appendChild(text);
+ area.appendChild(node("p","muted","Черновик сохраняется только на этом устройстве."));
  const send=smallButton("Отправить идею");
  send.addEventListener("click",async()=>{
   const value=text.value.trim();
   if(value.length<5){message("Напиши хотя бы 5 символов.",true);text.focus();return}
+  if(!navigator.onLine){message("Нет соединения. Твоя идея сохранена на устройстве.",true);return}
   send.disabled=true;
   const r=await supabaseClient.from("project_poll_ideas").insert({poll_id:p.id,user_id:user.id,idea_text:value});
   if(r.error){
-   if(r.error.code==="23505"){await load();message("Ваш ответ уже был сохранён.");return}
+   if(r.error.code==="23505"){clearProjectDraft(p,"idea");await load();message("Ваш ответ уже был сохранён.");return}
    message(r.error.message,true);send.disabled=false;return;
   }
+  clearProjectDraft(p,"idea");
   ideas.push({poll_id:p.id,user_id:user.id,idea_text:value});
   render();
   await load();message("Вы ответили. Спасибо за ваш ответ!");
