@@ -56,7 +56,8 @@ self.addEventListener("push", event => {
     if (
         data.type === "announcement" &&
         typeof data.body === "string" &&
-        data.body.startsWith("Новый вопрос в разделе «Вопросы проекта»:")
+        (data.body.startsWith("Новый вопрос в разделе «Вопросы проекта»:") ||
+        ["Новое голосование", "Нужны ваши идеи", "Итоги от «Анти-Шума»"].includes(data.title))
     ) {
         data.url = "./polls.html";
     }
