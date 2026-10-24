@@ -71,6 +71,14 @@ footer{text-align:center;color:#9d8e79;font-size:13px;margin:30px 0}
 .global-rules-link:hover{background:#392a1c}
 .global-rules-link:focus-visible{outline:2px solid #f0cb87;outline-offset:3px}
 
+
+/* Embedded admin workspace inside the main admin panel */
+body.admin-embedded{min-height:0;background:transparent}
+body.admin-embedded header,body.admin-embedded .hero,body.admin-embedded footer,body.admin-embedded .global-rules-link{display:none!important}
+body.admin-embedded main{margin:0 auto;padding:0 3px 18px;max-width:none}
+body.admin-embedded .admin-form{margin:4px 0 19px}
+body.admin-embedded .toolbar{margin:19px 0 12px}
+body.admin-embedded .poll-card{margin:12px 0}
 </style>
 </head>
 <body>
@@ -102,6 +110,8 @@ footer{text-align:center;color:#9d8e79;font-size:13px;margin:30px 0}
 </main>
 <script>
 "use strict";
+const ADMIN_EMBEDDED = new URLSearchParams(window.location.search).get("admin") === "1";
+if(ADMIN_EMBEDDED)document.body.classList.add("admin-embedded");
 const supabaseClient = window.supabase.createClient(
  "https://mkyendzqoohqcwnycuys.supabase.co",
  "sb_publishable_wscrhaPifbezRTe4rWs-Wg_j0kGqktT",
@@ -139,6 +149,7 @@ async function init() {
   const r=await supabaseClient.rpc("is_anti_shum_admin");
   if(r.error)throw r.error;
   admin=r.data===true;
+  if(ADMIN_EMBEDDED&&!admin){message("Этот раздел доступен только администратору.",true);return}
   app.classList.remove("hidden");
   adminPanel.classList.toggle("hidden",!admin);
   await load();
@@ -172,6 +183,7 @@ function render(){
   card.appendChild(meta);
   card.appendChild(node("h3","",p.title));
   if(p.details)card.appendChild(node("p","",p.details));
+  if(ADMIN_EMBEDDED){if(admin)renderAdminControls(p,card);pollList.appendChild(card);continue}
   const myVote=votes.find(v=>v.poll_id===p.id&&v.user_id===user.id);
   if(myVote){
    card.appendChild(node("div","message success","Ваш голос учтён: "+labelChoice(myVote.choice)+". Спасибо, что помогаете развивать проект."));
@@ -299,6 +311,12 @@ async function moderateIdea(id,newStatus){
 $("createPollForm").addEventListener("submit",e=>{e.preventDefault();createPoll("published")});
 $("saveDraftBtn").addEventListener("click",()=>createPoll("draft"));
 $("refreshBtn").addEventListener("click",load);
+if(ADMIN_EMBEDDED && window.parent!==window){
+ const notifyHeight=()=>window.parent.postMessage({type:"anti-shum-admin-polls-height",height:Math.ceil(document.documentElement.scrollHeight)},window.location.origin);
+ if("ResizeObserver" in window)new ResizeObserver(notifyHeight).observe(document.querySelector("main"));
+ window.addEventListener("load",notifyHeight);
+ setTimeout(notifyHeight,450);
+}
 init();
 </script>
 </body></html>
