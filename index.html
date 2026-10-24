@@ -21006,6 +21006,9 @@ document.addEventListener("visibilitychange", () => {
     if (!document.hidden) refreshVisibleSiteState();
 });
 window.addEventListener("online", refreshVisibleSiteState);
+window.addEventListener("pageshow", event => {
+    if (event.persisted) refreshVisibleSiteState();
+});
 
 
 /* =========================================================
