@@ -8722,6 +8722,38 @@
  .answer-save-scene, .answer-save-paper, .answer-save-quill{animation:none!important;transition:none!important}
 }
 
+
+/* ADMIN WORKSPACES · Antique paper style */
+.ash-help{margin:0 0 19px;color:#b1a08a;font:14px/1.7 Georgia,serif}
+.ash-toolbar,.ash-tabs{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:13px 0 17px}
+.ash-toolbar input,.ash-toolbar select,.ash-card input[type=number],.ash-card textarea,.ash-inline textarea{background:#170f0b;border:1px solid rgba(201,168,106,.37);border-radius:8px;color:#e4cfb1;padding:10px 12px;box-sizing:border-box;font:15px/1.5 Georgia,serif;min-height:42px;max-width:100%}
+.ash-toolbar input{flex:1 1 220px}.ash-toolbar select{flex:0 1 170px}
+.ash-btn{min-height:40px;padding:9px 14px;border:1px solid rgba(201,168,106,.43);border-radius:8px;color:#e0c393;background:linear-gradient(140deg,rgba(87,65,42,.45),rgba(33,24,18,.76));cursor:pointer;font:14px Georgia,serif}
+.ash-btn:hover,.ash-btn.active{background:rgba(151,108,57,.27);border-color:#d1a769;color:#f4d9a2}
+.ash-btn:disabled{opacity:.46;cursor:wait}.ash-btn.danger{border-color:rgba(186,91,74,.5);color:#e0a69b}.ash-btn.quiet{background:transparent;color:#b5a68e}
+.ash-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;align-items:start}
+.ash-card,.ash-user,.ash-stat{border:1px solid rgba(201,168,106,.2);border-radius:12px;background:linear-gradient(145deg,rgba(76,54,33,.25),rgba(17,12,9,.6));padding:20px;min-width:0}
+.ash-card h3{margin:0 0 17px;color:#d9b984;font:600 24px "Cormorant Garamond",Georgia,serif}
+.ash-label{display:block;color:#cbb494;font:14px Georgia,serif;margin:13px 0 6px}
+.ash-card input[type=number]{width:130px;display:block}
+.ash-card textarea{width:100%;min-height:135px;resize:vertical}
+.ash-check{display:flex;align-items:center;gap:9px;margin:12px 0;color:#c8b398;font:14px Georgia,serif}.ash-check input{accent-color:#c9a36e}
+.ash-status{margin:12px 0;color:#bca98d;font:14px/1.6 Georgia,serif;overflow-wrap:anywhere}.ash-status.error{color:#e1a599}
+.ash-muted{margin:7px 0;color:#988b78;font:13px/1.55 Georgia,serif}
+.ash-list{display:grid;gap:10px}.ash-days{max-height:570px;overflow:auto}
+.ash-day{background:rgba(19,14,11,.65);border:1px solid rgba(201,168,106,.2);border-radius:8px;padding:11px;text-align:left;color:#b7aa94;font:14px/1.45 Georgia,serif;cursor:pointer}
+.ash-day strong{display:block;color:#d6b983}.ash-day.active{border-color:#d4a760;background:rgba(151,107,53,.17)}
+.ash-polls-frame{display:block;width:100%;min-height:690px;height:840px;border:0;background:transparent}
+.ash-user{display:flex;align-items:start;flex-wrap:wrap;gap:12px;justify-content:space-between}
+.ash-user-main{flex:1 1 270px;min-width:0}.ash-user-name{color:#e0c494;font:600 23px "Cormorant Garamond",Georgia,serif;overflow-wrap:anywhere}.ash-user-email{font:13px Georgia,serif;color:#aa9a87;overflow-wrap:anywhere}
+.ash-tags,.ash-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.ash-actions{margin:0}
+.ash-tag{font:12px Georgia,serif;border:1px solid rgba(201,168,106,.29);border-radius:20px;padding:3px 9px;color:#c9ad80}.ash-tag.danger{border-color:rgba(177,95,80,.55);color:#dfa497}
+.ash-inline{flex:1 1 100%;border-top:1px solid rgba(201,168,106,.18);padding-top:12px;display:grid;gap:9px}.ash-inline textarea{min-height:83px;width:100%}
+.ash-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+.ash-stat{text-align:center;padding:20px 14px}.ash-stat-number{color:#e9c994;font:600 37px "Cormorant Garamond",Georgia,serif}.ash-stat-label{font:14px/1.45 Georgia,serif;color:#ac9b81;margin-top:9px}
+@media(max-width:730px){.ash-columns{grid-template-columns:1fr}.ash-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.ash-card{padding:17px}.ash-toolbar input{flex-basis:100%}}
+@media(max-width:365px){.ash-stats{grid-template-columns:1fr}}
+
 </style>
 
 <style id="diary-motion-system">
@@ -10172,29 +10204,19 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 </div>
 
 
-<!-- =========================================================
-     USERS
-========================================================= -->
-
-        <div
-            id="adminUsersSection"
-            class="admin-section hidden"
-            data-admin-content="users"
-        >
-
-            <div class="admin-section-title">
-                ПОЛЬЗОВАТЕЛИ
-            </div>
-
-            <div class="admin-empty">
-                Здесь будет список пользователей
-                и управление их статусом.
-            </div>
-
-        </div>
-
-
-        <!-- SUPPORT -->
+<!-- USERS -->
+<div id="adminUsersSection" class="admin-section hidden" data-admin-content="users">
+ <div class="admin-section-title">ПОЛЬЗОВАТЕЛИ</div>
+ <p class="ash-help">Управление доступом участников. Для блокировки нужно указать причину и подтвердить действие. Роли администраторов не редактируются.</p>
+ <div class="ash-toolbar">
+  <input id="ashUserSearch" type="search" placeholder="Поиск по имени или почте">
+  <select id="ashUserFilter"><option value="all">Все</option><option value="active">Активные</option><option value="blocked">Заблокированные</option></select>
+  <button id="ashReloadUsers" class="ash-btn" type="button">↻ Обновить</button>
+ </div>
+ <p id="ashUserStatus" class="ash-status" role="status">Данные будут загружены при открытии.</p>
+ <div id="ashUsers" class="ash-list"></div>
+</div>
+<!-- SUPPORT -->
 <div
     id="adminSupportSection"
     class="admin-section hidden"
@@ -10304,43 +10326,44 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 
 
         <!-- QUESTIONS -->
-        <div
-            id="adminQuestionsSection"
-            class="admin-section hidden"
-            data-admin-content="questions"
-        >
-
-            <div class="admin-section-title">
-                ВОПРОСЫ
-            </div>
-
-            <div class="admin-empty">
-                Здесь будет управление
-                вопросами проекта.
-            </div>
-
-        </div>
-
-
-        <!-- STATISTICS -->
-        <div
-            id="adminStatsSection"
-            class="admin-section hidden"
-            data-admin-content="stats"
-        >
-
-            <div class="admin-section-title">
-                СТАТИСТИКА
-            </div>
-
-            <div class="admin-empty">
-                Здесь появится статистика
-                проекта.
-            </div>
-
-               </div>
-
-        <!-- ANNOUNCEMENTS -->
+<div id="adminQuestionsSection" class="admin-section hidden" data-admin-content="questions">
+ <div class="admin-section-title">ВОПРОСЫ</div>
+ <div class="ash-tabs">
+  <button id="ashDailyTab" class="ash-btn active" type="button">Вопросы дня</button>
+  <button id="ashPollsTab" class="ash-btn" type="button">Вопросы проекта · Голосования</button>
+ </div>
+ <div id="ashDailyPane">
+  <p class="ash-help">Каждый вопрос открывается в 20:00 по Киеву. Подготовь вопросы для дней 1–365. После появления первого ответа редактирование вопроса блокируется, чтобы сохранить историю книги.</p>
+  <div class="ash-columns">
+   <form id="ashDailyForm" class="ash-card">
+    <h3>Редактор вопроса дня</h3>
+    <label class="ash-label" for="ashDay">День проекта</label><input id="ashDay" type="number" min="1" max="365" value="1" required>
+    <label class="ash-label" for="ashText">Вопрос</label><textarea id="ashText" maxlength="500" rows="5" placeholder="Напиши новый вопрос..." required></textarea>
+    <p id="ashLength" class="ash-muted">0 / 500</p>
+    <label class="ash-check"><input id="ashPhoto" type="checkbox"> Разрешить фото</label>
+    <label class="ash-check"><input id="ashRealtime" type="checkbox"> Фото нужно сделать во время ответа</label>
+    <p id="ashAnswerCount" class="ash-muted"></p>
+    <button id="ashSaveDay" class="ash-btn" type="submit">Сохранить вопрос</button>
+    <p id="ashDailyStatus" class="ash-status" role="status"></p>
+   </form>
+   <div class="ash-card"><h3>Подготовленные дни</h3><p class="ash-muted">Нажми на день, чтобы открыть вопрос в редакторе.</p><div id="ashDays" class="ash-list ash-days"></div></div>
+  </div>
+ </div>
+ <div id="ashPollsPane" class="hidden">
+  <p class="ash-help">Здесь можно создавать голосования с ответами ДА / НЕТ / ДРУГОЕ, публиковать их с уведомлением, смотреть результаты и принимать предложения участников.</p>
+  <iframe id="ashPollsFrame" class="ash-polls-frame" title="Управление голосованиями" loading="lazy" referrerpolicy="same-origin"></iframe>
+  <p class="ash-muted"><a href="./polls.html" target="_blank" rel="noopener">Посмотреть страницу голосований для пользователей ↗</a></p>
+ </div>
+</div>
+<!-- STATISTICS -->
+<div id="adminStatsSection" class="admin-section hidden" data-admin-content="stats">
+ <div class="admin-section-title">СТАТИСТИКА</div>
+ <p class="ash-help">Показатели из базы данных, доступные только администрации. Обновляются при открытии раздела.</p>
+ <div class="ash-toolbar"><button id="ashReloadStats" class="ash-btn" type="button">↻ Обновить</button><span id="ashStatTime" class="ash-muted"></span></div>
+ <p id="ashStatsStatus" class="ash-status" role="status">Статистика ещё не загружена.</p>
+ <div id="ashStats" class="ash-stats"></div>
+</div>
+<!-- ANNOUNCEMENTS -->
         <div
             id="adminAnnouncementsSection"
             class="admin-section hidden"
@@ -22087,5 +22110,199 @@ restoreSession();
  });
 })();
 </script>
+
+<script id="anti-shum-admin-workspaces">
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const mk=(tag,cls,text)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=String(text);return el};
+const status=(id,text,isError=false)=>{const el=$(id);el.textContent=text;el.classList.toggle("error",isError)};
+const isAdmin=async()=>Boolean(currentUser)&&await verifyAdminFeedAccess();
+const fmtDate=d=>d?new Date(d).toLocaleDateString("ru-RU",{timeZone:"Europe/Kyiv",day:"2-digit",month:"short",year:"numeric"}):"—";
+let daily=[],dailyAnswers=0,openingDay=0,people=[],usersRequest=0,statsRequest=0;
+function renderDays(){
+ const list=$("ashDays");list.replaceChildren();
+ if(!daily.length){list.textContent="Вопросов пока нет.";return}
+ daily.forEach(q=>{
+  const b=mk("button","ash-day"+(Number($("ashDay").value)===q.day?" active":""),"");
+  b.type="button";b.append(mk("strong","", "День "+q.day),mk("span","",q.question||"Без текста"));
+  if(q.allows_photo)b.append(mk("p","ash-muted",q.is_realtime_photo?"📷 Фото в момент ответа":"📷 Фото разрешено"));
+  b.addEventListener("click",()=>openDay(q.day));list.append(b);
+ });
+}
+async function openDay(rawDay){
+ if(!(await isAdmin()))return;
+ const day=Number(rawDay),ticket=++openingDay;
+ if(!Number.isInteger(day)||day<1||day>365){status("ashDailyStatus","Выбери день 1–365.",true);return}
+ $("ashDay").value=day;
+ const q=daily.find(item=>Number(item.day)===day);
+ $("ashText").value=q?.question||"";$("ashLength").textContent=$("ashText").value.length+" / 500";
+ $("ashPhoto").checked=Boolean(q?.allows_photo);$("ashRealtime").checked=Boolean(q?.is_realtime_photo);
+ $("ashText").readOnly=true;$("ashPhoto").disabled=true;$("ashRealtime").disabled=true;$("ashSaveDay").disabled=true;
+ dailyAnswers=0;status("ashDailyStatus","Проверяем возможность редактирования…");
+ if(q){
+  const {count,error}=await supabaseClient.from("answers").select("id",{head:true,count:"exact"}).eq("question_id",q.id);
+  if(ticket!==openingDay)return;
+  if(error){status("ashDailyStatus","Не удалось проверить ответы: "+error.message,true);return}
+  dailyAnswers=count||0;
+ }
+ if(ticket!==openingDay)return;
+ const locked=dailyAnswers>0;
+ $("ashText").readOnly=locked;$("ashPhoto").disabled=locked;$("ashRealtime").disabled=locked||!$("ashPhoto").checked;$("ashSaveDay").disabled=locked;
+ $("ashAnswerCount").textContent=locked?"Получено ответов: "+dailyAnswers+". Вопрос сохранён в истории и закрыт для редактирования.":"Ответов нет — можно редактировать.";
+ status("ashDailyStatus",locked?"Редактирование закрыто.":"Можно подготовить или изменить вопрос.");
+ renderDays();
+}
+async function loadDaily(){
+ if(!(await isAdmin()))return;
+ status("ashDailyStatus","Загружаем вопросы…");
+ const {data,error}=await supabaseClient.from("questions").select("id,day,question,allows_photo,is_realtime_photo").order("day").limit(365);
+ if(error){status("ashDailyStatus","Ошибка: "+error.message,true);return}
+ daily=data||[];await openDay($("ashDay").value||1);
+}
+$("ashDay").addEventListener("change",()=>openDay($("ashDay").value));
+$("ashText").addEventListener("input",()=>$("ashLength").textContent=$("ashText").value.length+" / 500");
+$("ashPhoto").addEventListener("change",()=>{if(!$("ashPhoto").checked)$("ashRealtime").checked=false;$("ashRealtime").disabled=!$("ashPhoto").checked});
+$("ashDailyForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ if(!(await isAdmin())){status("ashDailyStatus","Недостаточно прав.",true);return}
+ const day=Number($("ashDay").value),question=$("ashText").value.trim();
+ if(!Number.isInteger(day)||day<1||day>365||question.length<8){status("ashDailyStatus","Укажи день от 1 до 365 и вопрос не короче 8 символов.",true);return}
+ $("ashSaveDay").disabled=true;status("ashDailyStatus","Сохраняем…");
+ try{
+  const current=await supabaseClient.from("questions").select("id").eq("day",day).maybeSingle();
+  if(current.error)throw current.error;
+  if(current.data){
+   const a=await supabaseClient.from("answers").select("id",{head:true,count:"exact"}).eq("question_id",current.data.id);
+   if(a.error)throw a.error;
+   if((a.count||0)>0)throw Error("На этот вопрос уже ответили. Изменять его нельзя.");
+  }
+  const payload={question,allows_photo:$("ashPhoto").checked,is_realtime_photo:$("ashPhoto").checked&&$("ashRealtime").checked};
+  const result=current.data
+    ?await supabaseClient.from("questions").update(payload).eq("id",current.data.id).select("id").single()
+    :await supabaseClient.from("questions").insert({...payload,day}).select("id").single();
+  if(result.error)throw result.error;
+  await loadDaily();
+  status("ashDailyStatus","Вопрос дня "+day+" сохранён.");
+ }catch(error){status("ashDailyStatus","Ошибка сохранения: "+error.message,true)}
+ finally{if(dailyAnswers===0)$("ashSaveDay").disabled=false}
+});
+$("ashDailyTab").addEventListener("click",()=>{
+ $("ashDailyTab").classList.add("active");$("ashPollsTab").classList.remove("active");
+ $("ashDailyPane").classList.remove("hidden");$("ashPollsPane").classList.add("hidden");
+});
+$("ashPollsTab").addEventListener("click",()=>{
+ $("ashPollsTab").classList.add("active");$("ashDailyTab").classList.remove("active");
+ $("ashPollsPane").classList.remove("hidden");$("ashDailyPane").classList.add("hidden");
+ if(!$("ashPollsFrame").src)$("ashPollsFrame").src="./polls.html?admin=1";
+});
+window.addEventListener("message",event=>{
+ const frame=$("ashPollsFrame");
+ if(event.origin!==window.location.origin||event.source!==frame.contentWindow||event.data?.type!=="anti-shum-admin-polls-height")return;
+ const height=Number(event.data.height);
+ if(Number.isFinite(height)&&height>0)frame.style.height=Math.min(18000,Math.max(620,height+24))+"px";
+});
+function label(text,danger=false){return mk("span","ash-tag"+(danger?" danger":""),text)}
+function renderPeople(){
+ const term=$("ashUserSearch").value.trim().toLowerCase(),filter=$("ashUserFilter").value;
+ const shown=people.filter(p=>(filter==="all"||(filter==="active"?!p.is_blocked:p.is_blocked))&&(!term||(p.display_name||"").toLowerCase().includes(term)||(p.email||"").toLowerCase().includes(term)));
+ const list=$("ashUsers");list.replaceChildren();
+ if(!shown.length){list.append(mk("div","admin-empty","Участников по заданному фильтру нет."));return}
+ shown.forEach(p=>{
+  const card=mk("article","ash-user"),main=mk("div","ash-user-main");
+  main.append(mk("div","ash-user-name",p.display_name||"Без имени"));
+  if(p.email)main.append(mk("div","ash-user-email",p.email));
+  const tags=mk("div","ash-tags");
+  tags.append(label(p.is_admin?"Администратор":p.is_blocked?"Заблокирован":"Активен",p.is_blocked));
+  tags.append(label("Предупреждений: "+(p.warning_count||0)));
+  if(p.block_count)tags.append(label("Блокировок: "+p.block_count));
+  main.append(tags,mk("p","ash-muted","Регистрация: "+fmtDate(p.created_at)));
+  if(p.is_blocked&&p.block_reason)main.append(mk("p","ash-muted","Причина: "+p.block_reason));
+  card.append(main);
+  if(!p.is_admin&&p.id!==currentUser?.id){
+   const actions=mk("div","ash-actions"),b=mk("button","ash-btn"+(p.is_blocked?"":" danger"),p.is_blocked?"Разблокировать":"Заблокировать");
+   b.type="button";b.addEventListener("click",()=>prepareAction(card,p));actions.append(b);card.append(actions);
+  }
+  list.append(card);
+ });
+ status("ashUserStatus","Показано "+shown.length+" из "+people.length+(people.length>=300?" (первые 300)":"")+".");
+}
+function prepareAction(card,p){
+ card.querySelector(".ash-inline")?.remove();
+ const area=mk("div","ash-inline");
+ area.append(mk("p","ash-muted",p.is_blocked?"Подтверди восстановление доступа.":"Укажи причину блокировки, которую увидит участник."));
+ let reason;
+ if(!p.is_blocked){reason=document.createElement("textarea");reason.maxLength=500;reason.placeholder="Причина (от 5 символов)";area.append(reason)}
+ const actions=mk("div","ash-actions"),yes=mk("button","ash-btn"+(p.is_blocked?"":" danger"),p.is_blocked?"Подтвердить разблокировку":"Подтвердить блокировку"),no=mk("button","ash-btn quiet","Отмена");
+ yes.type=no.type="button";no.addEventListener("click",()=>area.remove());
+ yes.addEventListener("click",async()=>{
+  if(!(await isAdmin())||p.is_admin||p.id===currentUser?.id){status("ashUserStatus","Операция запрещена.",true);return}
+  const text=reason?.value.trim()||"";
+  if(!p.is_blocked&&text.length<5){status("ashUserStatus","Причина должна содержать хотя бы 5 символов.",true);return}
+  yes.disabled=no.disabled=true;
+  try{
+   const changes=p.is_blocked?{is_blocked:false,block_reason:null,blocked_at:null}:{is_blocked:true,block_reason:text,blocked_at:new Date().toISOString()};
+   const {data,error}=await supabaseClient.from("users").update(changes).eq("id",p.id).eq("is_admin",false).select("id");
+   if(error)throw error;
+   if(!data?.length)throw Error("Пользователь не найден или статус уже изменён.");
+   await loadPeople();
+   status("ashUserStatus",p.is_blocked?"Доступ восстановлен.":"Доступ заблокирован.");
+  }catch(err){status("ashUserStatus","Ошибка: "+err.message,true);yes.disabled=no.disabled=false}
+ });
+ actions.append(yes,no);area.append(actions);card.append(area);
+}
+async function loadPeople(){
+ if(!(await isAdmin()))return;
+ const ticket=++usersRequest;status("ashUserStatus","Загружаем пользователей…");
+ const {data,error}=await supabaseClient.from("users").select("id,display_name,email,created_at,is_admin,is_blocked,warning_count,block_count,block_reason").order("created_at",{ascending:false}).limit(300);
+ if(ticket!==usersRequest)return;
+ if(error){status("ashUserStatus","Ошибка: "+error.message,true);return}
+ people=data||[];renderPeople();
+}
+$("ashReloadUsers").addEventListener("click",loadPeople);
+$("ashUserSearch").addEventListener("input",renderPeople);
+$("ashUserFilter").addEventListener("change",renderPeople);
+const stats=[
+ ["Участников","users"],
+ ["С доступом","users",q=>q.eq("is_blocked",false)],
+ ["Заблокировано","users",q=>q.eq("is_blocked",true)],
+ ["Вопросов дня","questions"],
+ ["Опубликовано ответов","answers",q=>q.eq("is_hidden",false)],
+ ["Скрыто ответов","answers",q=>q.eq("is_hidden",true)],
+ ["Реакций","reactions"],
+ ["Необработанных жалоб","reports",q=>q.eq("is_resolved",false)],
+ ["Голосований","project_polls"],
+ ["Голосов","project_poll_votes"],
+ ["Идей участников","project_poll_ideas"]
+];
+async function loadStats(){
+ if(!(await isAdmin()))return;
+ const ticket=++statsRequest;status("ashStatsStatus","Обновляем показатели…");
+ const rows=await Promise.all(stats.map(async ([title,table,filter])=>{
+  let q=supabaseClient.from(table).select("id",{head:true,count:"exact"});
+  if(filter)q=filter(q);
+  const {count,error}=await q;return{title,count,error};
+ }));
+ if(ticket!==statsRequest)return;
+ const container=$("ashStats");container.replaceChildren();
+ rows.forEach(r=>{
+  const tile=mk("div","ash-stat");
+  tile.append(mk("div","ash-stat-number",r.error?"—":(r.count||0).toLocaleString("ru-RU")));
+  tile.append(mk("div","ash-stat-label",r.title));
+  container.append(tile);
+ });
+ const fails=rows.filter(r=>r.error);
+ status("ashStatsStatus",fails.length?"Некоторые показатели недоступны.":"Данные получены.",fails.length>0);
+ $("ashStatTime").textContent="Обновлено: "+new Date().toLocaleString("ru-RU",{timeZone:"Europe/Kyiv",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+}
+$("ashReloadStats").addEventListener("click",loadStats);
+document.querySelectorAll(".admin-nav-btn").forEach(b=>b.addEventListener("click",()=>{
+ if(b.dataset.adminSection==="questions")loadDaily();
+ if(b.dataset.adminSection==="users")loadPeople();
+ if(b.dataset.adminSection==="stats")loadStats();
+}));
+})();
+</script>
+
 </body>
 </html>
