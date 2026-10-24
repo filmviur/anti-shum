@@ -10048,13 +10048,15 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 </a>
 </div>
 
-<!-- Друг проекта: информационная карточка для демо-версии -->
+<!-- Блок поддержки виден только обычным пользователям. -->
+<div id="profileFriendArea" class="hidden">
 <div class="profile-section-title">ДРУГ ПРОЕКТА</div>
 <a href="./friend.html" class="profile-friend-card" aria-label="Друг проекта — информация, подписка в демо временно недоступна">
     <span class="profile-friend-card__title">✦ Друг проекта</span>
     <span class="profile-friend-card__badge">🔒 ДЕМО · ПОДПИСКА НЕДОСТУПНА</span>
     <span class="profile-friend-card__hint">Открыть описание · 1,99 $/месяц после демо</span>
 </a>
+</div>
 
 <!-- Приглашение друга — без реферальной программы и наград -->
 <div class="profile-section-title">ПРИГЛАСИТЬ ДРУГА</div>
@@ -16042,6 +16044,13 @@ async function loadProfile() {
             "admin-account",
             Boolean(currentUser && isCurrentUserAdmin)
         );
+        // Автору проекта не требуется оформлять подписку самому себе.
+        const friendArea = document.getElementById("profileFriendArea");
+        if (friendArea) {
+            friendArea.classList.toggle(
+                "hidden", !currentUser || isCurrentUserAdmin
+            );
+        }
 
        const button =
     document.getElementById("announcementsBtn");
