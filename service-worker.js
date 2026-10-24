@@ -1,12 +1,39 @@
 
-const CACHE_NAME = "anti-shum-v1";
+const CACHE_NAME = "anti-shum-offline-v1";
 
+// Кэшируем только безопасную страницу отсутствия связи, не личные данные.
 self.addEventListener("install", event => {
-    self.skipWaiting();
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => cache.add("./offline.html"))
+            .then(() => self.skipWaiting())
+    );
 });
 
 self.addEventListener("activate", event => {
-    event.waitUntil(self.clients.claim());
+    event.waitUntil(Promise.all([
+        self.clients.claim(),
+        caches.keys().then(keys => Promise.all(
+            keys.filter(key => key.startsWith("anti-shum-offline-") && key !== CACHE_NAME)
+                .map(key => caches.delete(key))
+        ))
+    ]));
+});
+
+// При новой навигации без сети показываем офлайн-экран.
+// Ответы, сессии и сообщения не кэшируем.
+self.addEventListener("fetch", event => {
+    if (event.request.mode !== "navigate") return;
+    const requested = new URL(event.request.url);
+    const scope = new URL(self.registration.scope);
+    if (requested.origin !== scope.origin ||
+        !requested.pathname.startsWith(scope.pathname)) return;
+    event.respondWith(
+        fetch(event.request).catch(async () => {
+            const cache = await caches.open(CACHE_NAME);
+            return await cache.match("./offline.html") || Response.error();
+        })
+    );
 });
 
 self.addEventListener("push", event => {
