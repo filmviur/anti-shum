@@ -51,6 +51,10 @@ label.field input,label.field textarea{margin-top:6px}
 .message{padding:11px 14px;border:1px solid rgba(212,172,106,.33);border-radius:7px;background:rgba(115,82,40,.14);margin:13px 0}
 .muted{font-size:13px;color:#a99a87}
 .success{color:#e9d8b0}
+.answer-confirmation{padding:17px 19px}
+.answer-confirmation strong{display:block;font:600 25px "Cormorant Garamond",Georgia,serif;color:#f2d8a6;line-height:1.15}
+.answer-confirmation p{margin:8px 0 0;line-height:1.55;color:#e9d8b0}
+.answer-confirmation .muted{margin-top:10px;color:#b9a890}
 .error{color:#ffb0a1}
 .idea-area{border-top:1px solid rgba(206,166,106,.2);margin-top:23px;padding-top:20px}
 .idea-area h4{font:600 22px "Cormorant Garamond",Georgia,serif;color:#e0c28d;margin:0}
@@ -168,8 +172,8 @@ const status=$("status"),app=$("app"),pollList=$("pollList"),adminPanel=$("admin
 let user=null,admin=false,polls=[],votes=[],ideas=[],activeSection="vote",realtimeChannel=null;
 let loadInProgress=false,loadAgain=false,realtimeTimer=null;
 const sections={
- vote:{heading:"Голосования",help:"Один человек — один голос. Если выберешь «ДРУГОЕ», расскажи о своём варианте."},
- ideas:{heading:"Ваши идеи",help:"Предложи свою мысль. Только ты и администратор видите твой ответ — здесь нет переписок и споров между людьми."},
+ vote:{heading:"Голосования",help:"Один голос на каждый вопрос, без таймера. После отправки изменить выбор нельзя. Если выберешь «ДРУГОЕ», расскажи о своём варианте."},
+ ideas:{heading:"Ваши идеи",help:"Одна идея на каждый вопрос, без таймера. После отправки изменить ответ нельзя. Только ты и администратор видите твою мысль — здесь нет переписок и споров между людьми."},
  result:{heading:"Результаты",help:"Здесь команда проекта делится решениями и итогами ваших голосований и предложений."}
 };
 function node(tag,cls,content){
@@ -178,6 +182,12 @@ function node(tag,cls,content){
 }
 function message(value,error=false){
  status.textContent=value;status.classList.toggle("error",error);
+}
+function completionCard(heading){
+ const box=node("div","message success answer-confirmation");
+ box.appendChild(node("strong","",heading));
+ box.appendChild(node("p","","Благодарим вас за внимание и ценный ответ. Ожидайте публикации результатов."));
+ return box;
 }
 function isOpen(p){return p.status==="published"&&(!p.closes_at||new Date(p.closes_at).getTime()>Date.now())}
 function labelChoice(v){return v==="yes"?"ДА":v==="no"?"НЕТ":"ДРУГОЕ"}
@@ -270,9 +280,10 @@ function render(){
 function renderVote(p,card){
  const myVote=votes.find(v=>v.poll_id===p.id&&v.user_id===user.id);
  if(myVote){
-  const label="Твой голос учтён: "+labelChoice(myVote.choice)+".";
-  card.appendChild(node("div","message success",label));
-  if(myVote.choice==="other"&&myVote.other_text)card.appendChild(node("p","muted","Твоё предложение: "+myVote.other_text));
+  const done=completionCard("Вы проголосовали");
+  done.appendChild(node("p","muted","Ваш выбор: "+labelChoice(myVote.choice)+"."));
+  if(myVote.choice==="other"&&myVote.other_text)done.appendChild(node("p","muted","Ваше предложение: "+myVote.other_text));
+  card.appendChild(done);
   return;
  }
  if(!isOpen(p)){
@@ -296,6 +307,7 @@ function renderVote(p,card){
   choices.appendChild(label);
  });
  card.append(choices,otherBox);
+ card.appendChild(node("p","muted","Ваш голос можно отправить только один раз. Таймера нет."));
  const send=smallButton("Отдать голос");
  send.addEventListener("click",async()=>{
   if(!selected){message("Выбери ДА, НЕТ или ДРУГОЕ.",true);return}
@@ -305,22 +317,28 @@ function renderVote(p,card){
   const r=await supabaseClient.from("project_poll_votes").insert({
    poll_id:p.id,user_id:user.id,choice:selected,other_text:selected==="other"?other:null
   });
-  if(r.error){message(r.error.code==="23505"?"Твой голос уже был учтён.":r.error.message,true);send.disabled=false;return}
-  await load();message("Спасибо! Твой голос сохранён.");
+  if(r.error){
+   if(r.error.code==="23505"){await load();message("Ваш голос уже был учтён.");return}
+   message(r.error.message,true);send.disabled=false;return;
+  }
+  votes.push({poll_id:p.id,user_id:user.id,choice:selected,other_text:selected==="other"?other:null});
+  render();
+  await load();message("Вы проголосовали. Спасибо за ваш ответ!");
  });
  card.appendChild(send);
 }
 function renderIdea(p,card){
  const myIdea=ideas.find(i=>i.poll_id===p.id&&i.user_id===user.id);
  if(myIdea){
-  card.appendChild(node("div","message success","Твоя идея сохранена."));
-  card.appendChild(node("p","",myIdea.idea_text));
-  card.appendChild(node("p","muted","Её видишь только ты и администрация."));return;
+  const done=completionCard("Вы ответили");
+  done.appendChild(node("p","muted","Ваш ответ: "+myIdea.idea_text));
+  done.appendChild(node("p","muted","Ответ виден только вам и администрации."));
+  card.appendChild(done);return;
  }
  if(!isOpen(p)){card.appendChild(node("p","muted","Приём идей завершён."));return}
  const area=node("div","idea-area");
  area.appendChild(node("h4","","Твоё предложение"));
- area.appendChild(node("p","muted","Напиши мысль своими словами — только администрация прочитает её. Одна идея к каждому вопросу."));
+ area.appendChild(node("p","muted","Напиши мысль своими словами — только администрация прочитает её. Один ответ на вопрос, без таймера. Изменить его после отправки нельзя."));
  const text=document.createElement("textarea");
  text.maxLength=500;text.rows=4;text.placeholder="Я предлагаю… (5–500 символов)";
  area.appendChild(text);
@@ -330,8 +348,13 @@ function renderIdea(p,card){
   if(value.length<5){message("Напиши хотя бы 5 символов.",true);text.focus();return}
   send.disabled=true;
   const r=await supabaseClient.from("project_poll_ideas").insert({poll_id:p.id,user_id:user.id,idea_text:value});
-  if(r.error){message(r.error.code==="23505"?"Ты уже предложил идею к этому вопросу.":r.error.message,true);send.disabled=false;return}
-  await load();message("Спасибо, идея отправлена!");
+  if(r.error){
+   if(r.error.code==="23505"){await load();message("Ваш ответ уже был сохранён.");return}
+   message(r.error.message,true);send.disabled=false;return;
+  }
+  ideas.push({poll_id:p.id,user_id:user.id,idea_text:value});
+  render();
+  await load();message("Вы ответили. Спасибо за ваш ответ!");
  });
  area.appendChild(send);card.appendChild(area);
 }
