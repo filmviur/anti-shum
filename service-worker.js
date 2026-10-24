@@ -44,6 +44,7 @@ self.addEventListener("push", event => {
         "daily",
         "support",
         "announcement",
+        "project",
         "admin"
     ];
 
@@ -64,6 +65,9 @@ self.addEventListener("push", event => {
     ) {
         data.url = "./polls.html";
     }
+
+    // Project notifications always open the project questions section.
+    if (data.type === "project") data.url = "./polls.html";
 
     let targetUrl = new URL("./", self.registration.scope);
 
@@ -93,6 +97,8 @@ self.addEventListener("push", event => {
             ? "anti-shum-daily"
             : data.type === "announcement"
                 ? `anti-shum-announcement-${data.id || "latest"}`
+                : data.type === "project"
+                    ? `anti-shum-project-${data.id || "latest"}`
                 : data.type === "support"
                     ? `anti-shum-support-${data.id || "latest"}`
                     : `anti-shum-admin-${data.section || "general"}`;
