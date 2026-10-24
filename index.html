@@ -21582,6 +21582,32 @@ setInterval(() => {
 document.addEventListener("visibilitychange", () => {
     if (!document.hidden && networkLost && navigator.onLine) confirmRealConnection();
 });
+
+// On some Android devices Wi-Fi can stay connected while the Internet disappears.
+// A tiny heartbeat detects that situation even when no "offline" event fires.
+let missingConnectionPings = 0;
+async function checkSilentConnectionLoss() {
+    if (networkLost || !navigator.onLine || document.hidden || networkChecking) return;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    try {
+        const response = await fetch("./offline.html?heartbeat=" + Date.now(), {
+            method: "HEAD", cache: "no-store", signal: controller.signal
+        });
+        if (!response.ok) throw new Error("Heartbeat unavailable");
+        missingConnectionPings = 0;
+    } catch (error) {
+        if (++missingConnectionPings >= 2) {
+            networkLost = true;
+            missingConnectionPings = 0;
+            offlineOverlayMinimized = false;
+            syncNetworkStatus();
+        }
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+setInterval(checkSilentConnectionLoss, 12000);
 syncNetworkStatus();
 
 /* =========================================================
