@@ -10,7 +10,7 @@
 #releaseWaitingView.hidden{display:none!important}
 .release-illustration{
   box-sizing:border-box;position:relative;isolation:isolate;flex:none;
-  width:min(100%,540px,calc((100dvh - 86px) * .5628));
+  width:min(100%,540px,calc(56.28dvh - 48px));
   aspect-ratio:941 / 1672;overflow:hidden;
   container-type:inline-size;
   border-radius:6px;
@@ -96,10 +96,13 @@
 }
 @media (max-height:640px){
   #releaseWaitingView.release-waiting-view{justify-content:flex-start}
-  .release-illustration{width:min(100%,420px,calc((100dvh - 72px) * .5628))}
+  .release-illustration{width:min(100%,420px,calc(56.28dvh - 41px))}
 }
 @media (prefers-reduced-motion:reduce){
  .release-canopy-motion,.release-grass-motion,.release-cup-steam:before,
  .release-cup-steam:after,.release-cup-steam>i{animation:none!important}
  .release-cup-steam{display:none}
 }
+
+/* No project-level quick links float across the release illustration. */
+#appScreen.release-waiting-mode .app-global-actions{display:none!important}
