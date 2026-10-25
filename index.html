@@ -12616,6 +12616,8 @@ function showOnly(view) {
         return;
     }
 
+    appScreen.classList.toggle("release-waiting-mode",view===releaseWaitingView);
+
     /* =========================
        СКРЫВАЕМ ВСЕ ЭКРАНЫ
     ========================= */
@@ -16173,6 +16175,12 @@ async function openProfile() {
 profileBackBtn.addEventListener(
     "click",
     async function() {
+
+        // Предрелизный профиль возвращается к заставке, а не к тестовой ленте.
+        if (shouldShowReleaseWaiting()) {
+            showReleaseWaitingView();
+            return;
+        }
 
         /*
             Возвращаемся к текущему состоянию.
