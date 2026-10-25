@@ -22798,30 +22798,48 @@ restoreSession();
 
         if (key === "2026-12") {
             art.classList.add("capsule-december");
-            const countNow = Math.max(0, Math.min(31, count));
-            image.src = "./capsule-assets/december/winter-tree.svg";
-            image.classList.remove("hidden");
-            image.style.opacity = "1";
-            const frost = document.createElement("div");
-            frost.className = "capsule-winter-points";
-            frost.setAttribute("aria-hidden","true");
-            const seeded = index => {
-                const value=Math.sin(index*71.09+16)*41279.6;
-                return value-Math.floor(value);
-            };
-            for (let i=0;i<31;i++) {
-                const crystal=document.createElement("span");
-                crystal.className="capsule-winter-flake";
-                crystal.style.left=(23+seeded(i+31)*56)+"%";
-                crystal.style.top=(14+seeded(i+307)*64)+"%";
-                frost.append(crystal);
-                if(i<countNow)setTimeout(()=>{
-                    if(version===imageVersion&&activeTreeMonth===key)
-                        crystal.classList.add("is-grown");
-                },Math.min(1100,i*35));
+            // Two matching paintings: a muted bare tree on day 0 and a
+            // snowy, magical landscape on day 31. No artificial stars.
+            const stage = Math.max(0, Math.min(31, count));
+            const folder = "./capsule-assets/december/";
+            const load = src => new Promise((resolve, reject) => {
+                const asset = new Image();
+                asset.onload = () => resolve(src);
+                asset.onerror = reject;
+                asset.src = src;
+            });
+            try {
+                const [startArt, finalArt] = await Promise.all([
+                    load(folder+"tree-start.webp"),
+                    load(folder+"tree-final.webp")
+                ]);
+                if (version !== imageVersion || activeTreeMonth !== key ||
+                    overlay.classList.contains("hidden")) return;
+
+                image.src = startArt;
+                image.classList.remove("hidden");
+                image.style.opacity = "1";
+                topImage.src = finalArt;
+                topImage.style.transition = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+                    ? "none" : "opacity 1400ms ease-in-out";
+                // Reveal more of the final painting as the month fills.
+                topImage.style.opacity = "0";
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    if (version === imageVersion && activeTreeMonth === key)
+                        topImage.style.opacity = String(stage/31);
+                }));
+                displayedCount = stage;
+            } catch (err) {
+                // Missing artwork should not leave the capsule blank.
+                if (version !== imageVersion || activeTreeMonth !== key) return;
+                console.warn("December illustration failed to load:",err);
+                image.src = folder+"winter-tree.svg";
+                image.classList.remove("hidden");
+                image.style.opacity = "1";
+                topImage.removeAttribute("src");
+                topImage.style.opacity = "0";
+                displayedCount = stage;
             }
-            art.append(frost);
-            displayedCount=countNow;
             return;
         }
         art.classList.remove("capsule-december");
@@ -23292,21 +23310,11 @@ function render(){
  panel.querySelector(".capsule-winter-points")?.remove();
  panel.classList.toggle("capsule-december",december);
  if(december){
-  base.src="./capsule-assets/december/winter-tree.svg";
-  growth.removeAttribute("src");
-  growth.style.opacity="0";
-  const frost=document.createElement("div");
-  frost.className="capsule-winter-points";
-  frost.setAttribute("aria-hidden","true");
-  const seeded=i=>{const v=Math.sin(i*71.09+16)*41279.6;return v-Math.floor(v)};
-  for(let i=0;i<n;i++){
-   const flake=document.createElement("span");
-   flake.className="capsule-winter-flake is-grown";
-   flake.style.left=(23+seeded(i+31)*56)+"%";
-   flake.style.top=(14+seeded(i+307)*64)+"%";
-   frost.append(flake);
-  }
-  panel.append(frost);
+  // The admin sees the same gradual transformation as the real capsule.
+  base.src="./capsule-assets/december/tree-start.webp";
+  growth.src="./capsule-assets/december/tree-final.webp";
+  growth.style.transition="opacity 320ms ease";
+  growth.style.opacity=String(n/31);
  }else{
   base.src="./capsule-assets/november/tree-base.png";
   if(n){growth.src="./capsule-assets/november/tree-overlay-"+String(n).padStart(2,"0")+".png";growth.style.opacity="1"}
