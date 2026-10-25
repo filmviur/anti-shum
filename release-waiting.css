@@ -22,7 +22,7 @@
 }
 .release-canopy-motion,.release-grass-motion{
   position:absolute;inset:0;pointer-events:none;z-index:2;
-  background-image:url("./release-assets/release-waiting.webp");
+  background-image:url("./release-assets/release-waiting.svg");
   background-size:100% 100%;
   background-repeat:no-repeat;
   will-change:transform;
