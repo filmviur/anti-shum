@@ -1,0 +1,105 @@
+/* Анти-Шум — самостоятельная заставка ожидания релиза.
+   Изображение служит сценой, время и движения создаются HTML/CSS. */
+#releaseWaitingView.release-waiting-view{
+  box-sizing:border-box;width:100%;min-height:100vh;min-height:100dvh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;padding:12px 10px max(14px,env(safe-area-inset-bottom,14px));
+  background:radial-gradient(ellipse at 50% 15%,#37251b 0%,#160e0b 68%,#0c0807 100%);
+  overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;
+}
+#releaseWaitingView.hidden{display:none!important}
+.release-illustration{
+  box-sizing:border-box;position:relative;isolation:isolate;flex:none;
+  width:min(100%,540px,calc((100dvh - 86px) * .5628));
+  aspect-ratio:941 / 1672;overflow:hidden;
+  container-type:inline-size;
+  border-radius:6px;
+  filter:drop-shadow(0 7px 30px rgba(0,0,0,.4));
+}
+.release-illustration>img.release-artwork{
+  display:block;width:100%;height:100%;object-fit:fill;
+  user-select:none;pointer-events:none;
+}
+.release-canopy-motion,.release-grass-motion{
+  position:absolute;inset:0;pointer-events:none;z-index:2;
+  background-image:url("./release-assets/release-waiting.webp");
+  background-size:100% 100%;
+  background-repeat:no-repeat;
+  will-change:transform;
+}
+.release-canopy-motion{
+  clip-path:polygon(0 0,100% 0,100% 15%,83% 10%,69% 12%,55% 7%,43% 15%,20% 14%,0 23%);
+  transform-origin:10% 5%;
+  animation:release-canopy-breeze 9s ease-in-out infinite;
+}
+.release-grass-motion{
+  clip-path:polygon(0 74%,10% 79%,22% 93%,38% 100%,0 100%,0 74%,100% 100%,100% 74%,91% 79%,84% 96%,64% 100%);
+  transform-origin:50% 100%;
+  animation:release-grass-breeze 6.8s ease-in-out infinite alternate;
+}
+.release-cup-steam{
+  position:absolute;z-index:3;left:29%;top:22.2%;width:14%;height:7%;
+  pointer-events:none;
+}
+.release-cup-steam::before,.release-cup-steam::after,
+.release-cup-steam>i{
+  content:"";position:absolute;display:block;bottom:0;left:45%;
+  width:30%;height:84%;border-radius:55% 40% 55% 45%;
+  background:radial-gradient(ellipse at 50% 65%,rgba(255,242,207,.44),rgba(255,230,199,.15) 32%,transparent 68%);
+  filter:blur(2.3px);opacity:0;
+  animation:release-steam-rise 4.2s ease-out infinite;
+}
+.release-cup-steam::after{left:29%;width:35%;animation-delay:-1.6s;animation-duration:5.1s}
+.release-cup-steam>i{left:58%;animation-delay:-2.8s;animation-duration:4.8s}
+.release-countdown{
+  position:absolute;z-index:4;left:11.3%;right:12.5%;top:59.4%;height:4.0%;
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  align-items:center;gap:2.1%;color:#fff0cd;pointer-events:none;
+}
+.release-countdown>span{
+  display:block;text-align:center;font:400 7.0cqw/1 Georgia,"Times New Roman",serif;
+  font-variant-numeric:tabular-nums;letter-spacing:.012em;
+  text-shadow:0 1px 7px rgba(255,190,97,.35);
+}
+.release-rules-hotspot{
+  position:absolute;z-index:5;left:33%;top:88.85%;width:35.5%;height:5.3%;
+  border-radius:100px;outline-offset:3px;
+}
+.release-rules-hotspot:hover{background:rgba(255,212,147,.07)}
+.release-rules-hotspot:focus-visible{outline:2px solid #fff0d1;background:rgba(255,212,147,.13)}
+.release-waiting-actions{display:flex;align-items:center;justify-content:center;gap:13px}
+.release-profile-access,.release-admin-return{
+  border:1px solid rgba(208,169,113,.55);background:#322319;
+  color:#e8cc9e;border-radius:24px;padding:9px 23px;
+  font:14px/1.3 Georgia,serif;cursor:pointer;
+}
+.release-profile-access:hover,.release-admin-return:hover{background:#4b3120}
+.release-waiting-help{margin:0;color:#b39d82;font:12px/1.3 Georgia,serif;text-align:center}
+.release-visually-hidden{
+  position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+@keyframes release-canopy-breeze{
+  0%,100%{transform:translate3d(0,0,0) rotate(0deg)}
+  36%{transform:translate3d(1.1px,.35px,0) rotate(.26deg)}
+  72%{transform:translate3d(-1px,0,0) rotate(-.23deg)}
+}
+@keyframes release-grass-breeze{
+  from{transform:translate3d(-.8px,0,0) skewX(-.25deg)}
+  to{transform:translate3d(1px,0,0) skewX(.26deg)}
+}
+@keyframes release-steam-rise{
+  0%{transform:translate(-4%,10%) scale(.7) rotate(-7deg);opacity:0}
+  20%{opacity:.36}
+  58%{opacity:.25}
+  100%{transform:translate(12%,-62%) scale(1.35) rotate(7deg);opacity:0}
+}
+@media (max-height:640px){
+  #releaseWaitingView.release-waiting-view{justify-content:flex-start}
+  .release-illustration{width:min(100%,420px,calc((100dvh - 72px) * .5628))}
+}
+@media (prefers-reduced-motion:reduce){
+ .release-canopy-motion,.release-grass-motion,.release-cup-steam:before,
+ .release-cup-steam:after,.release-cup-steam>i{animation:none!important}
+ .release-cup-steam{display:none}
+}
