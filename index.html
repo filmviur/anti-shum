@@ -9104,6 +9104,7 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
  .journal-curtain{display:none!important}
 }
 </style>
+<link rel="stylesheet" href="./release-waiting.css">
 <script src="./december-growth.js"></script>
 </head>
 
@@ -10763,6 +10764,7 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
   <img id="ashPreviewGrowth" class="capsule-tree-next" alt="" aria-hidden="true" style="opacity:1">
  </div>
  <p class="ash-muted">Книгу можно безопасно проверить отдельно: <a href="./book.html" target="_blank" rel="noopener">открыть мою книгу</a>.</p>
+ <button type="button" class="ash-btn" id="ashPreviewReleaseScreen">✦ Посмотреть экран ожидания релиза</button>
 </section>
 <!-- STATISTICS -->
 <div id="adminStatsSection" class="admin-section hidden" data-admin-content="stats">
@@ -10842,6 +10844,32 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 </section>
 
     
+
+<!-- Ожидание официального запуска: отдельный экран после входа. -->
+<section id="releaseWaitingView" class="release-waiting-view hidden" aria-label="Ожидание открытия Анти-Шума">
+  <div class="release-illustration">
+    <img class="release-artwork" src="./release-assets/release-waiting.webp"
+         alt="Анти-Шум. Ты уже внутри. Спасибо за регистрацию. Проект готовится к запуску. До открытия осталось: дни, часы, минуты и секунды. Официальный запуск — 1 ноября в 20:00 по Киеву."
+         decoding="async" fetchpriority="high">
+    <div class="release-canopy-motion" aria-hidden="true"></div>
+    <div class="release-grass-motion" aria-hidden="true"></div>
+    <div class="release-cup-steam" aria-hidden="true"><i></i></div>
+    <div class="release-countdown" id="releaseCountdown" aria-label="Время до открытия">
+      <span id="releaseDays">00</span>
+      <span id="releaseHours">00</span>
+      <span id="releaseMinutes">00</span>
+      <span id="releaseSeconds">00</span>
+    </div>
+    <a class="release-rules-hotspot" href="./rules.html" aria-label="Читать правила проекта">
+      <span class="release-visually-hidden">Правила проекта</span>
+    </a>
+  </div>
+  <div class="release-waiting-actions">
+    <button id="releaseProfileBtn" class="release-profile-access" type="button">Мой профиль</button>
+    <button id="releaseAdminReturnBtn" class="release-admin-return hidden" type="button">← В админ-панель</button>
+  </div>
+  <p id="releaseWaitingHelp" class="release-waiting-help">Профиль и поддержка доступны до запуска.</p>
+</section>
 
 <!-- CLOSED -->
 
@@ -11650,6 +11678,12 @@ const VAPID_PUBLIC_KEY =
 
 const PROJECT_START_DATE = "2026-10-01";
 
+// Экран ожидания и дата релиза настраиваются независимо от календаря вопросов.
+// Для официального старта календарь PROJECT_START_DATE включается отдельно.
+const RELEASE_WAITING_ENABLED = true;
+const RELEASE_WAITING_TARGET = "2026-11-01T20:00:00+02:00"; // 20:00 по Киеву
+
+
 const DEV_PROJECT_DAY = 1;
 
 const SESSION_MINUTES = 20;
@@ -11817,6 +11851,9 @@ const adminView =
 
 const closedView =
     document.getElementById("closedView");
+
+const releaseWaitingView =
+    document.getElementById("releaseWaitingView");
 
 
 const questionText =
@@ -12563,6 +12600,7 @@ function showOnly(view) {
         feedView,
         profileView,
         closedView,
+        releaseWaitingView,
         adminView
     ];
 
@@ -12586,6 +12624,8 @@ function showOnly(view) {
     feedView.classList.add("hidden");
     profileView.classList.add("hidden");
     closedView.classList.add("hidden");
+    releaseWaitingView.classList.add("hidden");
+    if (view !== releaseWaitingView) stopReleaseWaitingClock();
     adminView.classList.add("hidden");
 
 
@@ -13079,6 +13119,7 @@ supabaseClient.auth.onAuthStateChange(
 
         if (event === "SIGNED_OUT") {
 
+            stopReleaseWaitingClock();
             stopAnnouncementsRealtime();
 
             setAnnouncementsUnread(false);
@@ -13583,8 +13624,8 @@ appScreen.classList.add("hidden");
     appInitializedUserId = initializingUserId;
     bootScreen.classList.add("hidden");
     appScreen.classList.remove("hidden");
-    // Welcome appears only after a ready authenticated screen; not over the login form.
-    showAshWelcome();
+    // Знакомство показываем уже после открытия; пока виден экран ожидания.
+    if (releaseWaitingView.classList.contains("hidden")) showAshWelcome();
 
 
     /* =========================
@@ -13834,6 +13875,10 @@ async function loadTodayQuestionAndState() {
 
     const isAdmin =
         await verifyAdminFeedAccess();
+
+    if (!isAdmin && showReleaseWaitingView()) {
+        return;
+    }
 
     /*
         До начала проекта обычным пользователям
@@ -15856,6 +15901,79 @@ function updateRetroDigit(id, value) {
 }
 
 
+
+/* =========================================================
+   ОЖИДАНИЕ РЕЛИЗА (не изменяет дату старта вопросов)
+========================================================= */
+let releaseWaitingClockHandle = null;
+let releaseWaitingPreview = false;
+
+function shouldShowReleaseWaiting() {
+    return RELEASE_WAITING_ENABLED &&
+        Boolean(currentUser) &&
+        !isCurrentUserAdmin &&
+        Number.isFinite(Date.parse(RELEASE_WAITING_TARGET)) &&
+        Date.now() < Date.parse(RELEASE_WAITING_TARGET);
+}
+function stopReleaseWaitingClock() {
+    if (releaseWaitingClockHandle !== null) {
+        clearInterval(releaseWaitingClockHandle);
+        releaseWaitingClockHandle = null;
+    }
+}
+function updateReleaseWaitingClock() {
+    const target = Date.parse(RELEASE_WAITING_TARGET);
+    const seconds = Math.max(0,Math.ceil((target-Date.now())/1000));
+    const values = [
+      Math.floor(seconds/86400),
+      Math.floor(seconds%86400/3600),
+      Math.floor(seconds%3600/60),
+      seconds%60
+    ];
+    ["releaseDays","releaseHours","releaseMinutes","releaseSeconds"].forEach((id,index)=>{
+       const element = document.getElementById(id);
+       if(element) element.textContent=String(values[index]).padStart(2,"0");
+    });
+    const timer=document.getElementById("releaseCountdown");
+    if (timer) timer.setAttribute("aria-label",
+      "До запуска: "+values[0]+" дней, "+values[1]+" часов, "+
+      values[2]+" минут, "+values[3]+" секунд");
+    if(seconds===0 && !releaseWaitingPreview) {
+       stopReleaseWaitingClock();
+       // Нельзя показывать неподготовленные вопросы, если официальный
+       // календарь ещё не включён в отдельной настройке.
+       if(PROJECT_START_DATE === RELEASE_WAITING_TARGET.slice(0,10)) {
+           loadTodayQuestionAndState().catch(console.error);
+       } else {
+           document.getElementById("releaseWaitingHelp").textContent =
+             "Время ожидания подошло к концу. Открытие дневника готовится.";
+       }
+    }
+}
+function showReleaseWaitingView(preview=false) {
+    if (!preview && !shouldShowReleaseWaiting()) return false;
+    releaseWaitingPreview = Boolean(preview);
+    document.getElementById("releaseProfileBtn").classList.toggle("hidden",preview);
+    document.getElementById("releaseAdminReturnBtn").classList.toggle("hidden",!preview);
+    document.getElementById("releaseWaitingHelp").textContent=preview
+       ? "Предпросмотр: реальные ответы не затрагиваются."
+       : "Профиль и поддержка доступны до запуска.";
+    showOnly(releaseWaitingView);
+    stopReleaseWaitingClock();
+    updateReleaseWaitingClock();
+    if(releaseWaitingView && !releaseWaitingView.classList.contains("hidden"))
+       releaseWaitingClockHandle=setInterval(updateReleaseWaitingClock,1000);
+    return true;
+}
+document.getElementById("releaseProfileBtn").addEventListener("click",()=>openProfile());
+document.getElementById("releaseAdminReturnBtn").addEventListener("click",()=>{
+    releaseWaitingPreview=false;
+    showOnly(adminView);
+});
+document.addEventListener("visibilitychange",()=>{
+    if(!document.hidden && !releaseWaitingView.classList.contains("hidden"))
+        updateReleaseWaitingClock();
+});
 
 /* =========================================================
    CLOSED SCREEN
@@ -21837,6 +21955,9 @@ ashWelcomeNext.addEventListener("click",()=>{
  ashWelcomeStep++;renderAshWelcome();
 });
 document.getElementById("ashReplayWelcome").addEventListener("click",()=>showAshWelcome(true));
+document.getElementById("ashPreviewReleaseScreen").addEventListener("click",()=>{
+    if (isCurrentUserAdmin) showReleaseWaitingView(true);
+});
 ashWelcomeOverlay.addEventListener("click",event=>{
  if(event.target===ashWelcomeOverlay)hideAshWelcome();
 });
