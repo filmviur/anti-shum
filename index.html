@@ -22415,6 +22415,16 @@ restoreSession();
 .capsule-answer-detail .capsule-question { color:#e5bd86; font-weight:600; margin:10px 0; }
 .capsule-answer-detail img { max-width:100%; max-height:360px; object-fit:contain; border-radius:8px; margin-top:12px; }
 @media(max-width:750px) { .capsule-main-layout { grid-template-columns:1fr; } .capsule-archive { padding:15px; } .capsule-day-grid { gap:5px; } }
+
+/* Bare December tree: each answer adds a frost crystal. */
+.capsule-art.capsule-december{background:#1b2e47}
+.capsule-winter-points{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.capsule-winter-flake{position:absolute;width:10px;height:10px;opacity:0;transform:translate(-50%,-50%) scale(.1);transition:transform .8s ease,opacity .6s ease;filter:drop-shadow(0 0 5px rgba(220,241,255,.8))}
+.capsule-winter-flake:before,.capsule-winter-flake:after{content:"";position:absolute;border-radius:3px;background:#edf8ff}
+.capsule-winter-flake:before{left:4px;top:0;width:2px;height:10px}
+.capsule-winter-flake:after{left:0;top:4px;width:10px;height:2px}
+.capsule-winter-flake.is-grown{opacity:.83;transform:translate(-50%,-50%) scale(.85)}
+@media(prefers-reduced-motion:reduce){.capsule-winter-flake{transition:none}}
 .capsule-art {
     position: relative;
     width: 100%;
@@ -22757,10 +22767,11 @@ restoreSession();
         activeTreeMonth = key;
         const isOctober = key === "2026-10";
         const isNovember = key === "2026-11";
-        status.textContent = (isOctober ? "Дерево октября" : isNovember ? "Дерево ноября" : "Дерево " + key)
+        status.textContent = (isOctober ? "Дерево октября" : isNovember ? "Дерево ноября" : key==="2026-12" ? "Дерево зимней тишины" : "Дерево " + key)
             + " · " + count + " из " + days + " дней с ответами";
         const version = ++imageVersion;
         art.querySelector(".capsule-previous-growth")?.remove();
+        art.querySelector(".capsule-winter-points")?.remove();
         displayedCount = -1;
         art.querySelector(".capsule-month-placeholder")?.remove();
         art.classList.toggle("capsule-november", isNovember);
@@ -22768,6 +22779,36 @@ restoreSession();
         topImage.style.opacity = "0";
         topImage.removeAttribute("src");
         error.classList.add("hidden");
+
+        if (key === "2026-12") {
+            art.classList.add("capsule-december");
+            const countNow = Math.max(0, Math.min(31, count));
+            image.src = "./capsule-assets/december/winter-tree.svg";
+            image.classList.remove("hidden");
+            image.style.opacity = "1";
+            const frost = document.createElement("div");
+            frost.className = "capsule-winter-points";
+            frost.setAttribute("aria-hidden","true");
+            const seeded = index => {
+                const value=Math.sin(index*71.09+16)*41279.6;
+                return value-Math.floor(value);
+            };
+            for (let i=0;i<31;i++) {
+                const crystal=document.createElement("span");
+                crystal.className="capsule-winter-flake";
+                crystal.style.left=(23+seeded(i+31)*56)+"%";
+                crystal.style.top=(14+seeded(i+307)*64)+"%";
+                frost.append(crystal);
+                if(i<countNow)setTimeout(()=>{
+                    if(version===imageVersion&&activeTreeMonth===key)
+                        crystal.classList.add("is-grown");
+                },Math.min(1100,i*35));
+            }
+            art.append(frost);
+            displayedCount=countNow;
+            return;
+        }
+        art.classList.remove("capsule-december");
         if (isOctober) {
             image.classList.remove("hidden");
             showProgress(count);
@@ -22923,7 +22964,7 @@ restoreSession();
                 .from("questions")
                 .select("*")
                 .gte("day", 1)
-                .lte("day", 31);
+                .lte("day", 365);
 
             if (questionsResult.error) throw questionsResult.error;
             const questions = questionsResult.data || [];
