@@ -1037,6 +1037,7 @@ const prev=$("prevBtn"),next=$("nextBtn"),print=$("printBtn");
 let userId="",seen=new Set(),newWriting=new Set(),audioCtx=null;
 let index=-1,turning=false,bookReady=false,days=[],bookEntries=[],novemberTreeStage=0,decemberTreeStage=0,photoUrls=new Map(),startDate=null;
 let isBookAdmin=false; // Set from the protected admin RPC.
+const monthIdeas=new Map();
 let bookQuestionById=new Map(),bookRealtimeChannel=null,bookSyncRequest=0,bookSyncTimer=null;
 const MONTHS=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
 const pad=n=>String(n).padStart(2,"0");
@@ -1085,6 +1086,20 @@ function buildDecemberTreeArt(doc){
  }
  return scene;
 }
+function contributionText(month){
+ const rows=monthIdeas.get(month)||[];
+ if(!rows.length)return "";
+ const short=rows[0].replace(/\s+/g," ").trim().slice(0,65);
+ return "Мой вклад: "+rows.length+" одобренных идей · «"+short+(rows[0].length>65?"…":"")+"»";
+}
+function appendContribution(flow,month,doc){
+ const value=contributionText(month);if(!value)return;
+ const el=doc.createElement("div");el.textContent=value;
+ el.className="book-month-contribution";
+ el.style.cssText="max-width:90%;font:italic 12px/1.3 Georgia,serif;color:#6a5037;"+
+  "text-align:center;overflow-wrap:anywhere;max-height:44px;overflow:hidden";
+ flow.append(el);
+}
 function buildDecemberTreePage(){
  const page=document.createElement("div");page.className="entry-layout november-tree-page";
  const flow=document.createElement("div");flow.className="page-flow";
@@ -1095,6 +1110,7 @@ function buildDecemberTreePage(){
   buildDecemberTreeArt(document),
   text("div","november-tree-note","Каждая мысль добавила этому месяцу свою снежную искру.")
  );
+ appendContribution(flow,"2026-12",document);
  page.append(flow);return page;
 }
 function buildNovemberTreePage(){
@@ -1106,6 +1122,7 @@ function buildNovemberTreePage(){
   text("div","november-tree-caption",novemberTreeStage+" из 30 дней с ответами")
  );
  flow.append(buildNovemberTreeArt(document));
+ appendContribution(flow,"2026-11",document);
  flow.append(text("div","november-tree-note","Каждая прожитая и записанная мысль стала частью этого дерева."));
  page.append(flow);
  return page;
@@ -1470,7 +1487,7 @@ function printBook(){
     ["november-print-title","Моё дерево зимней тишины"],
     ["november-print-count",decemberTreeStage+" из 31 дня с ответами"]
    ]){const t=doc.createElement("div");t.className=cls;t.textContent=value;flow.append(t)}
-   flow.append(buildDecemberTreeArt(doc));doc.body.append(page);return;
+   flow.append(buildDecemberTreeArt(doc));appendContribution(flow,"2026-12",doc);doc.body.append(page);return;
   }
   if(entry.type==="novemberTree"){
    const page=doc.createElement("section");page.className="print-page print-november-tree";
@@ -1483,7 +1500,7 @@ function printBook(){
    ]){
     const el=doc.createElement("div");el.className=className;el.textContent=value;flow.append(el);
    }
-   flow.append(buildNovemberTreeArt(doc));
+   flow.append(buildNovemberTreeArt(doc));appendContribution(flow,"2026-11",doc);
    const note=doc.createElement("div");note.className="november-print-note";
    note.textContent="Каждая прожитая и записанная мысль стала частью этого дерева.";flow.append(note);
    doc.body.append(page);return;
@@ -1625,6 +1642,19 @@ try{
   client.from("answers").select("id,question_id,answer_text,photo_url,created_at").eq("user_id",user.id).order("created_at",{ascending:true})
  ]);
  if(qs.error)throw qs.error;if(as.error)throw as.error;
+ try{
+  const result=await client.from("project_poll_ideas")
+    .select("idea_text,status,created_at").eq("user_id",userId);
+  if(!result.error){
+   for(const row of result.data||[]){
+    if(row.status!=="approved")continue;
+    const month=kyivDay(row.created_at).slice(0,7);
+    const arr=monthIdeas.get(month)||[];
+    arr.push(String(row.idea_text||""));monthIdeas.set(month,arr);
+   }
+  }
+ }catch(error){console.warn("Book idea summary:",error)}
+
  const questions=new Map((qs.data||[]).map(q=>[String(q.id),q]));
  bookQuestionById=questions;
  const answers=new Map();
