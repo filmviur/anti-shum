@@ -1035,7 +1035,7 @@ const $=id=>document.getElementById(id);
 const book=$("book"),cover=$("cover"),left=$("leftPage"),right=$("rightPage");
 const prev=$("prevBtn"),next=$("nextBtn"),print=$("printBtn");
 let userId="",seen=new Set(),newWriting=new Set(),audioCtx=null;
-let index=-1,turning=false,bookReady=false,days=[],bookEntries=[],novemberTreeStage=0,photoUrls=new Map(),startDate=null;
+let index=-1,turning=false,bookReady=false,days=[],bookEntries=[],novemberTreeStage=0,decemberTreeStage=0,photoUrls=new Map(),startDate=null;
 let isBookAdmin=false; // Set from the protected admin RPC.
 let bookQuestionById=new Map(),bookRealtimeChannel=null,bookSyncRequest=0,bookSyncTimer=null;
 const MONTHS=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
@@ -1069,6 +1069,33 @@ function buildNovemberTreeArt(ownerDocument){
    addImage("tree-overlay-"+pad(novemberTreeStage)+".png","");
  }
  return scene;
+}
+
+function buildDecemberTreeArt(doc){
+ const scene=doc.createElement("div");scene.className="november-tree-art";
+ const image=doc.createElement("img");
+ image.src=new URL("./capsule-assets/december/winter-tree.svg",location.href).href;
+ image.alt="Зимнее дерево в декабре";scene.append(image);
+ const seeded=i=>{const v=Math.sin(i*71.09+16)*41279.6;return v-Math.floor(v)};
+ for(let i=0;i<decemberTreeStage;i++){
+  const point=doc.createElement("span");point.textContent="✧";
+  point.style.cssText="position:absolute;left:"+(23+seeded(i+31)*56)+"%;top:"+
+    (14+seeded(i+307)*64)+"%;font-size:11px;color:#effaff;text-shadow:0 0 4px #759caf";
+  scene.append(point);
+ }
+ return scene;
+}
+function buildDecemberTreePage(){
+ const page=document.createElement("div");page.className="entry-layout november-tree-page";
+ const flow=document.createElement("div");flow.className="page-flow";
+ flow.append(
+  text("div","november-tree-kicker","Капсула времени"),
+  text("div","november-tree-heading","Моё дерево зимней тишины"),
+  text("div","november-tree-caption",decemberTreeStage+" из 31 дня с ответами"),
+  buildDecemberTreeArt(document),
+  text("div","november-tree-note","Каждая мысль добавила этому месяцу свою снежную искру.")
+ );
+ page.append(flow);return page;
 }
 function buildNovemberTreePage(){
  const page=document.createElement("div");page.className="entry-layout november-tree-page";
@@ -1167,6 +1194,7 @@ function fillSlot(el,pageNumber){
  if(pageNumber===0){fillEpilogue(el);return;}
  const entry=bookEntries[pageNumber-1];
  if(entry?.type==="novemberTree"){fillNovemberTree(el);return;}
+ if(entry?.type==="decemberTree"){el.replaceChildren(buildDecemberTreePage());return;}
  if(entry?.type==="day")fill(el,entry.day,entry.number);
  else el.replaceChildren();
 }
@@ -1276,7 +1304,7 @@ function show(){
  const pageLabel=pageNumber=>{
   if(pageNumber===0)return "Пролог";
   const entry=bookEntries[pageNumber-1];
-  return entry?.type==="novemberTree"?"Итог ноября":entry?.type==="day"?"День "+entry.number:"";
+  return entry?.type==="novemberTree"?"Итог ноября":entry?.type==="decemberTree"?"Итог декабря":entry?.type==="day"?"День "+entry.number:"";
  };
  $("pageInfo").textContent=closed?"Обложка":
   (single?pageLabel(mobileLeaf):
@@ -1432,6 +1460,18 @@ function printBook(){
  };
  addCover("diary-front.webp");
  bookEntries.forEach((entry,i)=>{
+
+  if(entry.type==="decemberTree"){
+   const page=doc.createElement("section");page.className="print-page print-november-tree";
+   addArtwork(page,"diary-clean-right.webp");
+   const flow=doc.createElement("div");flow.className="print-flow";page.append(flow);
+   for(const [cls,value] of [
+    ["november-print-kicker","Капсула времени"],
+    ["november-print-title","Моё дерево зимней тишины"],
+    ["november-print-count",decemberTreeStage+" из 31 дня с ответами"]
+   ]){const t=doc.createElement("div");t.className=cls;t.textContent=value;flow.append(t)}
+   flow.append(buildDecemberTreeArt(doc));doc.body.append(page);return;
+  }
   if(entry.type==="novemberTree"){
    const page=doc.createElement("section");page.className="print-page print-november-tree";
    addArtwork(page,"diary-clean-right.webp");
@@ -1537,6 +1577,7 @@ async function syncBookFromServer(){
  await Promise.all(imageUpdates);
  if(request!==bookSyncRequest||userId!==targetUser)return;
  novemberTreeStage=Math.min(30,days.filter(d=>key(d.date).startsWith("2026-11-")&&d.answer).length);
+ decemberTreeStage=Math.min(31,days.filter(d=>key(d.date).startsWith("2026-12-")&&d.answer).length);
  const count=days.filter(d=>d.answer).length;
  $("progress").textContent="Начало: "+startDate.toLocaleDateString("ru-RU")+" · Заполнено "+count+" из 365 дней";
  if(!turning)show();
@@ -1599,9 +1640,12 @@ try{
  // The November recap is a separate page after November 30, without
  // altering October pages or the original 365 day numbers.
  novemberTreeStage=Math.min(30,days.filter(day=>key(day.date).startsWith("2026-11-")&&day.answer).length);
+ decemberTreeStage=Math.min(31,days.filter(day=>key(day.date).startsWith("2026-12-")&&day.answer).length);
  bookEntries=days.map((day,i)=>({type:"day",day,number:i+1}));
  const novemberLastDay=days.findIndex(day=>key(day.date)==="2026-11-30");
  if(novemberLastDay>=0)bookEntries.splice(novemberLastDay+1,0,{type:"novemberTree"});
+ const decLast=bookEntries.findIndex(e=>e.type==="day"&&key(e.day.date)==="2026-12-31");
+ if(decLast>=0)bookEntries.splice(decLast+1,0,{type:"decemberTree"});
  // Resolve only actual user photos; no photos are embedded for other accounts.
  await Promise.all(days.map(async day=>{
   if(!day.answer?.photo_url)return;
