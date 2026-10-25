@@ -1567,7 +1567,13 @@ try{
  const {data:{user},error:authError}=await client.auth.getUser();
  if(authError||!user)throw Error("Чтобы открыть личную книгу, войди в аккаунт Анти-Шум.");
  userId=user.id;
- startDate=dateFromDay(kyivDay(user.created_at));
+ const registeredDay=kyivDay(user.created_at);
+ // For existing beta accounts, the official 365-day journey begins at launch.
+ // Keep the beta book visible until then so testing remains possible.
+ const officialStart="2026-11-01";
+ const beginsAt=kyivDay(Date.now())>=officialStart && registeredDay<officialStart
+   ? officialStart : registeredDay;
+ startDate=dateFromDay(beginsAt);
  // Privilege check happens on the server using the protected is_admin flag.
  const {data:adminStatus,error:adminStatusError}=await client.rpc("is_anti_shum_admin");
  if(adminStatusError)console.warn("Book admin check:",adminStatusError);
