@@ -9104,6 +9104,7 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
  .journal-curtain{display:none!important}
 }
 </style>
+<script src="./december-growth.js"></script>
 </head>
 
 <body>
@@ -22798,42 +22799,57 @@ restoreSession();
 
         if (key === "2026-12") {
             art.classList.add("capsule-december");
-            // Two matching paintings: a muted bare tree on day 0 and a
-            // snowy, magical landscape on day 31. No artificial stars.
             const stage = Math.max(0, Math.min(31, count));
-            const folder = "./capsule-assets/december/";
-            const load = src => new Promise((resolve, reject) => {
-                const asset = new Image();
-                asset.onload = () => resolve(src);
-                asset.onerror = reject;
-                asset.src = src;
-            });
+            const paint = window.AntiShumDecemberGrowth;
+            const storageKey = "antiShumCapsuleSeen:" + currentUser.id + ":" + key;
+            let previousStage = Math.max(0, stage - 1);
             try {
-                const [startArt, finalArt] = await Promise.all([
-                    load(folder+"tree-start.webp"),
-                    load(folder+"tree-final.webp")
+                const previous = localStorage.getItem(storageKey);
+                if (previous !== null && Number.isFinite(Number(previous)))
+                    previousStage = Math.max(0, Math.min(stage, Math.floor(Number(previous))));
+            } catch (_) {}
+            const animate = previousStage < stage &&
+                !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            try {
+                const [currentSrc, previousSrc] = await Promise.all([
+                    paint.getFrame(stage),
+                    animate ? paint.getFrame(previousStage) : Promise.resolve(null)
                 ]);
                 if (version !== imageVersion || activeTreeMonth !== key ||
                     overlay.classList.contains("hidden")) return;
-
-                image.src = startArt;
+                image.src = previousSrc || currentSrc;
                 image.classList.remove("hidden");
                 image.style.opacity = "1";
-                topImage.src = finalArt;
-                topImage.style.transition = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-                    ? "none" : "opacity 1400ms ease-in-out";
-                // Reveal more of the final painting as the month fills.
-                topImage.style.opacity = "0";
-                requestAnimationFrame(() => requestAnimationFrame(() => {
-                    if (version === imageVersion && activeTreeMonth === key)
-                        topImage.style.opacity = String(stage/31);
-                }));
+                topImage.style.transition = animate ? "opacity 1600ms ease-in-out" : "none";
+                if (animate) {
+                    topImage.src = currentSrc;
+                    topImage.style.opacity = "0";
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        if (version === imageVersion && activeTreeMonth === key)
+                            topImage.style.opacity = "1";
+                    }));
+                    setTimeout(() => {
+                        if (version !== imageVersion || activeTreeMonth !== key) return;
+                        image.src = currentSrc;
+                        topImage.style.transition = "none";
+                        topImage.style.opacity = "0";
+                        topImage.removeAttribute("src");
+                    }, 1900);
+                } else {
+                    topImage.style.opacity = "0";
+                    topImage.removeAttribute("src");
+                }
+                const remember = () => {
+                    if (version !== imageVersion || activeTreeMonth !== key) return;
+                    try { localStorage.setItem(storageKey,String(stage)); } catch (_) {}
+                };
+                if (animate) setTimeout(remember,1900);
+                else remember();
                 displayedCount = stage;
-            } catch (err) {
-                // Missing artwork should not leave the capsule blank.
+            } catch (error) {
                 if (version !== imageVersion || activeTreeMonth !== key) return;
-                console.warn("December illustration failed to load:",err);
-                image.src = folder+"winter-tree.svg";
+                console.warn("December stages:",error);
+                image.src = paint.first;
                 image.classList.remove("hidden");
                 image.style.opacity = "1";
                 topImage.removeAttribute("src");
@@ -23300,6 +23316,7 @@ const label=document.getElementById("ashPreviewStageLabel");
 const panel=document.getElementById("ashPreviewArt");
 const base=document.getElementById("ashPreviewBase");
 const growth=document.getElementById("ashPreviewGrowth");
+let decemberPreviewVersion=0;
 function render(){
  const december=month.value==="12";
  const max=december?31:30;
@@ -23310,12 +23327,16 @@ function render(){
  panel.querySelector(".capsule-winter-points")?.remove();
  panel.classList.toggle("capsule-december",december);
  if(december){
-  // The admin sees the same gradual transformation as the real capsule.
-  base.src="./capsule-assets/december/tree-start.webp";
-  growth.src="./capsule-assets/december/tree-final.webp";
-  growth.style.transition="opacity 320ms ease";
-  growth.style.opacity=String(n/31);
+  // The real painted frame for every number, not a transparency percentage.
+  base.src=window.AntiShumDecemberGrowth.first;
+  growth.removeAttribute("src");growth.style.opacity="0";
+  const requested=++decemberPreviewVersion;
+  window.AntiShumDecemberGrowth.getFrame(n).then(src=>{
+   if(requested!==decemberPreviewVersion || month.value!=="12")return;
+   base.src=src;
+  }).catch(error=>console.warn("December preview:",error));
  }else{
+  ++decemberPreviewVersion;
   base.src="./capsule-assets/november/tree-base.png";
   if(n){growth.src="./capsule-assets/november/tree-overlay-"+String(n).padStart(2,"0")+".png";growth.style.opacity="1"}
   else{growth.removeAttribute("src");growth.style.opacity="0"}
