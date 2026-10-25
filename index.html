@@ -22824,6 +22824,10 @@ restoreSession();
                 if (animate) {
                     topImage.src = currentSrc;
                     topImage.style.opacity = "0";
+                    // Wait for the painted image to decode so the fade never jumps.
+                    if (topImage.decode) await topImage.decode().catch(() => {});
+                    if (version !== imageVersion || activeTreeMonth !== key ||
+                        overlay.classList.contains("hidden")) return;
                     requestAnimationFrame(() => requestAnimationFrame(() => {
                         if (version === imageVersion && activeTreeMonth === key)
                             topImage.style.opacity = "1";
@@ -23328,7 +23332,8 @@ function render(){
  panel.classList.toggle("capsule-december",december);
  if(december){
   // The real painted frame for every number, not a transparency percentage.
-  base.src=window.AntiShumDecemberGrowth.first;
+  if(base.dataset.previewMonth!=="12")base.src=window.AntiShumDecemberGrowth.first;
+  base.dataset.previewMonth="12";
   growth.removeAttribute("src");growth.style.opacity="0";
   const requested=++decemberPreviewVersion;
   window.AntiShumDecemberGrowth.getFrame(n).then(src=>{
@@ -23337,6 +23342,7 @@ function render(){
   }).catch(error=>console.warn("December preview:",error));
  }else{
   ++decemberPreviewVersion;
+  base.dataset.previewMonth="11";
   base.src="./capsule-assets/november/tree-base.png";
   if(n){growth.src="./capsule-assets/november/tree-overlay-"+String(n).padStart(2,"0")+".png";growth.style.opacity="1"}
   else{growth.removeAttribute("src");growth.style.opacity="0"}
