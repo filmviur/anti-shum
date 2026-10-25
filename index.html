@@ -15913,7 +15913,10 @@ function shouldShowReleaseWaiting() {
         Boolean(currentUser) &&
         !isCurrentUserAdmin &&
         Number.isFinite(Date.parse(RELEASE_WAITING_TARGET)) &&
-        Date.now() < Date.parse(RELEASE_WAITING_TARGET);
+        (
+            Date.now() < Date.parse(RELEASE_WAITING_TARGET) ||
+            PROJECT_START_DATE !== RELEASE_WAITING_TARGET.slice(0,10)
+        );
 }
 function stopReleaseWaitingClock() {
     if (releaseWaitingClockHandle !== null) {
