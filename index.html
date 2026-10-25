@@ -10747,6 +10747,22 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
   <p class="ash-muted"><a href="./polls.html" target="_blank" rel="noopener">Посмотреть страницу голосований для пользователей ↗</a></p>
  </div>
 </div>
+<section class="ash-card" id="ashPreviewPanel" style="margin:22px 0">
+ <h3>✦ Режим проверки</h3>
+ <p class="ash-muted">Только пример дерева. Здесь не используются и не изменяются настоящие ответы участников.</p>
+ <div class="ash-actions" style="flex-wrap:wrap;align-items:center">
+  <label for="ashPreviewMonth">Месяц</label>
+  <select id="ashPreviewMonth"><option value="11">Ноябрь</option><option value="12">Декабрь</option></select>
+  <label for="ashPreviewStage">Ответов</label>
+  <input id="ashPreviewStage" type="range" min="0" max="30" step="1" value="0">
+  <strong id="ashPreviewStageLabel">0 из 30</strong>
+ </div>
+ <div id="ashPreviewArt" class="capsule-art" style="width:min(390px,100%);margin:14px auto">
+  <img id="ashPreviewBase" alt="Дерево выбранного месяца">
+  <img id="ashPreviewGrowth" class="capsule-tree-next" alt="" aria-hidden="true" style="opacity:1">
+ </div>
+ <p class="ash-muted">Книгу можно безопасно проверить отдельно: <a href="./book.html" target="_blank" rel="noopener">открыть мою книгу</a>.</p>
+</section>
 <!-- STATISTICS -->
 <div id="adminStatsSection" class="admin-section hidden" data-admin-content="stats">
  <div class="admin-section-title">СТАТИСТИКА</div>
@@ -23253,6 +23269,53 @@ document.querySelectorAll(".admin-nav-btn").forEach(b=>b.addEventListener("click
  if(b.dataset.adminSection==="users")loadPeople();
  if(b.dataset.adminSection==="stats")loadStats();
 }));
+})();
+</script>
+
+
+<script>
+/* An isolated administrator preview. It reads only public artwork; no writes. */
+(function(){
+const month=document.getElementById("ashPreviewMonth");
+const stage=document.getElementById("ashPreviewStage");
+const label=document.getElementById("ashPreviewStageLabel");
+const panel=document.getElementById("ashPreviewArt");
+const base=document.getElementById("ashPreviewBase");
+const growth=document.getElementById("ashPreviewGrowth");
+function render(){
+ const december=month.value==="12";
+ const max=december?31:30;
+ stage.max=String(max);
+ stage.value=String(Math.min(max,Number(stage.value)));
+ const n=Number(stage.value);
+ label.textContent=n+" из "+max;
+ panel.querySelector(".capsule-winter-points")?.remove();
+ panel.classList.toggle("capsule-december",december);
+ if(december){
+  base.src="./capsule-assets/december/winter-tree.svg";
+  growth.removeAttribute("src");
+  growth.style.opacity="0";
+  const frost=document.createElement("div");
+  frost.className="capsule-winter-points";
+  frost.setAttribute("aria-hidden","true");
+  const seeded=i=>{const v=Math.sin(i*71.09+16)*41279.6;return v-Math.floor(v)};
+  for(let i=0;i<n;i++){
+   const flake=document.createElement("span");
+   flake.className="capsule-winter-flake is-grown";
+   flake.style.left=(23+seeded(i+31)*56)+"%";
+   flake.style.top=(14+seeded(i+307)*64)+"%";
+   frost.append(flake);
+  }
+  panel.append(frost);
+ }else{
+  base.src="./capsule-assets/november/tree-base.png";
+  if(n){growth.src="./capsule-assets/november/tree-overlay-"+String(n).padStart(2,"0")+".png";growth.style.opacity="1"}
+  else{growth.removeAttribute("src");growth.style.opacity="0"}
+ }
+}
+month.addEventListener("change",()=>{stage.value="0";render()});
+stage.addEventListener("input",render);
+render();
 })();
 </script>
 
