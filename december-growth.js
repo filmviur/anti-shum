@@ -75,7 +75,12 @@
   overlay.width=w;overlay.height=h;
   const overlayContext=overlay.getContext("2d");
   if(!overlayContext)throw Error("Рисование дерева недоступно на этом устройстве");
+  // Early snow stays subdued under the overcast sky; warmth arrives gradually.
+  const brightness=(.62+.38*Math.pow(stage/31,1.15)).toFixed(3);
+  const saturation=(.48+.52*stage/31).toFixed(3);
+  overlayContext.filter="brightness("+brightness+") saturate("+saturation+")";
   overlayContext.drawImage(after,0,0,w,h);
+  overlayContext.filter="none";
   overlayContext.globalCompositeOperation="destination-in";
   overlayContext.drawImage(mask,0,0,w,h);
   overlayContext.globalCompositeOperation="source-over";
