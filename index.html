@@ -9027,6 +9027,29 @@ body:has(#networkOfflineOverlay:not(.hidden)) {
     transition:transform .18s ease,opacity .18s ease;
 }
 #closedView .closed-pull-cue.is-visible {opacity:1}
+
+/* First-time introduction: quiet and optional, no change to the journal layout. */
+.ash-welcome-backdrop{position:fixed;inset:0;z-index:10035;padding:18px;
+ display:flex;align-items:center;justify-content:center;
+ background:rgba(9,8,7,.92);backdrop-filter:blur(6px);overflow-y:auto}
+.ash-welcome-card{position:relative;width:min(470px,100%);max-height:calc(100dvh - 36px);
+ overflow-y:auto;padding:24px 24px 20px;text-align:center;
+ border:1px solid rgba(201,168,106,.48);border-radius:12px;
+ background:radial-gradient(circle at 50% 20%,#44301f,#1c1712 70%);
+ box-shadow:0 20px 55px rgba(0,0,0,.55);color:#e6d0ac}
+.ash-welcome-skip{display:block;margin:0 0 8px auto;border:0;background:transparent;
+ color:#bea47a;padding:9px;font-size:13px}
+.ash-welcome-emblem{font-size:51px;margin:8px auto 13px}
+.ash-welcome-card h2{font:600 clamp(27px,6vw,36px)/1.15 "Cormorant Garamond",Georgia,serif;
+ color:#eed2a1;margin:0 0 17px}
+.ash-welcome-card p{font:15px/1.68 Georgia,serif;color:#d5c3a6;margin:0 auto 19px;max-width:340px}
+.ash-welcome-dots{display:flex;justify-content:center;gap:9px;margin:22px 0}
+.ash-welcome-dots span{height:7px;width:7px;border-radius:10px;background:#63503c}
+.ash-welcome-dots span.is-active{background:#dfb875;width:21px}
+.ash-welcome-next{width:100%;min-height:46px;border:1px solid #c9a66b;border-radius:6px;
+ background:#65472b;color:#fff0cf;font-weight:600}
+.ash-welcome-help{font:12px/1.4 Georgia,serif;color:#ae9879;margin-top:14px}
+@media(max-height:650px){.ash-welcome-card{padding:12px 18px}.ash-welcome-emblem{font-size:38px;margin:0 0 5px}}
 </style>
 
 <style id="diary-motion-system">
@@ -9606,6 +9629,21 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
     ✦ Нет соединения · Подробнее
 </button>
 
+
+<!-- A three-step introduction, displayed only after the first successful login. -->
+<div id="ashWelcomeOverlay" class="ash-welcome-backdrop hidden" role="dialog"
+ aria-modal="true" aria-labelledby="ashWelcomeTitle">
+ <section class="ash-welcome-card">
+   <button id="ashWelcomeSkip" class="ash-welcome-skip" type="button">Пропустить</button>
+   <div id="ashWelcomeEmblem" class="ash-welcome-emblem" aria-hidden="true">🌿</div>
+   <h2 id="ashWelcomeTitle">Здесь можно услышать себя</h2>
+   <p id="ashWelcomeText">Каждый вечер в 20:00 тебя ждёт один вопрос.</p>
+   <div class="ash-welcome-dots" id="ashWelcomeDots" aria-hidden="true"></div>
+   <button id="ashWelcomeNext" class="ash-welcome-next" type="button">Далее</button>
+   <div class="ash-welcome-help">Знакомство можно открыть повторно в профиле.</div>
+ </section>
+</div>
+
 <!-- MAIN APP -->
 
 <main id="appScreen" class="hidden">
@@ -10029,6 +10067,12 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
     "
 >
     ✦ Открыть капсулу времени
+</button>
+
+<div class="profile-section-title">ЗНАКОМСТВО С ПРОЕКТОМ</div>
+<button id="ashReplayWelcome" class="secondary-btn" type="button"
+ style="display:block;width:100%;margin-bottom:24px;min-height:45px">
+ ✦ Как устроен «Анти-Шум»
 </button>
 
 <!-- КНИГА ВОСПОМИНАНИЙ -->
@@ -13522,6 +13566,8 @@ appScreen.classList.add("hidden");
     appInitializedUserId = initializingUserId;
     bootScreen.classList.add("hidden");
     appScreen.classList.remove("hidden");
+    // Welcome appears only after a ready authenticated screen; not over the login form.
+    showAshWelcome();
 
 
     /* =========================
@@ -21722,6 +21768,64 @@ closedView.addEventListener("touchend", () => {
     }
 }, {passive:true});
 closedView.addEventListener("touchcancel", resetClosedPullCue, {passive:true});
+
+
+/* Calm, optional, three-page introduction. */
+const ashWelcomeOverlay=document.getElementById("ashWelcomeOverlay");
+const ashWelcomeTitle=document.getElementById("ashWelcomeTitle");
+const ashWelcomeText=document.getElementById("ashWelcomeText");
+const ashWelcomeEmblem=document.getElementById("ashWelcomeEmblem");
+const ashWelcomeDots=document.getElementById("ashWelcomeDots");
+const ashWelcomeNext=document.getElementById("ashWelcomeNext");
+const ashWelcomeSlides=[
+ {emblem:"🌿",title:"Здесь можно услышать себя",
+  text:"Каждый вечер в 20:00 по Киеву тебя ждёт один вопрос. У тебя есть 20 минут, чтобы ответить и прочитать мысли других."},
+ {emblem:"🫂",title:"Здесь тебя не оценивают",
+  text:"Сначала ты делишься своей мыслью, а затем открываются ответы других людей. Без личных переписок, рейтингов и гонки за вниманием."},
+ {emblem:"📖",title:"Твоя история останется с тобой",
+  text:"Ответы сохраняются в личном архиве и постепенно становятся страницами твоей книги. Если ты пропустил день — ничего страшного."}
+];
+let ashWelcomeStep=0;
+function renderAshWelcome(){
+ const slide=ashWelcomeSlides[ashWelcomeStep];
+ ashWelcomeTitle.textContent=slide.title;
+ ashWelcomeText.textContent=slide.text;
+ ashWelcomeEmblem.textContent=slide.emblem;
+ ashWelcomeDots.replaceChildren();
+ ashWelcomeSlides.forEach((_,i)=>{
+  const dot=document.createElement("span");
+  if(i===ashWelcomeStep)dot.classList.add("is-active");
+  ashWelcomeDots.append(dot);
+ });
+ ashWelcomeNext.textContent=ashWelcomeStep===ashWelcomeSlides.length-1?"Начать":"Далее";
+}
+function hideAshWelcome(){
+ ashWelcomeOverlay.classList.add("hidden");
+ if(currentUser?.id){
+  try{localStorage.setItem("antiShumWelcomeDoneV1:"+currentUser.id,"1")}catch(error){}
+ }
+}
+function showAshWelcome(force=false){
+ if(!currentUser||isCurrentUserAdmin&&!force)return;
+ try{
+  if(!force&&localStorage.getItem("antiShumWelcomeDoneV1:"+currentUser.id)==="1")return;
+ }catch(error){}
+ ashWelcomeStep=0;renderAshWelcome();
+ ashWelcomeOverlay.classList.remove("hidden");
+ ashWelcomeNext.focus();
+}
+document.getElementById("ashWelcomeSkip").addEventListener("click",hideAshWelcome);
+ashWelcomeNext.addEventListener("click",()=>{
+ if(ashWelcomeStep===ashWelcomeSlides.length-1){hideAshWelcome();return}
+ ashWelcomeStep++;renderAshWelcome();
+});
+document.getElementById("ashReplayWelcome").addEventListener("click",()=>showAshWelcome(true));
+ashWelcomeOverlay.addEventListener("click",event=>{
+ if(event.target===ashWelcomeOverlay)hideAshWelcome();
+});
+document.addEventListener("keydown",event=>{
+ if(event.key==="Escape"&&!ashWelcomeOverlay.classList.contains("hidden"))hideAshWelcome();
+});
 
 /* =========================================================
    PWA
