@@ -1074,15 +1074,19 @@ function buildNovemberTreeArt(ownerDocument){
 
 function buildDecemberTreeArt(doc){
  const scene=doc.createElement("div");scene.className="november-tree-art";
- const image=doc.createElement("img");
- image.src=new URL("./capsule-assets/december/winter-tree.svg",location.href).href;
- image.alt="Зимнее дерево в декабре";scene.append(image);
- const seeded=i=>{const v=Math.sin(i*71.09+16)*41279.6;return v-Math.floor(v)};
- for(let i=0;i<decemberTreeStage;i++){
-  const point=doc.createElement("span");point.textContent="✧";
-  point.style.cssText="position:absolute;left:"+(23+seeded(i+31)*56)+"%;top:"+
-    (14+seeded(i+307)*64)+"%;font-size:11px;color:#effaff;text-shadow:0 0 4px #759caf";
-  scene.append(point);
+ const opacity=Math.max(0,Math.min(31,decemberTreeStage))/31;
+ for(const [file,alpha,alt] of [
+  ["tree-start.webp",1,"Голое дерево в сумерках"],
+  ["tree-final.webp",opacity,"Заснеженное дерево после всех декабрьских ответов"]
+ ]){
+  const img=doc.createElement("img");
+  img.src=new URL("./capsule-assets/december/"+file,location.href).href;
+  img.alt=alt;
+  img.loading="eager";
+  img.decoding="async";
+  img.style.opacity=String(alpha);
+  if(file==="tree-final.webp")img.style.transition="opacity 1200ms ease";
+  scene.append(img);
  }
  return scene;
 }
