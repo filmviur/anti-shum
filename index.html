@@ -15778,8 +15778,8 @@ async function refreshReactionButtons(answerId = null) {
             item.user_id === currentId && item.reaction_type === type);
         button.classList.toggle("selected", selected);
         button.classList.toggle("active", selected);
-        button.textContent = count ? button.dataset.reactionLabel + " " + count
-            : button.dataset.reactionLabel;
+        const translatedLabel = window.AntiShumI18n?.t(button.dataset.reactionLabel) || button.dataset.reactionLabel;
+        button.textContent = count ? translatedLabel + " " + count : translatedLabel;
     }
 }
 
@@ -15791,7 +15791,8 @@ function createReactionButton(text, answerId, reactionType, count, selected) {
     button.dataset.reactionType = reactionType;
     button.dataset.reactionLabel = text;
     if (selected) button.classList.add("selected", "active");
-    button.textContent = count > 0 ? `${text} ${count}` : text;
+    const localized = window.AntiShumI18n?.t(text) || text;
+    button.textContent = count > 0 ? `${localized} ${count}` : localized;
 
     button.addEventListener("click", async function() {
         if (!currentUser || !answerId || !reactionType || button.disabled) return;
@@ -23215,19 +23216,25 @@ restoreSession();
     let archiveAnswers = new Map();
     let activeTreeMonth = "2026-10";
     const monthNames = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+    const capsuleLang = () => window.AntiShumI18n?.language || "ru";
+    const capsuleT = text => window.AntiShumI18n?.t(text) || text;
+    const capsuleCount = (count, days) => capsuleLang()==="uk"
+        ? count + " із " + days + " днів із відповідями"
+        : capsuleLang()==="en" ? count + " of " + days + " days with answers"
+        : count + " из " + days + " дней с ответами";
     function monthKey(date) { return date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2,"0"); }
     function renderArchive() {
         const key = archiveMonths[selectedMonth];
         if (!key) return;
         const [year, month] = key.split("-").map(Number);
         const days = new Date(year,month,0).getDate();
-        monthTitle.textContent = monthNames[month-1] + " " + year;
+        monthTitle.textContent = capsuleT(monthNames[month-1]) + " " + year;
         prevMonth.disabled = selectedMonth === 0;
         nextMonth.disabled = selectedMonth === archiveMonths.length-1;
         const answeredCount = Array.from({length:days},(_,i)=>archiveAnswers.has(key+"-"+(i+1))).filter(Boolean).length;
         updateMonthlyTree(key, answeredCount, days);
         document.getElementById("capsuleMonthProgress").textContent =
-            answeredCount + " из " + days + " дней с ответами";
+            capsuleCount(answeredCount, days);
         dayGrid.replaceChildren();
         for(let day=1;day<=days;day++) {
             const answer = archiveAnswers.get(key + "-" + day);
@@ -23240,7 +23247,7 @@ restoreSession();
             if(answer) btn.addEventListener("click",()=>selectArchiveAnswer(btn,answer,day));
             dayGrid.appendChild(btn);
         }
-        detail.textContent="Выбери заполненный день, чтобы прочитать свой ответ.";
+        detail.textContent=capsuleT("Выбери заполненный день, чтобы прочитать свой ответ.");
         const first=dayGrid.querySelector(".has-answer");
         if(first) first.click();
     }
@@ -23248,12 +23255,12 @@ restoreSession();
         dayGrid.querySelectorAll(".is-selected").forEach(el=>el.classList.remove("is-selected"));
         btn.classList.add("is-selected");
         detail.replaceChildren();
-        const heading=document.createElement("h4"); heading.textContent="День "+day;
+        const heading=document.createElement("h4"); heading.textContent=(capsuleLang()==="en"?"Day ":capsuleLang()==="uk"?"День ":"День ")+day;
         detail.appendChild(heading);
         const question=document.createElement("div");question.className="capsule-question";
-        question.textContent=answer.questionText || "Вопрос дня";
+        question.textContent=window.AntiShumI18n?.translateRecord(answer.questionRecord,"question") || answer.questionText || capsuleT("Вопрос дня");
         detail.appendChild(question);
-        const body=document.createElement("div");body.textContent=answer.answer_text || "Ответ с фотографией";
+        const body=document.createElement("div");body.setAttribute("data-no-translate","");body.textContent=answer.answer_text || capsuleT("Ответ с фотографией");
         detail.appendChild(body);
         if(answer.photo_url && typeof createSignedPhoto === "function") {
             try {
@@ -23282,12 +23289,15 @@ restoreSession();
             }
             if(day<1||day>new Date(Number(key.slice(0,4)),Number(key.slice(5)),0).getDate()) continue;
             keys.add(key);
-            archiveAnswers.set(key+"-"+day,{...answer,questionText:question?.question||question?.text||question?.question_text||""});
+            archiveAnswers.set(key+"-"+day,{...answer,questionRecord:question,questionText:question?.question||question?.text||question?.question_text||""});
         }
         archiveMonths=[...keys].sort();
         selectedMonth=Math.max(0,archiveMonths.indexOf(currentKey));
         renderArchive();
     }
+    document.addEventListener("anti-shum-language-changed",()=>{
+        if(archiveMonths.length && !overlay.classList.contains("hidden")) renderArchive();
+    });
     // Month-specific tree views. October retains its existing six original images.
     // November's approved artwork will live at capsule-assets/november/tree-01.png
     // (later growth stages can be added without changing archive records).
@@ -23297,8 +23307,8 @@ restoreSession();
         activeTreeMonth = key;
         const isOctober = key === "2026-10";
         const isNovember = key === "2026-11";
-        status.textContent = (isOctober ? "Дерево октября" : isNovember ? "Дерево ноября" : key==="2026-12" ? "Дерево зимней тишины" : "Дерево " + key)
-            + " · " + count + " из " + days + " дней с ответами";
+        status.textContent = capsuleT(isOctober ? "Дерево октября" : isNovember ? "Дерево ноября" : key==="2026-12" ? "Дерево зимней тишины" : "Дерево") + (isOctober||isNovember||key==="2026-12" ? "" : " " + key)
+            + " · " + capsuleCount(count, days);
         const version = ++imageVersion;
         art.querySelector(".capsule-previous-growth")?.remove();
         art.querySelector(".capsule-winter-points")?.remove();
@@ -23386,7 +23396,7 @@ restoreSession();
         if (!isNovember) {
             const info = document.createElement("div");
             info.className = "capsule-month-placeholder";
-            info.textContent = "Дерево этого месяца пока не подготовлено.";
+            info.textContent = capsuleT("Дерево этого месяца пока не подготовлено.");
             art.appendChild(info);
             return;
         }
