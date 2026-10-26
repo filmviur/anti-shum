@@ -233,6 +233,47 @@ Object.assign(strings,{
 "Вопросы о своих данных можно отправить через поддержку на сайте.":["Питання щодо своїх даних можна надіслати через підтримку на сайті.","Questions about your data can be sent through the site's support service."],
 "Версия для предрелизного тестирования · 25 октября 2026 года":["Версія для передрелізного тестування · 25 жовтня 2026 року","Pre-release testing version · October 25, 2026"]
 });
+Object.assign(strings,{
+"← К профилю и сайту":["← До профілю та сайту","← Back to profile and site"],
+"Тишину создают вместе":["Тишу створюють разом","Quiet is something we build together"],
+"Друг проекта":["Друг проєкту","Friend of the project"],
+"Не ради особого статуса. Ради того, чтобы у каждого из нас оставалось место, где можно остановиться, услышать себя и сохранить важное.":["Не заради особливого статусу. А щоб у кожного з нас залишалося місце, де можна зупинитися, почути себе й зберегти важливе.","Not for special status, but to keep a place for each of us to pause, listen to ourselves and preserve what matters."],
+"ПРЕДПРОСМОТР · ДЕМО-ВЕРСИЯ 30 ДНЕЙ":["ПОПЕРЕДНІЙ ПЕРЕГЛЯД · 30-ДЕННА ДЕМО-ВЕРСІЯ","PREVIEW · 30-DAY DEMO"],
+"/ месяц после запуска подписки":["/ місяць після запуску передплати","/ month after subscriptions launch"],
+"Добровольная поддержка существования и развития «Анти-Шума».":["Добровільна підтримка існування та розвитку «Анти-Шуму».","Voluntary support for maintaining and improving Anti-Shum."],
+"На что идёт поддержка?":["На що йде підтримка?","What does your support fund?"],
+"Сохранение записей":["Збереження записів","Keeping your entries"],
+"Хранение ответов, фотографий и личной истории, которая со временем становится книгой.":["Зберігання відповідей, фотографій та особистої історії, яка з часом стає книгою.","Storing answers, photographs and your personal story as it grows into a book."],
+"Работа пространства":["Робота простору","Keeping the space running"],
+"Обслуживание сайта, ежедневных вопросов, уведомлений и безопасность участников.":["Підтримка сайту, щоденних питань, сповіщень і безпеки учасників.","Maintaining the site, daily questions, notifications and participant safety."],
+"Новые возможности":["Нові можливості","New features"],
+"Развитие капсулы времени, книги, удобства сайта и полезных функций.":["Розвиток капсули часу, книги, зручності сайту та корисних функцій.","Improving the time capsule, book, usability and other helpful features."],
+"Независимость идеи":["Незалежність ідеї","Independence of the idea"],
+"Поддержка спокойного проекта без погони за бесконечным вниманием и активностью.":["Підтримка спокійного проєкту без гонитви за нескінченною увагою та активністю.","Supporting a quiet project without chasing endless attention and activity."],
+"Одна честная привилегия — скидка на PDF-книгу":["Одна чесна перевага — знижка на PDF-книгу","One fair benefit — a discount on your PDF book"],
+"После 365 календарных дней с даты личной регистрации участника станет доступна покупка его книги «Мои 365 дней в Анти-Шум» в формате PDF.":["Через 365 календарних днів від особистої реєстрації учасник зможе придбати свою книгу «Мої 365 днів в Анти-Шумі» у форматі PDF.","After 365 calendar days from personal registration, participants can purchase their own 'My 365 Days in Anti-Shum' book as a PDF."],
+"Обычная цена PDF-книги —":["Звичайна ціна PDF-книги —","Standard PDF book price —"],
+"Для участника с действующей подпиской «Друг проекта» —":["Для учасника з активною передплатою «Друг проєкту» —","For a participant with an active Friend of the Project subscription —"],
+"Ваша экономия —":["Ваша економія —","Your savings —"],
+"при покупке.":["під час покупки.","on purchase."],
+"После одной покупки файл можно скачивать повторно в любой удобный момент.":["Після одноразової покупки файл можна завантажувати знову в будь-який зручний час.","Once purchased, the file can be downloaded again whenever you wish."],
+"Все участники равны":["Усі учасники рівні","All participants are equal"],
+"Ежедневные вопросы, ответы, реакции, архив и голосования «Вопросы проекта» остаются бесплатными. Подписка не увеличивает время сессии, не даёт дополнительных голосов и не делает чей-то ответ важнее других.":["Щоденні питання, відповіді, реакції, архів і голосування в «Питаннях проєкту» залишаються безкоштовними. Передплата не подовжує сесію, не додає голосів і не робить чиюсь відповідь важливішою.","Daily questions, answers, reactions, the archive and Project Questions polls remain free. A subscription does not extend sessions, grant extra votes or make anyone's answer more important."],
+"🔒 Оформление временно недоступно":["🔒 Оформлення тимчасово недоступне","🔒 Subscription sign-up temporarily unavailable"],
+"Во время 30-дневной демо-версии деньги не списываются. Мы сначала хотим понять, нужен ли людям этот проект.":["Під час 30-денної демоверсії кошти не стягуються. Спочатку ми хочемо зрозуміти, чи потрібен людям цей проєкт.","No payments are taken during the 30-day demo. We first want to see whether people find this project useful."],
+"Можно ли отказаться от подписки?":["Чи можна відмовитися від передплати?","Can I cancel my subscription?"],
+"Да. После запуска оплаты управление подпиской будет доступно в профиле. По принятому правилу проекта отмена предусматривает возврат суммы за текущий оплаченный месяц, при этом скидка и статус «Друг проекта» прекращаются сразу. До запуска платежей ничего отменять не нужно.":["Так. Після запуску оплати керувати передплатою можна буде в профілі. За правилами проєкту скасування передбачає повернення суми за поточний оплачений місяць, а знижка й статус «Друг проєкту» припиняються відразу. До запуску платежів нічого скасовувати не потрібно.","Yes. Once payments launch, you'll be able to manage your subscription in your profile. Under the project's stated policy, cancellation refunds the current paid month, while the discount and Friend of the Project status end immediately. No cancellation is needed before payments launch."],
+"Обязательно ли подписываться?":["Чи обов’язково оформлювати передплату?","Do I have to subscribe?"],
+"Нет. Не оформляя подписку, вы остаётесь полноценным участником и можете пользоваться основными функциями. Поддержка должна быть добровольной.":["Ні. Без передплати ви залишаєтеся повноправним учасником і можете користуватися основними функціями. Підтримка має бути добровільною.","No. You remain a full participant without subscribing and can use all core features. Support should be voluntary."],
+"Когда можно будет купить книгу?":["Коли можна буде придбати книгу?","When can I buy my book?"],
+"После завершения 365 календарных дней с даты регистрации участника. В демо-версии покупка PDF и сама подписка выключены.":["Після 365 календарних днів від реєстрації учасника. У демоверсії покупка PDF і сама передплата вимкнені.","After 365 calendar days from a participant's registration. PDF purchases and subscriptions are disabled during the demo."],
+"Что если я куплю PDF, а потом отменю подписку?":["Що, як я придбаю PDF, а потім скасую передплату?","What if I buy the PDF and then cancel my subscription?"],
+"Уже купленная PDF-книга останется доступной для повторного скачивания. Отмена влияет на будущие преимущества действующей подписки, а не на отдельную совершённую покупку.":["Придбана PDF-книга залишиться доступною для повторного завантаження. Скасування впливає на майбутні переваги активної передплати, а не на вже здійснену окрему покупку.","Your purchased PDF book remains available for future downloads. Cancellation affects future subscription benefits, not a separate purchase you've already made."],
+"Условия будущей подписки и способы оплаты будут уточнены до её включения. Сейчас страница носит информационный характер: платёжных форм и активных списаний здесь нет.":["Умови майбутньої передплати та способи оплати буде уточнено до її запуску. Зараз сторінка має лише інформаційний характер: платіжних форм і активних списань тут немає.","Subscription terms and payment methods will be finalized before launch. This page is currently informational: there are no payment forms or active charges."],
+"Подробнее:":["Докладніше:","Learn more:"],
+"правила «Друг проекта»":["правила «Друг проєкту»","Friend of the Project rules"],
+"все правила сайта":["усі правила сайту","all site rules"]
+});
 const dict=Object.create(null);
 for(const [k,[uk,en]] of Object.entries(strings))dict[k]={ru:k,uk,en};
 const staticSources=new WeakMap();
