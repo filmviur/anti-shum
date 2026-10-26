@@ -4,6 +4,8 @@
 "use strict";
 const SUPPORTED=["ru","uk","en"],KEY="antiShumLanguage";
 const strings={
+"Знакомство с проектом":["Знайомство з проєктом","Meet the project"],
+"ПОДЕЛИТЬСЯ":["ПОДІЛИТИСЯ","SHARE"],
 "Меню профиля":["Меню профілю","Profile menu"],
 "Настройки профиля":["Налаштування профілю","Profile settings"],
 "МОЁ ПРОСТРАНСТВО":["МІЙ ПРОСТІР","MY SPACE"],
