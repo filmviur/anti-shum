@@ -24,7 +24,9 @@ function setRecoveryView(status,deadline){
  setText("accountRestoreMessage",status==="expired"
   ?"30 дней для возвращения прошли. Профиль ожидает окончательного удаления; восстановление через сайт больше недоступно."
   :"Ты просил удалить профиль. Пока действует период восстановления, можно вернуть прежние ответы, фотографии, книгу и продолжить участие с того же места.");
- setText("accountRestoreDeadline","Восстановление до "+deadlineText(deadline));
+ setText("accountRestoreDeadline",deadline
+  ? "Восстановление до "+deadlineText(deadline)
+  : "Если ошибка повторится, обратись в поддержку.");
  $("accountRestoreAccept").classList.toggle("hidden",status!=="recoverable");
  accountStatus("accountRestoreStatus","");
  open("accountRestoreView");
@@ -74,7 +76,7 @@ $("sendResetEmailBtn").addEventListener("click",async()=>{
  const button=$("sendResetEmailBtn");button.disabled=true;
  try{
   const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{
-   redirectTo:window.location.origin+window.location.pathname
+   redirectTo:new URL("./",window.location.href).href
   });
   if(error)throw error;
   accountStatus("authRecoveryStatus","Если этот email зарегистрирован, на него придёт письмо со ссылкой для смены пароля. Проверь также папку «Спам». Твои записи сохранятся.");
