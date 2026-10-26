@@ -13,12 +13,12 @@
    <link rel="icon" type="image/png" href="./icon-512.png">
 <link rel="manifest" href="./manifest.json">
 
-<meta name="theme-color" content="#0b0b16">
+<meta name="theme-color" content="#15110d">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Анти-Шум">
 <link rel="apple-touch-icon" href="./icon-512.png">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.0/dist/tus.min.js"></script>
@@ -9107,6 +9107,66 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 <link rel="stylesheet" href="./release-waiting.css">
 <link rel="stylesheet" href="./account-management.css">
 <script src="./december-growth.js"></script>
+
+<style id="anti-shum-viewport-fix">
+/* One uninterrupted dark canvas behind Safari's rubber band and iOS safe areas.
+   Preserve the original gradients, layout, and the browser pull-to-refresh. */
+@media screen {
+  :root {
+    color-scheme: dark;
+    background-color: #15110d;
+  }
+  html {
+    background-color: #15110d;
+    min-height: 100%;
+    overscroll-behavior-x: none;
+  }
+  body {
+    background-color: #15110d;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  .page {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-right: calc(16px + env(safe-area-inset-right, 0px));
+    padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+    padding-left: calc(16px + env(safe-area-inset-left, 0px));
+  }
+  @media (max-width: 560px) {
+    .page {
+      padding-top: calc(16px + env(safe-area-inset-top, 0px));
+      padding-right: calc(12px + env(safe-area-inset-right, 0px));
+      padding-bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+      padding-left: calc(12px + env(safe-area-inset-left, 0px));
+    }
+  }
+  /* Installed app: stop pulling the whole document away from its viewport.
+     Do not suppress Safari/Chrome's native pull-down refresh in regular tabs. */
+  @media (display-mode: standalone) {
+    html, body { overscroll-behavior-y: none; }
+  }
+  /* Standalone iOS WebKit reports this independently from display-mode. */
+  html.ash-ios-standalone,
+  html.ash-ios-standalone body { overscroll-behavior-y: none; }
+  /* Fullscreen cards must stay inside the real (dynamic) phone viewport. */
+  #closedView {
+    padding-top: calc(30px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+  }
+  .network-offline-overlay {
+    padding-top: calc(22px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  }
+}
+</style>
+<script>
+/* Set only the standalone iOS class; browser tabs keep native refresh. */
+if (window.navigator.standalone === true) {
+  document.documentElement.classList.add("ash-ios-standalone");
+}
+</script>
 </head>
 
 <body>
