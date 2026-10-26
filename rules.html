@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#100c09">
+<meta name="theme-color" content="#15110d">
 <title>Правила и принципы — Анти-Шум</title>
 <link rel="icon" href="./icon-512.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,6 +45,25 @@ footer{text-align:center;color:#9d8c75;font-size:13px;padding:24px 10px 34px}
 @media(max-width:600px){.header-inner{padding:11px 12px}.brand{font-size:20px}.back{padding:8px 10px;font-size:12px}main{margin-top:13px;padding:0 10px}article{padding:27px 20px}nav ul{columns:1}section{margin-top:31px}th,td{padding:9px 6px;font-size:12px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<style id="anti-shum-viewport-fix">
+@media screen {
+ :root{color-scheme:dark;background-color:#15110d}
+ html{min-height:100%;background-color:#15110d;overscroll-behavior-x:none}
+ body{
+   min-height:100vh;min-height:100dvh;background-color:#15110d;
+   padding-top:env(safe-area-inset-top,0px);
+   padding-bottom:env(safe-area-inset-bottom,0px);
+ }
+ @media (display-mode:standalone){html,body{overscroll-behavior-y:none}}
+ html.ash-ios-standalone,html.ash-ios-standalone body{overscroll-behavior-y:none}
+}
+</style>
+<script>
+if(window.navigator.standalone===true)document.documentElement.classList.add("ash-ios-standalone");
+</script>
 </head>
 <body>
 <header><div class="header-inner"><a class="brand" href="./index.html">АНТИ-ШУМ</a><a class="back" href="./index.html">← Вернуться на сайт</a></div></header>
