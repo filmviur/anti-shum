@@ -9172,6 +9172,21 @@ if (window.navigator.standalone === true ||
   document.documentElement.classList.add("ash-ios-standalone");
 }
 </script>
+<style id="ash-auth-language-style">
+.ash-auth-language{
+ display:flex;align-items:center;justify-content:center;gap:14px;
+ width:100%;margin:16px auto 18px;padding:0 4px;
+ color:#d5bc94;font:14px/1.4 Georgia,serif
+}
+.ash-auth-language label{white-space:nowrap}
+.ash-auth-language select{
+ flex:1;min-width:0;max-width:190px;padding:11px 12px;
+ color:#edd4b0;background:#211a15;border:1px solid rgba(201,168,106,.45);
+ border-radius:6px;font:15px/1.3 Georgia,serif;
+}
+.ash-auth-language select:focus-visible{outline:2px solid #e4c18d;outline-offset:2px}
+@media(max-width:360px){.ash-auth-language{gap:7px;font-size:13px}.ash-auth-language select{max-width:164px}}
+</style>
 </head>
 
 <body>
@@ -9233,6 +9248,14 @@ if (window.navigator.standalone === true ||
             </button>
         </div>
 
+        <div class="ash-auth-language" id="authLanguageSetting">
+            <label for="authLanguageSelect">Язык сайта</label>
+            <select id="authLanguageSelect" aria-label="Язык сайта">
+                <option value="ru">Русский</option>
+                <option value="uk">Українська</option>
+                <option value="en">English</option>
+            </select>
+        </div>
         <form id="authForm">
 
             <div id="nameField" class="field hidden">
@@ -13012,6 +13035,18 @@ function questionNeedsPhoto(question) {
 
 
 /* Настройки языка: локально сразу, в профиле — сохранение в БД. */
+const authLanguageSelect=document.getElementById("authLanguageSelect");
+if(authLanguageSelect){
+  authLanguageSelect.value=window.AntiShumI18n?.language||"ru";
+  authLanguageSelect.addEventListener("change",()=>{
+    const code=window.AntiShumI18n?.setLanguage(authLanguageSelect.value);
+    const profile=document.getElementById("profileLanguageSelect");
+    if(profile)profile.value=code||"ru";
+  });
+  document.addEventListener("anti-shum-language-changed",()=>{
+    authLanguageSelect.value=window.AntiShumI18n?.language||"ru";
+  });
+}
 const profileLanguageSelect=document.getElementById("profileLanguageSelect");
 if (profileLanguageSelect) {
   profileLanguageSelect.value=window.AntiShumI18n?.language || "ru";
@@ -13087,7 +13122,10 @@ function setAuthMode(mode) {
     );
 
     document.getElementById("authRecoveryActions")?.classList.toggle("hidden", register);
-    document.getElementById("authPrelaunchNotifications")?.classList.toggle("hidden", !register);
+    // Launch notifications are offered only when the owner activates prelaunch mode.
+    document.getElementById("authPrelaunchNotifications")?.classList.toggle(
+        "hidden", !register || window.AntiShumRelease?.enabled !== true
+    );
     authSubmitBtn.textContent =
         register
             ? "Зарегистрироваться"
