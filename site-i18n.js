@@ -444,6 +444,9 @@ Object.assign(strings,{
 const dict=Object.create(null);
 for(const [k,[uk,en]] of Object.entries(strings))dict[k]={ru:k,uk,en};
 const staticSources=new WeakMap();
+// Preserve original attribute values in memory; "sourcearia-label" is not
+// a valid DOMStringMap name and crashes translation on profile load.
+const attributeSources=new WeakMap();
 const blocked="script,style,textarea,code,pre,[contenteditable],[data-no-translate],.answer-text,.answer-card,.support-message,.support-messages,.user-name,.feed-text,.message-text";
 let language=readStored(),busy=false,observer=null;
 function normalize(v){return SUPPORTED.includes(v)?v:"ru";}
@@ -472,13 +475,17 @@ function translateTextNode(node){
 }
 function translateAttrs(el){
  if(el.closest(blocked))return;
+ let sources=attributeSources.get(el);
+ if(!sources){
+  sources=Object.create(null);
+  attributeSources.set(el,sources);
+ }
  for(const name of ["placeholder","title","aria-label"]){
   const old=el.getAttribute(name);
   if(!old)continue;
-  const key="source"+name;
-  const original=el.dataset[key]||old;
+  const original=sources[name]||old;
   if(!dict[original])continue;
-  if(!el.dataset[key])el.dataset[key]=original;
+  if(!sources[name])sources[name]=original;
   const translated=t(original);
   if(translated!==old)el.setAttribute(name,translated);
  }
