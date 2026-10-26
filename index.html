@@ -9144,9 +9144,8 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
   }
   /* Installed app: stop pulling the whole document away from its viewport.
      Do not suppress Safari/Chrome's native pull-down refresh in regular tabs. */
-  @media (display-mode: standalone) {
-    html, body { overscroll-behavior-y: none; }
-  }
+  /* The installed iOS WebKit view has its own standalone class.
+     Other PWA engines keep their native refresh gesture. */
   /* Standalone iOS WebKit reports this independently from display-mode. */
   html.ash-ios-standalone,
   html.ash-ios-standalone body { overscroll-behavior-y: none; }
@@ -9163,7 +9162,9 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 </style>
 <script>
 /* Set only the standalone iOS class; browser tabs keep native refresh. */
-if (window.navigator.standalone === true) {
+if (window.navigator.standalone === true ||
+    (/iPad|iPhone|iPod/.test(navigator.userAgent) &&
+     window.matchMedia("(display-mode: standalone)").matches)) {
   document.documentElement.classList.add("ash-ios-standalone");
 }
 </script>
