@@ -10764,7 +10764,7 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
   <img id="ashPreviewGrowth" class="capsule-tree-next" alt="" aria-hidden="true" style="opacity:1">
  </div>
  <p class="ash-muted">Книгу можно безопасно проверить отдельно: <a href="./book.html" target="_blank" rel="noopener">открыть мою книгу</a>.</p>
- <button type="button" class="ash-btn" id="ashPreviewReleaseScreen">✦ Посмотреть экран ожидания релиза</button>
+ <button type="button" class="ash-btn hidden" id="ashPreviewReleaseScreen">✦ Посмотреть экран ожидания релиза</button>
 </section>
 <!-- STATISTICS -->
 <div id="adminStatsSection" class="admin-section hidden" data-admin-content="stats">
@@ -11680,7 +11680,7 @@ const PROJECT_START_DATE = "2026-10-01";
 
 // Экран ожидания и дата релиза настраиваются независимо от календаря вопросов.
 // Для официального старта календарь PROJECT_START_DATE включается отдельно.
-const RELEASE_WAITING_ENABLED = true;
+const RELEASE_WAITING_ENABLED = false; // Подготовлено, но до отдельного указания не включать.
 const RELEASE_WAITING_TARGET = "2026-11-01T20:00:00+02:00"; // 20:00 по Киеву
 
 
@@ -13878,10 +13878,8 @@ async function loadTodayQuestionAndState() {
     const isAdmin =
         await verifyAdminFeedAccess();
 
-    if (!isAdmin && showReleaseWaitingView()) {
-        return;
-    }
-
+    // Релизный экран выключен. До отдельной команды обычные пользователи
+    // проходят по прежней рабочей логике вопросов и ответов.
     /*
         До начала проекта обычным пользователям
         доступ закрыт.
@@ -15956,6 +15954,8 @@ function updateReleaseWaitingClock() {
     }
 }
 function showReleaseWaitingView(preview=false) {
+    // Полностью выключено на этапе тестирования, включая предпросмотр.
+    if (!RELEASE_WAITING_ENABLED) return false;
     if (!preview && !shouldShowReleaseWaiting()) return false;
     releaseWaitingPreview = Boolean(preview);
     document.getElementById("releaseProfileBtn").classList.toggle("hidden",preview);
