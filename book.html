@@ -1101,7 +1101,7 @@ function bookAnswerDay(a,q){
  const selected=actual.startsWith("2026-10-")&&q&&q.day>=1&&q.day<=31?"2026-10-"+pad(Number(q.day)):actual;
  return startDate&&selected<key(startDate)?actual:selected;
 }
-const text=(tag,cls,value)=>{const el=document.createElement(tag);el.className=cls;el.textContent=value;return el};
+const text=(tag,cls,value)=>{const el=document.createElement(tag);el.className=cls;el.textContent=(cls==="page-answer"||cls==="page-question")?value:bt(value);return el};
 function buildNovemberTreeArt(ownerDocument){
  const scene=ownerDocument.createElement("div");scene.className="november-tree-art";
  const folder=new URL("./capsule-assets/november/",location.href).href;
@@ -1292,7 +1292,7 @@ function setCoverYaw(value,animated=true){
   " сторона книги. Проведи пальцем для вращения или нажми, чтобы открыть");
 }
 function updateSoundButton(){
- soundBtn.textContent=soundEnabled?"🔊 Звук включён":"🔇 Без звука";
+ soundBtn.textContent=bt(soundEnabled?"🔊 Звук включён":"🔇 Без звука");
  soundBtn.setAttribute("aria-pressed",String(soundEnabled));
 }
 updateSoundButton();setCoverYaw(-8);
@@ -1365,18 +1365,18 @@ function show(){
   }
  }
  const pageLabel=pageNumber=>{
-  if(pageNumber===0)return "Пролог";
+  if(pageNumber===0)return bt("Пролог");
   const entry=bookEntries[pageNumber-1];
-  return entry?.type==="novemberTree"?"Итог ноября":entry?.type==="decemberTree"?"Итог декабря":entry?.type==="day"?"День "+entry.number:"";
+  return entry?.type==="novemberTree"?bt("Итог ноября"):entry?.type==="decemberTree"?bt("Итог декабря"):entry?.type==="day"?(bookLang()==="en"?"Day ":"День ")+entry.number:"";
  };
- $("pageInfo").textContent=closed?"Обложка":
+ $("pageInfo").textContent=closed?bt("Обложка"):
   (single?pageLabel(mobileLeaf):
-   [pageLabel(index*2),pageLabel(index*2+1)].filter(Boolean).join(" · "))+" / 365 дней";
+   [pageLabel(index*2),pageLabel(index*2+1)].filter(Boolean).join(" · "))+(bookLang()==="en"?" / 365 days":bookLang()==="uk"?" / 365 днів":" / 365 дней");
  prev.disabled=turning||closed;
  next.disabled=turning||(single?mobileLeaf>=bookEntries.length:index>=Math.floor(bookEntries.length/2));
  backCoverBtn.hidden=!closed;backCoverBtn.disabled=turning;
- bookHint.textContent=closed?"Вращай закрытую книгу пальцем · Нажми, чтобы открыть":
-  "Листай страницы свайпом влево или вправо";
+ bookHint.textContent=bt(closed?"Вращай закрытую книгу пальцем · Нажми, чтобы открыть":
+  "Листай страницы свайпом влево или вправо");
  if(!turning){
   closedScene.hidden=!closed;
   book.style.visibility=closed?"hidden":"visible";
@@ -1742,8 +1742,8 @@ try{
  $("loading").style.visibility="hidden";
  const end=nextYear();
  print.disabled=!canExport();
- print.textContent=canExport()?"Сохранить книгу в PDF":"PDF после "+end.toLocaleDateString("ru-RU");
- print.title=canExport()?"Печатная книга A5":"Доступно после завершения 365 дней";
+ print.textContent=canExport()?bt("Сохранить книгу в PDF"):(bookLang()==="en"?"PDF after ":bookLang()==="uk"?"PDF після ":"PDF после ")+end.toLocaleDateString(bookLang()==="uk"?"uk-UA":bookLang()==="en"?"en-US":"ru-RU");
+ print.title=bt(canExport()?"Печатная книга A5":"Доступно после завершения 365 дней");
  bookReady=true;
  show();
  connectBookRealtime();
