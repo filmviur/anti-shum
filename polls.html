@@ -12,6 +12,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./release-config.js"></script>
 <script src="./site-i18n.js"></script>
+<script defer src="./author-translations.js"></script>
 <style>
 *{box-sizing:border-box}html{scroll-behavior:smooth}
 body{margin:0;min-height:100vh;color:#dcccb4;background:radial-gradient(circle at 50% 0,rgba(118,82,42,.17),transparent 38%),linear-gradient(140deg,#0c0a08,#17110d 60%,#0c0a08);font:15px/1.65 Georgia,"Times New Roman",serif}
@@ -135,6 +136,13 @@ body.admin-embedded .poll-card{margin:12px 0}
 if(window.navigator.standalone===true||(/iPad|iPhone|iPod/.test(navigator.userAgent)&&window.matchMedia("(display-mode:standalone)").matches))document.documentElement.classList.add("ash-ios-standalone");
 </script>
 <script src="./release-access.js"></script>
+<style id="ash-author-translation-style">
+.ash-auto-translate{display:block;margin:8px 0 10px;padding:10px 14px;
+ border:1px solid #8f6d43;border-radius:7px;background:#32251a;
+ color:#e7c79c;font:14px/1.4 Georgia,serif;cursor:pointer}
+.ash-auto-translate:disabled{opacity:.6}
+.ash-auto-translate-status{display:block;color:#c3a982;font:13px Georgia,serif;min-height:18px}
+</style>
 </head>
 <body>
 <a class="global-rules-link" href="./rules.html" aria-label="Правила сайта">§ Правила</a>
