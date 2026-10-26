@@ -12256,6 +12256,14 @@ adminPublishAnnouncementBtn.addEventListener(
         if (!body || !currentUser) {
             return;
         }
+        const announcementUk=document.getElementById("adminAnnouncementUk").value.trim();
+        const announcementEn=document.getElementById("adminAnnouncementEn").value.trim();
+        if(!announcementUk||!announcementEn){
+            adminAnnouncementStatus.textContent=
+              "Добавь переводы на украинский и английский перед отправкой. В поддерживаемом браузере кнопка ✦ Автоперевод подготовит их одним нажатием.";
+            adminAnnouncementStatus.classList.remove("hidden");
+            return;
+        }
 
         const isAdmin =
             await verifyAdminFeedAccess();
@@ -12279,8 +12287,8 @@ adminPublishAnnouncementBtn.addEventListener(
                         title_uk: "Оголошення",
                         title_en: "Announcement",
                         body: body,
-                        body_uk:document.getElementById("adminAnnouncementUk").value.trim()||null,
-                        body_en:document.getElementById("adminAnnouncementEn").value.trim()||null,
+                        body_uk:announcementUk,
+                        body_en:announcementEn,
                         created_by: currentUser.id
                     });
 
