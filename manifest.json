@@ -4,8 +4,8 @@
   "description": "20 минут без информационного шума",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#0b0b16",
-  "theme_color": "#0b0b16",
+  "background_color": "#15110d",
+  "theme_color": "#15110d",
   "icons": [
     {
       "src": "./icon-512.png",
