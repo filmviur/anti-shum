@@ -1646,7 +1646,7 @@ async function syncBookFromServer(){
  if(request!==bookSyncRequest||userId!==targetUser)return;
  decemberArtUrl=refreshedArt;
  const count=days.filter(d=>d.answer).length;
- $("progress").textContent="Начало: "+startDate.toLocaleDateString("ru-RU")+" · Заполнено "+count+" из 365 дней";
+ $("progress").textContent=(bookLang()==="en"?"Started: ":bookLang()==="uk"?"Початок: ":"Начало: ")+startDate.toLocaleDateString(bookLang()==="uk"?"uk-UA":bookLang()==="en"?"en-US":"ru-RU")+(bookLang()==="en"?" · Filled: "+count+" of 365 days":bookLang()==="uk"?" · Заповнено: "+count+" із 365 днів":" · Заполнено "+count+" из 365 дней");
  if(!turning)show();
 }
 function scheduleBookSync(){
@@ -1737,7 +1737,7 @@ try{
  }));
  days.forEach((day,i)=>{if(day.answer&&!seen.has(i+1))newWriting.add(i+1);});
  const count=days.filter(d=>d.answer).length;
- $("progress").textContent="Начало: "+startDate.toLocaleDateString("ru-RU")+" · Заполнено "+count+" из 365 дней";
+ $("progress").textContent=(bookLang()==="en"?"Started: ":bookLang()==="uk"?"Початок: ":"Начало: ")+startDate.toLocaleDateString(bookLang()==="uk"?"uk-UA":bookLang()==="en"?"en-US":"ru-RU")+(bookLang()==="en"?" · Filled: "+count+" of 365 days":bookLang()==="uk"?" · Заповнено: "+count+" із 365 днів":" · Заполнено "+count+" из 365 дней");
  // Keep the loading row's space so the cover does not shift when ready.
  $("loading").style.visibility="hidden";
  const end=nextYear();
