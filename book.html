@@ -1072,6 +1072,21 @@ async function refreshDecemberArt(){
 const monthIdeas=new Map();
 let bookQuestionById=new Map(),bookRealtimeChannel=null,bookSyncRequest=0,bookSyncTimer=null;
 const MONTHS=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+const bookLang=()=>window.AntiShumI18n?.language||"ru";
+const bt=text=>window.AntiShumI18n?.t(text)||text;
+const allMonths={
+ ru:MONTHS,
+ uk:["січня","лютого","березня","квітня","травня","червня","липня","серпня","вересня","жовтня","листопада","грудня"],
+ en:["January","February","March","April","May","June","July","August","September","October","November","December"]
+};
+const monthInBook=date=>allMonths[bookLang()][date.getMonth()];
+const bookDayName=n=>bookLang()==="en"?"Day "+n+" of 365":bookLang()==="uk"?"День "+n+" із 365":"День "+n+" из 365";
+const bookQuestion=q=>window.AntiShumI18n?.translateRecord(q,"question")||q?.question||"";
+const bookAnswered=(count,total)=>bookLang()==="en"?count+" of "+total+" answered days":bookLang()==="uk"?count+" із "+total+" днів із відповідями":count+" из "+total+" дней с ответами";
+const bookTreeTitle=type=>type==="november"
+ ?(bookLang()==="en"?"My November tree":bookLang()==="uk"?"Моє дерево листопада":"Моё дерево ноября")
+ :(bookLang()==="en"?"My tree of winter silence":bookLang()==="uk"?"Моє дерево зимової тиші":"Моё дерево зимней тишины");
+
 const pad=n=>String(n).padStart(2,"0");
 const key=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const kyivDay=v=>{
@@ -1165,7 +1180,7 @@ function fillNovemberTree(el){
 function buildPage(day,number){
  const page=document.createElement("div");page.className="entry-layout";
  const heading=document.createElement("div");heading.className="entry-heading";
- heading.append(text("div","page-kicker","День "+number),text("div","page-date",day.date.getDate()+" "+MONTHS[day.date.getMonth()]+" "+day.date.getFullYear()));
+ heading.append(text("div","page-kicker",bookDayName(number)),text("div","page-date",day.date.getDate()+" "+monthInBook(day.date)+" "+day.date.getFullYear()));
  page.append(heading);
  if(day.answer){
   const q=document.createElement("div");q.className="question-block";
@@ -1542,8 +1557,8 @@ function printBook(){
   const append=(tag,cls,value)=>{
    const el=doc.createElement(tag);el.className=cls;el.textContent=value;flow.append(el);
   };
-  append("div","title","День "+entry.number+" из 365");
-  append("div","date",day.date.getDate()+" "+MONTHS[day.date.getMonth()]+" "+day.date.getFullYear());
+  append("div","title",bookDayName(entry.number));
+  append("div","date",day.date.getDate()+" "+monthInBook(day.date)+" "+day.date.getFullYear());
   append("div","rule","");
   if(day.answer){
    append("div","question-label","Вопрос дня");
@@ -1603,7 +1618,7 @@ async function syncBookFromServer(){
  for(const a of result.data||[]){
   const q=bookQuestionById.get(String(a.question_id));
   const dayKey=bookAnswerDay(a,q);
-  answers.set(dayKey,{answer:a,question:q?.question||""});
+  answers.set(dayKey,{answer:a,question:bookQuestion(q)});
  }
  const imageUpdates=[];
  days.forEach((day,i)=>{
@@ -1696,7 +1711,7 @@ try{
  for(const a of as.data||[]){
   const q=questions.get(String(a.question_id));
   const dayKey=bookAnswerDay(a,q);
-  answers.set(dayKey,{answer:a,question:q?.question||""});
+  answers.set(dayKey,{answer:a,question:bookQuestion(q)});
  }
  for(let i=0;i<365;i++){
   const date=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate()+i);
