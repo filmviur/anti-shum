@@ -106,3 +106,12 @@
 
 /* No project-level quick links float across the release illustration. */
 #appScreen.release-waiting-mode .app-global-actions{display:none!important}
+
+/* The release scene is immersive and deliberately offers no profile or support. */
+#appScreen.release-waiting-mode .app-global-actions,
+#appScreen.release-waiting-mode #profileBtn,
+#appScreen.release-waiting-mode #supportBtn,
+#appScreen.release-waiting-mode #projectQuestionsQuickLink{display:none!important}
+#releaseWaitingView:not(.hidden){animation:release-scene-enter .75s cubic-bezier(.22,.74,.27,1) both}
+@keyframes release-scene-enter{from{opacity:0;filter:brightness(.7);transform:translateY(9px)}to{opacity:1;filter:brightness(1);transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){#releaseWaitingView:not(.hidden){animation:none!important}}
