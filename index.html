@@ -9052,6 +9052,86 @@ body:has(#networkOfflineOverlay:not(.hidden)) {
  background:#65472b;color:#fff0cf;font-weight:600}
 .ash-welcome-help{font:12px/1.4 Georgia,serif;color:#ae9879;margin-top:14px}
 @media(max-height:650px){.ash-welcome-card{padding:12px 18px}.ash-welcome-emblem{font-size:38px;margin:0 0 5px}}
+
+/* ===== Личное пространство: profile visual redesign ===== */
+#profileView.ash-profile-redesign{width:min(900px,100%);padding:0 0 42px;color:#e6d1ac;font-family:Georgia,serif}
+.ash-profile-redesign .ash-pf-topbar{border:0;margin:0 0 18px;justify-content:space-between;padding-bottom:0}
+.ash-profile-redesign .ash-pf-topbar .profile-title{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.ash-profile-redesign .ash-pf-topbar .back-btn{font-size:14px;color:#a68d6b}
+.ash-profile-redesign .ash-pf-menu{position:relative;z-index:5}
+.ash-profile-redesign .ash-pf-menu summary{list-style:none;display:grid;place-items:center;border:1px solid #84633a;border-radius:50%;height:46px;width:46px;color:#cba668;cursor:pointer;font-size:25px;letter-spacing:3px;line-height:1}
+.ash-profile-redesign .ash-pf-menu summary::-webkit-details-marker{display:none}
+.ash-profile-redesign .ash-pf-menu-panel{position:absolute;top:51px;right:0;min-width:220px;border:1px solid #695030;border-radius:9px;background:#211912;box-shadow:0 14px 32px #0009;padding:8px;display:grid;gap:4px}
+.ash-profile-redesign .ash-pf-menu-panel button{position:static;display:block;width:100%;min-height:37px;padding:8px 12px;text-align:left;font:16px Georgia,serif;background:transparent;color:#d5b77e;border:0;white-space:nowrap}
+.ash-profile-redesign .ash-pf-menu-panel button.hidden{display:none!important}
+.ash-profile-redesign .ash-pf-menu-panel button:hover{background:#3c2b1c}
+.ash-profile-redesign .ash-pf-identity{display:flex;gap:26px;align-items:center;padding:0 25px}
+.ash-profile-redesign .ash-pf-identity .profile-avatar-wrap{margin:0;flex:0 0 auto}
+.ash-profile-redesign .ash-pf-identity .profile-avatar{width:142px;height:142px;object-fit:cover;border:1px solid #ad864c;border-radius:50%;box-shadow:0 0 0 5px #261d14}
+.ash-profile-redesign .ash-pf-identity-copy{min-width:0}
+.ash-profile-redesign .profile-name{margin:0 0 8px;text-align:left;color:#f1dec3;font:600 clamp(35px,5vw,53px)/1.05 'Cormorant Garamond',Georgia,serif}
+.ash-profile-redesign .profile-email{margin:7px 0 0;text-align:left;color:#9a8978;font-size:13px;overflow-wrap:anywhere}
+.ash-profile-redesign .ash-pf-kicker{font:600 15px Georgia,serif;letter-spacing:.25em;color:#c8a264}
+.ash-profile-redesign .ash-pf-motto{display:flex;align-items:center;gap:23px;color:#cab9a2;font:20px 'Cormorant Garamond',Georgia,serif;margin:30px 4px 26px}
+.ash-profile-redesign .ash-pf-motto i,.ash-profile-redesign .ash-pf-section-heading i{height:1px;flex:1;background:linear-gradient(90deg,#81603988,#81603955)}
+.ash-profile-redesign .ash-pf-motto b,.ash-profile-redesign .ash-pf-section-heading b{font-size:20px;color:#d1a766;font-weight:400}
+.ash-profile-redesign .ash-pf-book-card{position:relative;min-height:475px;overflow:hidden;border:1px solid #97713f;border-radius:17px;background:linear-gradient(90deg,rgba(19,14,10,.98) 0%,rgba(19,14,10,.83) 37%,rgba(19,14,10,.08) 79%),url('./profile-journal-hero.png') 70% center/cover no-repeat,#1b140f}
+.ash-profile-redesign .ash-pf-book-content{position:relative;max-width:52%;padding:45px 0 34px 46px;display:flex;flex-direction:column;min-height:475px}
+.ash-profile-redesign .ash-pf-eyebrow{font:600 13px Georgia,serif;letter-spacing:.19em;color:#c6a168;line-height:1.7}
+.ash-profile-redesign .ash-pf-book-card h2{font:600 clamp(43px,6vw,68px)/1 'Cormorant Garamond',Georgia,serif;color:#f1dec4;margin:22px 0 22px}
+.ash-profile-redesign .ash-pf-book-card p{color:#c4b7a8;font:clamp(17px,2.2vw,22px)/1.5 'Cormorant Garamond',Georgia,serif;margin:0 0 26px}
+.ash-profile-redesign .ash-pf-primary-action{margin-top:auto;display:flex;align-items:center;justify-content:space-around;gap:20px;min-height:65px;border:1px solid #bc9156;border-radius:12px;padding:10px 22px;background:linear-gradient(130deg,#564029cc,#261d14dd);color:#edc782;text-decoration:none;font:600 27px 'Cormorant Garamond',Georgia,serif;white-space:nowrap}
+.ash-profile-redesign .ash-pf-primary-action:hover{background:#62472d}
+.ash-profile-redesign .ash-pf-capsule-card{margin-top:24px;padding:29px 42px;min-height:158px;display:flex;align-items:end;justify-content:space-between;gap:16px;border:1px solid #846339;border-radius:16px;background:linear-gradient(90deg,#15100ded,rgba(18,13,10,.58) 63%,#15100d55),url('./profile-capsule-night.png') center/cover no-repeat,#1b1510}
+.ash-profile-redesign .ash-pf-capsule-card h2{font:600 23px 'Cormorant Garamond',Georgia,serif;letter-spacing:.12em;color:#dbb77c;margin:0 0 13px}
+.ash-profile-redesign .ash-pf-capsule-card p{font:19px/1.35 'Cormorant Garamond',Georgia,serif;color:#c6b8a7;margin:0}
+.ash-profile-redesign .ash-pf-capsule-open{background:transparent;border:0;color:#e8ba72;cursor:pointer;white-space:nowrap;font:25px 'Cormorant Garamond',Georgia,serif;padding:8px}
+.ash-profile-redesign .ash-pf-capsule-open span{margin-left:16px}
+.ash-profile-redesign .ash-pf-section-heading{display:flex;align-items:center;gap:23px;margin:35px 4px 18px;font:600 19px Georgia,serif;letter-spacing:.18em;color:#d0a76e}
+.ash-profile-redesign .ash-pf-utility{border:1px solid #785833;border-radius:16px;padding:10px 30px;background:linear-gradient(120deg,#2d2117bd,#16120edc)}
+.ash-profile-redesign .ash-pf-utility-row,.ash-profile-redesign .ash-pf-install-row,.ash-profile-redesign .ash-pf-invite{width:100%;display:flex;align-items:center;gap:25px;min-height:98px;text-align:left;background:transparent;border:0;border-bottom:1px solid #7559366e;padding:17px 0;margin:0;text-decoration:none;color:#e8d6ba;border-radius:0}
+.ash-profile-redesign .ash-pf-extra:last-child .ash-pf-utility-row{border-bottom:0}
+.ash-profile-redesign .ash-pf-utility-row:last-child{border-bottom:0}
+.ash-profile-redesign .ash-pf-utility-icon{display:grid;place-items:center;width:54px;height:54px;flex:0 0 54px;border-radius:50%;background:#4a3421;color:#eac185;font:31px Georgia,serif}
+.ash-profile-redesign .ash-pf-utility-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:6px}
+.ash-profile-redesign .ash-pf-utility-copy strong,.ash-profile-redesign .ash-pf-utility-title-button{font:600 26px 'Cormorant Garamond',Georgia,serif;color:#f0dcc0}
+.ash-profile-redesign .ash-pf-utility-copy small{color:#a99a88;font:17px 'Cormorant Garamond',Georgia,serif}
+.ash-profile-redesign .ash-pf-chevron{margin-left:auto;font:35px Georgia,serif;color:#deb67b}
+.ash-profile-redesign .ash-pf-utility-title-button{display:flex;justify-content:space-between;width:100%;border:0;background:transparent;text-align:left;padding:0;cursor:pointer}
+.ash-profile-redesign .ash-pf-utility-title-button span{color:#deb67b}
+.ash-profile-redesign .ash-pf-copy-link{width:max-content;margin-top:1px;padding:0;background:transparent;border:0;text-decoration:underline;text-underline-offset:3px;font:12px Georgia,serif;color:#b8a081;cursor:pointer}
+.ash-profile-redesign .profile-invite-card p{margin:0;font:12px Georgia,serif}
+.ash-profile-redesign .ash-pf-invite{padding:17px 0;background:transparent}
+.ash-profile-redesign .ash-pf-extra .profile-polls-card,.ash-profile-redesign .ash-pf-extra .profile-friend-card{flex-direction:row;align-items:center;gap:25px;padding:17px 0;margin:0;background:transparent;text-align:left}
+.ash-profile-redesign .ash-pf-extra .profile-polls-card__free,.ash-profile-redesign .ash-pf-extra .profile-friend-card__badge{font-size:10px;color:#b8a081}
+.ash-profile-redesign .ash-pf-language{width:max-content;margin:35px auto 0;display:flex;align-items:center;gap:13px;border:1px solid #73532e;border-radius:30px;padding:7px 23px;color:#d4ac6d;background:#211811}
+.ash-profile-redesign .ash-pf-language select{appearance:none;border:0;background:transparent;color:#e6d1b4;font:20px 'Cormorant Garamond',Georgia,serif;cursor:pointer;padding:7px 2px}
+.ash-profile-redesign .ash-pf-language select option{background:#211811;color:#e6d1b4}
+.ash-profile-redesign .ash-pf-sr-only{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap}
+@media(max-width:620px){
+ .ash-profile-redesign .ash-pf-identity{gap:17px;padding:0 9px}
+ .ash-profile-redesign .ash-pf-identity .profile-avatar{width:92px;height:92px}
+ .ash-profile-redesign .profile-name{font-size:37px}
+ .ash-profile-redesign .ash-pf-kicker{font-size:10px;letter-spacing:.2em}
+ .ash-profile-redesign .ash-pf-motto{margin:25px 3px 20px;font-size:17px;gap:12px}
+ .ash-profile-redesign .ash-pf-book-card{min-height:430px;background-position:66% center}
+ .ash-profile-redesign .ash-pf-book-content{min-height:430px;max-width:75%;padding:25px 13px 24px 22px}
+ .ash-profile-redesign .ash-pf-book-card h2{font-size:43px;margin:16px 0}
+ .ash-profile-redesign .ash-pf-book-card p{font-size:17px}
+ .ash-profile-redesign .ash-pf-eyebrow{font-size:10px}
+ .ash-profile-redesign .ash-pf-primary-action{font-size:22px;min-height:56px;gap:8px;padding:8px}
+ .ash-profile-redesign .ash-pf-capsule-card{padding:22px 18px;min-height:145px}
+ .ash-profile-redesign .ash-pf-capsule-card h2{font-size:17px}
+ .ash-profile-redesign .ash-pf-capsule-card p{font-size:16px}
+ .ash-profile-redesign .ash-pf-capsule-open{font-size:20px}
+ .ash-profile-redesign .ash-pf-utility{padding:4px 15px}
+ .ash-profile-redesign .ash-pf-utility-row,.ash-profile-redesign .ash-pf-invite,.ash-profile-redesign .ash-pf-install-row{gap:13px;min-height:83px}
+ .ash-profile-redesign .ash-pf-utility-icon{width:39px;height:39px;flex-basis:39px;font-size:22px}
+ .ash-profile-redesign .ash-pf-utility-copy strong,.ash-profile-redesign .ash-pf-utility-title-button{font-size:21px}
+ .ash-profile-redesign .ash-pf-utility-copy small{font-size:14px}
+}
+@media(max-width:370px){.ash-profile-redesign .ash-pf-book-content{max-width:86%}.ash-profile-redesign .ash-pf-identity .profile-avatar{width:75px;height:75px}.ash-profile-redesign .profile-name{font-size:31px}}
+
 </style>
 
 <style id="diary-motion-system">
@@ -10112,217 +10192,107 @@ if (window.navigator.standalone === true ||
 
 
 <!-- PROFILE -->
-<section
-    id="profileView"
-    class="profile-screen hidden"
->
+<section id="profileView" class="profile-screen hidden ash-profile-redesign">
+  <div class="profile-header ash-pf-topbar">
+    <button id="profileBackBtn" class="back-btn" type="button">← Назад</button>
+    <div class="profile-title">МОЙ ПРОФИЛЬ</div>
+    <details class="ash-pf-menu">
+      <summary title="Настройки профиля" aria-label="Меню профиля">···</summary>
+      <div class="ash-pf-menu-panel profile-header-actions">
+        <button id="editProfileBtn" class="profile-edit-btn" type="button" title="Редактировать профиль" aria-label="Редактировать профиль">✎ Редактировать профиль</button>
+        <button id="adminPanelBtn" class="profile-admin hidden" type="button">Админ-панель</button>
+        <button id="logoutBtn" class="profile-logout" type="button">Выйти</button>
+      </div>
+    </details>
+  </div>
 
-    <div class="profile-header">
-
-        <button
-            id="profileBackBtn"
-            class="back-btn"
-            type="button"
-        >
-            ← Назад
-        </button>
-
-        <div class="profile-title">
-            МОЙ ПРОФИЛЬ
-        </div>
-
-       <div class="profile-header-actions">
-
-    <button
-        id="editProfileBtn"
-        class="profile-edit-btn"
-        type="button"
-        title="Редактировать профиль"
-        aria-label="Редактировать профиль"
-    >
-        ✎
-    </button>
-
-    <button
-        id="adminPanelBtn"
-        class="profile-admin hidden"
-        type="button"
-    >
-        Админ-панель
-    </button>
-
-    <button
-        id="logoutBtn"
-        class="profile-logout"
-        type="button"
-    >
-        Выйти
-    </button>
-
-</div>
-
-    </div>
-
-
+  <div class="ash-pf-identity">
     <div class="profile-avatar-wrap">
-
-        <img
-            id="profileAvatar"
-            class="profile-avatar"
-            alt="Аватар"
-        >
-
-        <input
-            id="avatarInput"
-            type="file"
-            accept="image/*"
-            class="hidden"
-        >
-
+      <img id="profileAvatar" class="profile-avatar" alt="Аватар">
+      <input id="avatarInput" type="file" accept="image/*" class="hidden">
     </div>
-
-    <div
-        id="profileName"
-        class="profile-name"
-    ></div>
-
-    <div
-        id="profileEmail"
-        class="profile-email"
-    ></div>
-
-
-    <div class="profile-actions hidden">
-
-        <button
-            id="changeAvatarBtn"
-            class="secondary-btn"
-            type="button"
-        >
-            Изменить аватар
-        </button>
-
-        <button
-            id="changeNameBtn"
-            class="secondary-btn"
-            type="button"
-        >
-            Изменить имя
-        </button>
-
-        <button
-            id="changeEmailBtn"
-            class="secondary-btn"
-            type="button"
-        >
-            Изменить email
-        </button>
-
-        <button
-            id="changePasswordBtn"
-            class="secondary-btn"
-            type="button"
-        >
-            Изменить пароль
-        </button>
-
+    <div class="ash-pf-identity-copy">
+      <div id="profileName" class="profile-name"></div>
+      <div class="ash-pf-kicker">МОЁ ПРОСТРАНСТВО</div>
+      <div id="profileEmail" class="profile-email"></div>
     </div>
+  </div>
+  <div class="ash-pf-motto"><span>Меньше шума. Больше себя.</span><i aria-hidden="true"></i><b aria-hidden="true">✦</b></div>
 
+  <div class="profile-actions hidden">
+    <button id="changeAvatarBtn" class="secondary-btn" type="button">Изменить аватар</button>
+    <button id="changeNameBtn" class="secondary-btn" type="button">Изменить имя</button>
+    <button id="changeEmailBtn" class="secondary-btn" type="button">Изменить email</button>
+    <button id="changePasswordBtn" class="secondary-btn" type="button">Изменить пароль</button>
+  </div>
 
-    <!-- КАПСУЛА ВРЕМЕНИ -->
-
-<div class="profile-section-title">ЯЗЫК САЙТА</div>
-<div class="ash-language-setting" id="profileLanguageSetting">
-  <label for="profileLanguageSelect">Язык сайта</label>
-  <select id="profileLanguageSelect" aria-label="Язык сайта">
-    <option value="ru">Русский</option>
-    <option value="uk">Українська</option>
-    <option value="en">English</option>
-  </select>
-  <p>Выбранный язык сохранится при повторном входе.</p>
-</div>
-<div class="profile-section-title">
-    КАПСУЛА ВРЕМЕНИ
-</div>
-
-<button
-    id="openTimeCapsuleBtn"
-    class="secondary-btn"
-    type="button"
-    style="
-        display: block;
-        width: 100%;
-        padding: 17px;
-        margin-bottom: 28px;
-        border: 1px solid rgba(201,168,106,0.35);
-        border-radius: 5px;
-        background: linear-gradient(
-            135deg,
-            #3b2d1e,
-            #1c1712
-        );
-        color: #d6b875;
-        font-family: 'Cormorant Garamond', Georgia, serif;
-        font-size: 21px;
-        cursor: pointer;
-    "
->
-    ✦ Открыть капсулу времени
-</button>
-
-<div class="profile-section-title">ЗНАКОМСТВО С ПРОЕКТОМ</div>
-<button id="ashReplayWelcome" class="secondary-btn" type="button"
- style="display:block;width:100%;margin-bottom:24px;min-height:45px">
- ✦ Как устроен «Анти-Шум»
-</button>
-
-<!-- КНИГА ВОСПОМИНАНИЙ -->
-<div class="profile-section-title">МОИ 365 ДНЕЙ В АНТИ-ШУМ</div>
-<a href="./book.html" class="secondary-btn" style="display:block;width:100%;padding:17px;margin-bottom:28px;border:1px solid rgba(201,168,106,.35);border-radius:5px;background:linear-gradient(135deg,#3b2d1e,#1c1712);color:#d6b875;font-family:'Cormorant Garamond',Georgia,serif;font-size:21px;text-align:center;text-decoration:none;">
-    📖 Открыть мою книгу
-</a>
-
-
-<!-- Бесплатные опросы о развитии проекта -->
-<div id="profilePollsArea">
-<div class="profile-section-title">ВОПРОСЫ ПРОЕКТА</div>
-<a href="./polls.html" class="profile-polls-card" aria-label="Вопросы проекта — бесплатные голосования и идеи">
-    <span class="profile-polls-card__title">✦ Вопросы проекта</span>
-    <span class="profile-polls-card__hint">Голосования · ДА / НЕТ / ДРУГОЕ · Предложения идей</span>
-    <span class="profile-polls-card__free">БЕСПЛАТНО ДЛЯ ВСЕХ</span>
-</a>
-</div>
-
-<!-- Блок поддержки виден только обычным пользователям. -->
-<div id="profileFriendArea" class="hidden">
-<div class="profile-section-title">ДРУГ ПРОЕКТА</div>
-<a href="./friend.html" class="profile-friend-card" aria-label="Друг проекта — информация, подписка в демо временно недоступна">
-    <span class="profile-friend-card__title">✦ Друг проекта</span>
-    <span class="profile-friend-card__badge">🔒 ДЕМО · ПОДПИСКА НЕДОСТУПНА</span>
-    <span class="profile-friend-card__hint">Открыть описание · 1,99 $/месяц после демо</span>
-</a>
-</div>
-
-<!-- Приглашение друга — без реферальной программы и наград -->
-<div class="profile-section-title">ПРИГЛАСИТЬ ДРУГА</div>
-<div class="profile-invite-card">
-    <p>Поделись «Анти-Шумом» с человеком, которому тоже нужно немного тишины.</p>
-    <div class="profile-invite-actions">
-        <button id="inviteFriendBtn" class="secondary-btn" type="button">✉ Пригласить друга</button>
-        <button id="copyInviteLinkBtn" class="secondary-btn" type="button">Скопировать ссылку</button>
+  <div class="ash-pf-book-card">
+    <div class="ash-pf-book-content">
+      <div class="ash-pf-eyebrow">МОИ 365 ДНЕЙ В АНТИ-ШУМ</div>
+      <h2>Моя книга</h2>
+      <p>Личные мысли, наблюдения<br>и важные моменты.<br>365 дней тишины, которые<br>принадлежат только вам.</p>
+      <a href="./book.html" class="ash-pf-primary-action"><span aria-hidden="true">▤</span> Открыть <span aria-hidden="true">→</span></a>
     </div>
-    <p id="inviteFriendStatus" role="status" aria-live="polite"></p>
-</div>
+  </div>
 
-<!-- Установку всегда можно найти здесь, даже после «Не сейчас» -->
-<div class="profile-section-title">УСТАНОВКА ПРИЛОЖЕНИЯ</div>
-<button id="openInstallGuideFromProfileBtn" class="profile-install-button hidden" type="button">
-    📱 Добавить «Анти-Шум» на главный экран
-</button>
+  <div class="ash-pf-capsule-card">
+    <div>
+      <h2>КАПСУЛА ВРЕМЕНИ</h2>
+      <p>Ваши мысли сегодня<br>для себя в будущем.</p>
+    </div>
+    <button id="openTimeCapsuleBtn" class="ash-pf-capsule-open" type="button">Открыть <span aria-hidden="true">→</span></button>
+  </div>
 
-<!-- Лента собственных ответов скрыта в профиле. Архив и книга сохраняются. -->
-<div id="ownAnswers" hidden style="display:none!important"></div>
+  <h2 class="ash-pf-section-heading"><span>ПОЛЕЗНОЕ</span><i aria-hidden="true"></i><b aria-hidden="true">✦</b></h2>
+  <div class="ash-pf-utility">
+    <button id="ashReplayWelcome" class="ash-pf-utility-row" type="button">
+      <span class="ash-pf-utility-icon" aria-hidden="true">▤</span>
+      <span class="ash-pf-utility-copy"><strong>О проекте</strong><small>Как устроен «Анти-Шум»</small></span>
+      <span class="ash-pf-chevron" aria-hidden="true">›</span>
+    </button>
+    <div class="profile-invite-card ash-pf-invite">
+      <div class="ash-pf-utility-icon" aria-hidden="true">♧</div>
+      <div class="ash-pf-utility-copy">
+        <button id="inviteFriendBtn" type="button" class="ash-pf-utility-title-button">Пригласить друга <span aria-hidden="true">›</span></button>
+        <small>Поделитесь тишиной</small>
+        <button id="copyInviteLinkBtn" type="button" class="ash-pf-copy-link">Скопировать ссылку</button>
+        <p id="inviteFriendStatus" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+    <div class="ash-pf-install-row">
+      <span class="ash-pf-utility-icon" aria-hidden="true">▯</span>
+      <div class="ash-pf-utility-copy">
+        <button id="openInstallGuideFromProfileBtn" class="ash-pf-utility-title-button profile-install-button hidden" type="button">Установить приложение <span aria-hidden="true">›</span></button>
+        <small>Добавить «Анти-Шум» на главный экран</small>
+      </div>
+    </div>
+    <div id="profilePollsArea" class="ash-pf-extra">
+      <a href="./polls.html" class="ash-pf-utility-row profile-polls-card" aria-label="Вопросы проекта — бесплатные голосования и идеи">
+        <span class="ash-pf-utility-icon" aria-hidden="true">✦</span>
+        <span class="ash-pf-utility-copy"><strong>Вопросы проекта</strong><small>Голосования и предложения идей</small><span class="profile-polls-card__free">БЕСПЛАТНО ДЛЯ ВСЕХ</span></span>
+        <span class="ash-pf-chevron" aria-hidden="true">›</span>
+      </a>
+    </div>
+    <div id="profileFriendArea" class="ash-pf-extra hidden">
+      <a href="./friend.html" class="ash-pf-utility-row profile-friend-card" aria-label="Друг проекта — информация, подписка в демо временно недоступна">
+        <span class="ash-pf-utility-icon" aria-hidden="true">♡</span>
+        <span class="ash-pf-utility-copy"><strong>Друг проекта</strong><small>Информация о поддержке проекта</small><span class="profile-friend-card__badge">🔒 ДЕМО · ПОДПИСКА НЕДОСТУПНА</span></span>
+        <span class="ash-pf-chevron" aria-hidden="true">›</span>
+      </a>
+    </div>
+  </div>
 
+  <div class="ash-pf-language" id="profileLanguageSetting">
+    <span aria-hidden="true">◎</span>
+    <label for="profileLanguageSelect" class="ash-pf-sr-only">Язык сайта</label>
+    <select id="profileLanguageSelect" aria-label="Язык сайта">
+      <option value="ru">Русский</option>
+      <option value="uk">Українська</option>
+      <option value="en">English</option>
+    </select>
+    <span aria-hidden="true">⌄</span>
+  </div>
+  <div id="ownAnswers" hidden style="display:none!important"></div>
 </section>
 
 <!-- ADMIN PANEL -->
