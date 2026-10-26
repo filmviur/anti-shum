@@ -445,6 +445,7 @@ Object.assign(strings,{"✦ Режим проверки":["✦ Режим пер
 Object.assign(strings,{"Дерево":["Дерево","Tree"]});
 Object.assign(strings,{"АДМИН-ПАНЕЛЬ":["АДМІНПАНЕЛЬ","ADMIN PANEL"],"МОДЕРАЦИЯ":["МОДЕРАЦІЯ","MODERATION"],"📢 Объявления":["📢 Оголошення","📢 Announcements"],"Новых жалоб нет.":["Нових скарг немає.","No new reports."],"Скрытых ответов пока нет.":["Прихованих відповідей поки немає.","No hidden answers yet."],"Обработанных жалоб пока нет.":["Опрацьованих скарг поки немає.","No resolved reports yet."],"Дерево выбранного месяца":["Дерево вибраного місяця","Tree for the selected month"],"Загрузка жалоб...":["Завантаження скарг...","Loading reports..."],"Новых жалоб:":["Нових скарг:","New reports:"]});
 Object.assign(strings,{"Здесь собраны 365 дней.":["Тут зібрано 365 днів.","These pages hold 365 days."],"Мысли, переживания, маленькие радости, вдохновение, трудности и важные открытия.":["Думки, переживання, маленькі радощі, натхнення, труднощі й важливі відкриття.","Thoughts, feelings, little joys, inspiration, challenges and important discoveries."],"Каждая страница — часть твоего пути, напоминание о том, каким разным и ценным бывает жизнь.":["Кожна сторінка — частина твого шляху, нагадування про те, яким різноманітним і цінним буває життя.","Every page is part of your journey, a reminder of how varied and precious life can be."],"Пусть эти записи всегда будут для тебя источником сил, спокойствия и тёплых воспоминаний.":["Нехай ці записи завжди дарують тобі сили, спокій і теплі спогади.","May these entries always bring you strength, peace and warm memories."],"Желаем, чтобы впереди было ещё больше хороших дней, искренних людей, новых открытий и всего, что делает жизнь по-настоящему особенной.":["Бажаємо, щоб попереду було ще більше хороших днів, щирих людей, нових відкриттів і всього, що робить життя по-справжньому особливим.","May the days ahead bring more good moments, sincere people, new discoveries and everything that makes life truly special."]});
+Object.assign(strings,{"ВОПРОС ДНЯ":["ПИТАННЯ ДНЯ","QUESTION OF THE DAY"],"Сохранить мысль":["Зберегти думку","Save my thought"],"Загрузка...":["Завантаження...","Loading..."],"Загрузка вопроса...":["Завантаження питання...","Loading question..."]});
 const dict=Object.create(null);
 for(const [k,[uk,en]] of Object.entries(strings))dict[k]={ru:k,uk,en};
 const staticSources=new WeakMap();
@@ -452,6 +453,7 @@ const staticSources=new WeakMap();
 // a valid DOMStringMap name and crashes translation on profile load.
 const attributeSources=new WeakMap();
 const blocked="script,style,textarea,code,pre,[contenteditable],[data-no-translate],.answer-text,.page-answer,.answer-card,.support-message,.support-messages,.user-name,.feed-text,.message-text";
+const blockedAttributes=blocked.replace("textarea,","");
 let language=readStored(),busy=false,observer=null;
 function normalize(v){return SUPPORTED.includes(v)?v:"ru";}
 function readStored(){try{return normalize(localStorage.getItem(KEY));}catch{return "ru"}}
@@ -478,7 +480,7 @@ function translateTextNode(node){
  if(raw!==result)node.nodeValue=result;
 }
 function translateAttrs(el){
- if(el.closest(blocked))return;
+ if(el.closest(blockedAttributes))return;
  let sources=attributeSources.get(el);
  if(!sources){
   sources=Object.create(null);
