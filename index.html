@@ -10969,6 +10969,7 @@ if (window.navigator.standalone === true ||
     <p id="ashAnswerCount" class="ash-muted"></p>
     <button id="ashSaveDay" class="ash-btn" type="submit">Сохранить вопрос</button>
     <p id="ashDailyStatus" class="ash-status" role="status"></p>
+    <button id="ashPreviewDayFeedBtn" class="ash-btn" type="button">Открыть ленту выбранного дня</button>
    </form>
    <div class="ash-card"><h3>Подготовленные дни</h3><p class="ash-muted">Нажми на день, чтобы открыть вопрос в редакторе.</p><div id="ashDays" class="ash-list ash-days"></div></div>
   </div>
@@ -11914,7 +11915,7 @@ const VAPID_PUBLIC_KEY =
     День 1 начнётся в 20:00 этой даты.
 */
 
-const PROJECT_START_DATE = "2026-10-01";
+const PROJECT_START_DATE = "2026-11-01";
 
 // Экран ожидания и дата релиза настраиваются независимо от календаря вопросов.
 // Для официального старта календарь PROJECT_START_DATE включается отдельно.
@@ -13961,6 +13962,28 @@ appScreen.classList.add("hidden");
 
 
     /* =========================
+       АДМИНИСТРАТОР ДО РЕЛИЗА
+       Никаких консольных команд: профиль и админ-панель
+       доступны постоянно, вопросы для посетителей не открываются.
+    ========================= */
+
+    if (
+        isCurrentUserAdmin &&
+        Date.now() < Date.parse(RELEASE_WAITING_TARGET) &&
+        await verifyAdminFeedAccess()
+    ) {
+        showOnly(adminView);
+        appInitializedUserId = initializingUserId;
+        bootScreen.classList.add("hidden");
+        appScreen.classList.remove("hidden");
+        loadAdminModeration().catch(error =>
+            console.error("Prelaunch admin moderation:", error)
+        );
+        showInstallOption();
+        return;
+    }
+
+    /* =========================
        ВОПРОС ДНЯ
     ========================= */
 
@@ -14226,8 +14249,7 @@ async function loadTodayQuestionAndState() {
     const isAdmin =
         await verifyAdminFeedAccess();
 
-    // Релизный экран выключен. До отдельной команды обычные пользователи
-    // проходят по прежней рабочей логике вопросов и ответов.
+    // Календарь официально начинается 1 ноября; до запуска обычные ответы закрыты.
     /*
         До начала проекта обычным пользователям
         доступ закрыт.
@@ -15195,6 +15217,13 @@ async function verifyAdminFeedAccess() {
 
     return data === true;
 }
+
+document.getElementById("ashPreviewDayFeedBtn")?.addEventListener("click", () => {
+    const selectedDay = document.getElementById("ashDay")?.value;
+    openAdminDayFeed(selectedDay).catch(error =>
+        console.error("Admin preview feed:", error)
+    );
+});
 
 async function openAdminDayFeed(day) {
 
@@ -16532,7 +16561,17 @@ profileBackBtn.addEventListener(
     "click",
     async function() {
 
-        // Предрелизный профиль возвращается к заставке, а не к тестовой ленте.
+        // До релиза администратор возвращается к рабочей панели.
+        if (
+            isCurrentUserAdmin &&
+            Date.now() < Date.parse(RELEASE_WAITING_TARGET) &&
+            await verifyAdminFeedAccess()
+        ) {
+            showOnly(adminView);
+            return;
+        }
+
+        // Для обычного пользователя предрелизный профиль недоступен.
         if (shouldShowReleaseWaiting()) {
             showReleaseWaitingView();
             return;
