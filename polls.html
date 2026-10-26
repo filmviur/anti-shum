@@ -10,6 +10,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&display=swap&subset=cyrillic" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./release-config.js"></script>
+<script src="./site-i18n.js"></script>
 <style>
 *{box-sizing:border-box}html{scroll-behavior:smooth}
 body{margin:0;min-height:100vh;color:#dcccb4;background:radial-gradient(circle at 50% 0,rgba(118,82,42,.17),transparent 38%),linear-gradient(140deg,#0c0a08,#17110d 60%,#0c0a08);font:15px/1.65 Georgia,"Times New Roman",serif}
@@ -163,6 +165,13 @@ if(window.navigator.standalone===true||(/iPad|iPhone|iPod/.test(navigator.userAg
    <label class="field">Вопрос голосования<input id="voteTitle" type="text" maxlength="300" minlength="8" required placeholder="Например: Хотите ли вы отдельные тематические дни?"></label>
    <label class="field">Пояснение вопроса (необязательно)<textarea id="voteDetails" maxlength="1500" rows="2" placeholder="Здесь можно чуть подробнее раскрыть вопрос"></textarea></label>
    <div class="choice-row"><span class="choice">○ ДА</span><span class="choice">○ НЕТ</span><span class="choice">○ ДРУГОЕ — с полем ответа</span></div>
+   <div class="ash-locale-extra">
+    <p class="section-intro">Переводы для участников. Если оставить поле пустым, будет показан русский оригинал.</p>
+    <label class="field">Українська — заголовок<input id="voteTitleUk" maxlength="300" type="text"></label>
+    <label class="field">English — title<input id="voteTitleEn" maxlength="300" type="text"></label>
+    <label class="field">Українська — пояснення<textarea id="voteDetailsUk" maxlength="1500" rows="2"></textarea></label>
+    <label class="field">English — details<textarea id="voteDetailsEn" maxlength="1500" rows="2"></textarea></label>
+   </div>
    <div class="admin-actions"><button class="btn" type="submit" id="publishVote">Опубликовать и уведомить</button><button class="btn btn-secondary" type="button" id="draftVote">Сохранить черновик</button></div>
   </form>
  </div>
@@ -172,6 +181,13 @@ if(window.navigator.standalone===true||(/iPad|iPhone|iPod/.test(navigator.userAg
   <form id="ideasForm">
    <label class="field">Какой вопрос зададим людям?<input id="ideasTitle" type="text" maxlength="300" minlength="8" required placeholder="Например: Как сделать наши вечера уютнее?"></label>
    <label class="field">Короткое пояснение (необязательно)<textarea id="ideasDetails" maxlength="1500" rows="2" placeholder="Что именно хотелось бы узнать?"></textarea></label>
+   <div class="ash-locale-extra">
+    <p class="section-intro">Переводы для участников. Если оставить поле пустым, будет показан русский оригинал.</p>
+    <label class="field">Українська — заголовок<input id="ideasTitleUk" maxlength="300" type="text"></label>
+    <label class="field">English — title<input id="ideasTitleEn" maxlength="300" type="text"></label>
+    <label class="field">Українська — пояснення<textarea id="ideasDetailsUk" maxlength="1500" rows="2"></textarea></label>
+    <label class="field">English — details<textarea id="ideasDetailsEn" maxlength="1500" rows="2"></textarea></label>
+   </div>
    <div class="admin-actions"><button class="btn" type="submit" id="publishIdeas">Опубликовать запрос идей</button><button class="btn btn-secondary" type="button" id="draftIdeas">Сохранить черновик</button></div>
   </form>
  </div>
@@ -181,6 +197,13 @@ if(window.navigator.standalone===true||(/iPad|iPhone|iPod/.test(navigator.userAg
   <form id="resultForm">
    <label class="field">Заголовок результата<input id="resultTitle" type="text" maxlength="300" minlength="8" required placeholder="Например: Итоги голосования о тематических днях"></label>
    <label class="field">Что решили?<textarea id="resultDetails" maxlength="1500" minlength="5" rows="5" required placeholder="Спасибо за ваши голоса. По итогам мы решили…"></textarea></label>
+   <div class="ash-locale-extra">
+    <p class="section-intro">Переводы для участников. Если оставить поле пустым, будет показан русский оригинал.</p>
+    <label class="field">Українська — заголовок<input id="resultTitleUk" maxlength="300" type="text"></label>
+    <label class="field">English — title<input id="resultTitleEn" maxlength="300" type="text"></label>
+    <label class="field">Українська — пояснення<textarea id="resultDetailsUk" maxlength="1500" rows="2"></textarea></label>
+    <label class="field">English — details<textarea id="resultDetailsEn" maxlength="1500" rows="2"></textarea></label>
+   </div>
    <div class="admin-actions"><button class="btn" type="submit" id="publishResult">Опубликовать результат</button><button class="btn btn-secondary" type="button" id="draftResult">Сохранить черновик</button></div>
   </form>
  </div>
@@ -203,6 +226,11 @@ const $=id=>document.getElementById(id);
 const status=$("status"),app=$("app"),pollList=$("pollList"),adminPanel=$("admin");
 let user=null,admin=false,polls=[],votes=[],ideas=[],activeSection="vote",realtimeChannel=null;
 let loadInProgress=false,loadAgain=false,realtimeTimer=null;
+const pt=value=>window.AntiShumI18n?.t(value)||value;
+const pollText=(poll,field)=>window.AntiShumI18n?.translateRecord(poll,field)||poll?.[field]||"";
+document.addEventListener("anti-shum-language-changed",()=>{
+ if(user){changeSection(activeSection);renderProjectUpdates();}
+});
 const sections={
  vote:{heading:"Голосования",help:"Один голос на каждый вопрос, без таймера. После отправки изменить выбор нельзя. Если выберешь «ДРУГОЕ», расскажи о своём варианте."},
  ideas:{heading:"Ваши идеи",help:"Одна идея на каждый вопрос, без таймера. После отправки изменить ответ нельзя. Только ты и администратор видите твою мысль — здесь нет переписок и споров между людьми."},
@@ -238,8 +266,8 @@ function changeSection(kind){
  for(const key of Object.keys(sections)){
   $("admin"+key.charAt(0).toUpperCase()+key.slice(1)).classList.toggle("hidden",key!==kind);
  }
- $("listHeading").textContent=sections[kind].heading;
- $("sectionDescription").textContent=sections[kind].help;
+ $("listHeading").textContent=pt(sections[kind].heading);
+ $("sectionDescription").textContent=pt(sections[kind].help);
  render();
  if(ADMIN_EMBEDDED)notifyEmbeddedHeight();
 }
@@ -252,6 +280,10 @@ async function init(){
   const {data,error}=await supabaseClient.auth.getUser();
   if(error)throw error;
   user=data.user;
+  if(user?.id){
+    const {data:pref}=await supabaseClient.from("users").select("language").eq("id",user.id).maybeSingle();
+    if(pref?.language)window.AntiShumI18n?.setLanguage(pref.language);
+  }
   if(!user||user.is_anonymous){message("Войди в свой обычный профиль, чтобы участвовать в вопросах проекта.");return}
   const r=await supabaseClient.rpc("is_anti_shum_admin");
   if(r.error)throw r.error;
@@ -296,7 +328,7 @@ function renderProjectUpdates() {
  for(const p of latest){
   const button=node("button","project-update-link");
   button.type="button";
-  button.appendChild(node("span","",labels[p.kind] + ": " + p.title));
+  button.appendChild(node("span","",pt(labels[p.kind]) + ": " + pollText(p,"title")));
   button.appendChild(node("small","",timeLabel(p.published_at)));
   button.addEventListener("click",()=>{
    changeSection(p.kind||"vote");
@@ -326,8 +358,8 @@ function render(){
   meta.appendChild(node("span","tag",p.status==="draft"?"Черновик":isOpen(p)?"Опубликовано":"Закрыто"));
   meta.appendChild(node("span","",timeLabel(p.published_at||p.created_at)));
   card.appendChild(meta);
-  card.appendChild(node("h3","",p.title));
-  if(p.details)card.appendChild(node("p","",p.details));
+  card.appendChild(node("h3","",pollText(p,"title")));
+  if(p.details)card.appendChild(node("p","",pollText(p,"details")));
   if(ADMIN_EMBEDDED){
    if(admin)renderAdminControls(p,card);
    pollList.appendChild(card);continue;
@@ -518,7 +550,12 @@ async function createEntry(kind,state){
  buttons.forEach(b=>b.disabled=true);
  try{
   const r=await supabaseClient.from("project_polls").insert({
-   title,details,kind,allow_ideas:kind==="ideas",status:state,created_by:user.id,
+   title,details,
+   title_uk:$(prefix+"TitleUk").value.trim()||null,
+   title_en:$(prefix+"TitleEn").value.trim()||null,
+   details_uk:$(prefix+"DetailsUk").value.trim()||null,
+   details_en:$(prefix+"DetailsEn").value.trim()||null,
+   kind,allow_ideas:kind==="ideas",status:state,created_by:user.id,
    published_at:state==="published"?new Date().toISOString():null
   }).select("id,title,kind").single();
   if(r.error)throw r.error;
