@@ -1151,7 +1151,7 @@ function buildDecemberTreePage(){
  flow.append(
   text("div","november-tree-kicker","Капсула времени"),
   text("div","november-tree-heading","Моё дерево зимней тишины"),
-  text("div","november-tree-caption",decemberTreeStage+" из 31 дня с ответами"),
+  text("div","november-tree-caption",bookAnswered(decemberTreeStage,31)),
   buildDecemberTreeArt(document),
   text("div","november-tree-note","Каждая мысль добавила этому месяцу свою снежную искру.")
  );
@@ -1164,7 +1164,7 @@ function buildNovemberTreePage(){
  flow.append(
   text("div","november-tree-kicker","Капсула времени"),
   text("div","november-tree-heading","Моё дерево ноября"),
-  text("div","november-tree-caption",novemberTreeStage+" из 30 дней с ответами")
+  text("div","november-tree-caption",bookAnswered(novemberTreeStage,30))
  );
  flow.append(buildNovemberTreeArt(document));
  appendContribution(flow,"2026-11",document);
@@ -1511,6 +1511,7 @@ function printBook(){
  const doc=frame.contentDocument;doc.open();
  doc.write("<!doctype html><html lang=\"ru\"><head><meta charset=\"utf-8\"><title>Мои 365 дней в Анти-Шум — A5</title><style>"+"@import url(\"https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=PT+Serif:wght@400;700&family=Caveat:wght@400;500;600&display=swap\");\n@page{size:A5 portrait;margin:0}\n*{box-sizing:border-box}\nhtml,body{margin:0;padding:0}\nbody{font-family:\"PT Serif\",Georgia,serif;color:#46372a}\n.print-page{position:relative;width:148mm;height:210mm;break-after:page;page-break-after:always;overflow:hidden;background:#eddbbd;padding:27mm 22mm 40mm}\n.print-page:last-child{break-after:auto;page-break-after:auto}\n.print-art{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0}\n.print-cover{padding:0}\n.print-flow{position:relative;z-index:1;width:100%;height:auto;overflow:visible;transform-origin:top left}\n.title{text-align:center;font:600 17pt/1.12 \"Cormorant Garamond\",Georgia,serif;color:#6b442b;letter-spacing:.3pt}\n.date{text-align:center;font:600 19pt/1.15 \"Cormorant Garamond\",Georgia,serif;color:#69472d;margin:2mm 0 3mm}\n.rule{width:56%;height:1px;background:#a27e50;margin:0 auto 5mm}\n.question-label,.answer-label{font:700 10.5pt/1.2 \"PT Serif\",Georgia,serif;color:#775335;margin-bottom:1.5mm}\n.question{font:600 12.2pt/1.27 \"PT Serif\",Georgia,serif;margin-bottom:4mm;overflow-wrap:anywhere;hyphens:auto}\n.answer{font:500 16pt/1.13 \"Caveat\",\"Segoe Print\",cursive;white-space:pre-wrap;overflow-wrap:anywhere;hyphens:auto}\n.photo-wrap{display:table;max-width:74%;margin:0 auto 4mm;background:#fbf0dc;padding:2mm 2mm 3mm;border:1px solid #be9c68;box-shadow:1mm 1.5mm 2.5mm #57422845;transform:rotate(-1deg)}\n.photo{display:block;max-width:100%;max-height:39mm;object-fit:contain}\n.empty{text-align:center;color:#927759;font:italic 13pt/1.6 Georgia,serif;padding-top:19mm}\n.print-november-tree .print-flow{text-align:center}\n.november-print-kicker{font:italic 15pt Georgia,serif;color:#8a6a45;margin:0 auto 4mm}\n.november-print-title{font:600 22pt \"Cormorant Garamond\",Georgia,serif;color:#674427}\n.november-print-count{font:11pt Georgia,serif;color:#896847;margin:3mm auto 6mm}\n.november-tree-art{position:relative;width:100%;max-width:115mm;aspect-ratio:1;margin:0 auto}\n.november-tree-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}\n.november-print-note{font:italic 13pt \"Cormorant Garamond\",Georgia,serif;color:#775536;margin:6mm auto}\n@media print{.print-page{-webkit-print-color-adjust:exact;print-color-adjust:exact}}"+"</style></head><body></body></html>");
  doc.close();
+ doc.documentElement.lang=bookLang()==="uk"?"uk":bookLang();
  const bookAsset=name=>new URL("./"+name,location.href).href;
  const addArtwork=(page,asset)=>{
   const art=doc.createElement("img");art.className="print-art";
@@ -1528,9 +1529,9 @@ function printBook(){
    addArtwork(page,"diary-clean-right.webp");
    const flow=doc.createElement("div");flow.className="print-flow";page.append(flow);
    for(const [cls,value] of [
-    ["november-print-kicker","Капсула времени"],
-    ["november-print-title","Моё дерево зимней тишины"],
-    ["november-print-count",decemberTreeStage+" из 31 дня с ответами"]
+    ["november-print-kicker",bt("Капсула времени")],
+    ["november-print-title",bookTreeTitle("december")],
+    ["november-print-count",bookAnswered(decemberTreeStage,31)]
    ]){const t=doc.createElement("div");t.className=cls;t.textContent=value;flow.append(t)}
    flow.append(buildDecemberTreeArt(doc));appendContribution(flow,"2026-12",doc);doc.body.append(page);return;
   }
@@ -1539,15 +1540,15 @@ function printBook(){
    addArtwork(page,"diary-clean-right.webp");
    const flow=doc.createElement("div");flow.className="print-flow";page.append(flow);
    for(const [className,value] of [
-    ["november-print-kicker","Капсула времени"],
-    ["november-print-title","Моё дерево ноября"],
-    ["november-print-count",novemberTreeStage+" из 30 дней с ответами"]
+    ["november-print-kicker",bt("Капсула времени")],
+    ["november-print-title",bookTreeTitle("november")],
+    ["november-print-count",bookAnswered(novemberTreeStage,30)]
    ]){
     const el=doc.createElement("div");el.className=className;el.textContent=value;flow.append(el);
    }
    flow.append(buildNovemberTreeArt(doc));appendContribution(flow,"2026-11",doc);
    const note=doc.createElement("div");note.className="november-print-note";
-   note.textContent="Каждая прожитая и записанная мысль стала частью этого дерева.";flow.append(note);
+   note.textContent=bt("Каждая прожитая и записанная мысль стала частью этого дерева.");flow.append(note);
    doc.body.append(page);return;
   }
   const day=entry.day;
@@ -1561,16 +1562,16 @@ function printBook(){
   append("div","date",day.date.getDate()+" "+monthInBook(day.date)+" "+day.date.getFullYear());
   append("div","rule","");
   if(day.answer){
-   append("div","question-label","Вопрос дня");
+   append("div","question-label",bt("Вопрос дня"));
    append("div","question",day.question||"Вопрос дня");
    if(day.photo){
     const note=doc.createElement("div");note.className="photo-wrap";
     const img=doc.createElement("img");img.className="photo";img.alt="Фотоответ";img.src=day.photo;
     note.append(img);flow.append(note);
    }
-   append("div","answer-label","Мои мысли");
+   append("div","answer-label",bt("Мои мысли"));
    append("div","answer",day.answer.answer_text||"");
-  }else append("div","empty","Эта страница ждёт твоих мыслей…");
+  }else append("div","empty",bt("Эта страница ждёт твоих мыслей…"));
   doc.body.append(page);
  });
  addCover("diary-back.webp");
