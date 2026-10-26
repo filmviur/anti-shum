@@ -11,6 +11,8 @@ const definitions=[
 ];
 const get=id=>document.getElementById(id);
 function sourceFields(prefix){
+ if(prefix==="adminAnnouncementText")
+   return [get("adminAnnouncementText"),get("adminAnnouncementUk"),get("adminAnnouncementEn")];
  return [get(prefix),get(prefix+"Uk"),get(prefix+"En")];
 }
 async function makeTranslators(){
