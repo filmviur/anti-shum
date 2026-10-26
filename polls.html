@@ -555,6 +555,14 @@ async function createEntry(kind,state){
  const title=$(prefix+"Title").value.trim(),details=$(prefix+"Details").value.trim();
  if(title.length<8||title.length>300){message("Вопрос или заголовок должен содержать 8–300 символов.",true);return}
  if(kind==="result"&&details.length<5){message("Напиши результат хотя бы из 5 символов.",true);return}
+ if(state==="published"){
+   const hasTitles=$(prefix+"TitleUk").value.trim()&&$(prefix+"TitleEn").value.trim();
+   const hasDetails=!details||($(prefix+"DetailsUk").value.trim()&&$(prefix+"DetailsEn").value.trim());
+   if(!hasTitles||!hasDetails){
+      message("Перед публикацией добавь украинский и английский переводы заголовка и текста. Кнопка ✦ Автоперевод поможет подготовить их в поддерживаемом браузере.",true);
+      return;
+   }
+ }
  const form=$(prefix+"Form"),buttons=form.querySelectorAll("button");
  buttons.forEach(b=>b.disabled=true);
  try{
@@ -574,6 +582,11 @@ async function createEntry(kind,state){
 }
 async function changeStatus(p,state){
  if(!admin)return;
+ if(state==="published"&&(!p.title_uk?.trim()||!p.title_en?.trim()||
+    (p.details?.trim()&&(!p.details_uk?.trim()||!p.details_en?.trim())))){
+    message("У этого черновика пока нет переводов. Опубликовать его нельзя: участники получат текст на неправильном языке. Создай новую публикацию с переводами.",true);
+    return;
+ }
  const r=await supabaseClient.from("project_polls").update({
   status:state,published_at:state==="published"?new Date().toISOString():p.published_at
  }).eq("id",p.id);
