@@ -13824,7 +13824,7 @@ appScreen.classList.add("hidden");
         bootScreen.classList.add("hidden");
         appScreen.classList.remove("hidden");
         // Разрешение спрашивается только по инициативе пользователя.
-        if (Notification?.permission === "granted") {
+        if ("Notification" in window && Notification.permission === "granted") {
             enablePushNotifications().catch(error=>console.warn("Prelaunch push:",error));
         }
         return;
