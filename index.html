@@ -9108,6 +9108,8 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 </style>
 <link rel="stylesheet" href="./release-waiting.css">
 <link rel="stylesheet" href="./account-management.css">
+<script src="./release-config.js"></script>
+<script src="./site-i18n.js"></script>
 <script src="./december-growth.js"></script>
 
 <style id="anti-shum-viewport-fix">
@@ -9275,6 +9277,11 @@ if (window.navigator.standalone === true ||
         </form>
 
         <div id="authMessage" class="auth-message"></div>
+        <div id="authPrelaunchNotifications" class="ash-register-notify hidden">
+           <p>Если уведомления доступны, включи их заранее.</p>
+           <button id="authEnableNotifyBtn" class="secondary-btn" type="button">Включить уведомления о запуске</button>
+           <p id="authNotifyStatus" role="status" aria-live="polite"></p>
+        </div>
 <div id="authRecoveryActions" class="ash-account-link-row">
  <button id="authRecoveryHelpBtn" class="ash-account-link" type="button">Забыл пароль? Восстановить доступ</button>
  <button id="authRestoreProfileBtn" class="ash-account-link" type="button">Восстановить удалённый профиль</button>
@@ -10189,6 +10196,16 @@ if (window.navigator.standalone === true ||
 
     <!-- КАПСУЛА ВРЕМЕНИ -->
 
+<div class="profile-section-title">ЯЗЫК САЙТА</div>
+<div class="ash-language-setting" id="profileLanguageSetting">
+  <label for="profileLanguageSelect">Язык сайта</label>
+  <select id="profileLanguageSelect" aria-label="Язык сайта">
+    <option value="ru">Русский</option>
+    <option value="uk">Українська</option>
+    <option value="en">English</option>
+  </select>
+  <p>Выбранный язык сохранится при повторном входе.</p>
+</div>
 <div class="profile-section-title">
     КАПСУЛА ВРЕМЕНИ
 </div>
@@ -11012,7 +11029,6 @@ if (window.navigator.standalone === true ||
     </a>
   </div>
   <div class="release-waiting-actions">
-    <button id="releaseProfileBtn" class="release-profile-access" type="button">Мой профиль</button>
     <button id="releaseAdminReturnBtn" class="release-admin-return hidden" type="button">← В админ-панель</button>
   </div>
   <p id="releaseWaitingHelp" class="release-waiting-help">Профиль и поддержка доступны до запуска.</p>
@@ -11829,8 +11845,8 @@ const PROJECT_START_DATE = "2026-10-01";
 
 // Экран ожидания и дата релиза настраиваются независимо от календаря вопросов.
 // Для официального старта календарь PROJECT_START_DATE включается отдельно.
-const RELEASE_WAITING_ENABLED = false; // Подготовлено, но до отдельного указания не включать.
-const RELEASE_WAITING_TARGET = "2026-11-01T20:00:00+02:00"; // 20:00 по Киеву
+const RELEASE_WAITING_ENABLED = window.AntiShumRelease?.enabled === true;
+const RELEASE_WAITING_TARGET = window.AntiShumRelease?.target || "2026-11-01T20:00:00+02:00";
 
 
 const DEV_PROJECT_DAY = 1;
@@ -12982,6 +12998,55 @@ function questionNeedsPhoto(question) {
 }
 
 
+/* Настройки языка: локально сразу, в профиле — сохранение в БД. */
+const profileLanguageSelect=document.getElementById("profileLanguageSelect");
+if (profileLanguageSelect) {
+  profileLanguageSelect.value=window.AntiShumI18n?.language || "ru";
+  profileLanguageSelect.addEventListener("change",async()=>{
+    const language=window.AntiShumI18n?.setLanguage(profileLanguageSelect.value);
+    if(currentUser?.id){
+       profileLanguageSelect.disabled=true;
+       const {error}=await supabaseClient.from("users")
+         .update({language}).eq("id",currentUser.id);
+       profileLanguageSelect.disabled=false;
+       if(error)showNotice("Не удалось сохранить язык: "+error.message);
+    }
+    const q=currentQuestion;
+    if(q){
+      const label=window.AntiShumI18n.translateRecord(q,"question");
+      questionText.textContent=label;
+      feedQuestion.textContent=label;
+    }
+  });
+}
+const authEnableNotifyBtn=document.getElementById("authEnableNotifyBtn");
+if(authEnableNotifyBtn)authEnableNotifyBtn.addEventListener("click",async()=>{
+  const status=document.getElementById("authNotifyStatus");
+  if(!("Notification" in window)||!("serviceWorker" in navigator)){
+    status.textContent="На этом устройстве веб-уведомления недоступны.";
+    return;
+  }
+  try{
+    const permission=await Notification.requestPermission();
+    if(permission==="granted"){
+      try{localStorage.setItem("ash_prelaunch_notification_consent","yes")}catch{}
+      status.textContent="Разрешение получено. Подписка будет сохранена после входа.";
+    }else{
+      status.textContent="Уведомления не разрешены. Их можно включить позже в настройках устройства.";
+    }
+  }catch(err){
+    status.textContent="Не удалось включить уведомления. На iPhone может потребоваться установка сайта на главный экран.";
+  }
+});
+document.addEventListener("anti-shum-language-changed",()=>{
+ const q=typeof currentQuestion!=="undefined"?currentQuestion:null;
+ if(q){
+   const label=window.AntiShumI18n.translateRecord(q,"question");
+   questionText.textContent=label;
+   feedQuestion.textContent=label;
+ }
+});
+
 /* =========================================================
    AUTH
 ========================================================= */
@@ -13009,6 +13074,7 @@ function setAuthMode(mode) {
     );
 
     document.getElementById("authRecoveryActions")?.classList.toggle("hidden", register);
+    document.getElementById("authPrelaunchNotifications")?.classList.toggle("hidden", !register);
     authSubmitBtn.textContent =
         register
             ? "Зарегистрироваться"
@@ -13086,7 +13152,8 @@ authForm.addEventListener(
                             data: {
                                 display_name: displayName,
                                 // Marks a newly registered account for its personal greeting.
-                                welcome_to_anti_shum: true
+                                welcome_to_anti_shum: true,
+                                language: window.AntiShumI18n?.language || "ru"
                             }
                         }
                     });
@@ -13749,6 +13816,20 @@ appScreen.classList.add("hidden");
 
     await loadProfile();
 
+    // После официального включения заставки обычным пользователям
+    // доступны только ожидание и правила; профиль/архив/поддержка скрыты.
+    if (shouldShowReleaseWaiting()) {
+        showReleaseWaitingView();
+        appInitializedUserId = initializingUserId;
+        bootScreen.classList.add("hidden");
+        appScreen.classList.remove("hidden");
+        // Разрешение спрашивается только по инициативе пользователя.
+        if (Notification?.permission === "granted") {
+            enablePushNotifications().catch(error=>console.warn("Prelaunch push:",error));
+        }
+        return;
+    }
+
     // A personal welcome is created only once per account and is visible
     // only to that account; the admin does not receive user announcements.
     if (!isCurrentUserAdmin) {
@@ -14133,6 +14214,7 @@ async function loadTodayQuestionAndState() {
         currentQuestionId = data.id;
 
         const question =
+            window.AntiShumI18n?.translateRecord(data,"question") ||
             data.question ||
             data.text ||
             data.question_text ||
@@ -16127,11 +16209,10 @@ function showReleaseWaitingView(preview=false) {
         return false;
     }
     releaseWaitingPreview = Boolean(preview);
-    document.getElementById("releaseProfileBtn").classList.toggle("hidden",preview);
     document.getElementById("releaseAdminReturnBtn").classList.toggle("hidden",!preview);
     document.getElementById("releaseWaitingHelp").textContent=preview
        ? "Предпросмотр: реальные ответы не затрагиваются."
-       : "Профиль и поддержка доступны до запуска.";
+       : "До запуска здесь доступны только правила проекта.";
     showOnly(releaseWaitingView);
     stopReleaseWaitingClock();
     updateReleaseWaitingClock();
@@ -16139,7 +16220,6 @@ function showReleaseWaitingView(preview=false) {
        releaseWaitingClockHandle=setInterval(updateReleaseWaitingClock,1000);
     return true;
 }
-document.getElementById("releaseProfileBtn").addEventListener("click",()=>openProfile());
 document.getElementById("releaseAdminReturnBtn").addEventListener("click",()=>{
     releaseWaitingPreview=false;
     showOnly(adminView);
@@ -16330,6 +16410,10 @@ async function openProfile() {
         return;
     }
 
+    if (shouldShowReleaseWaiting()) {
+        showReleaseWaitingView();
+        return;
+    }
     clearSessionTimer();
 
     showOnly(profileView);
@@ -16454,7 +16538,7 @@ async function loadProfile() {
         } = await supabaseClient
             .from("users")
             .select(
-                "id, display_name, avatar_url, is_admin"
+                "id, display_name, avatar_url, is_admin, language"
             )
             .eq("id", currentUser.id)
             .maybeSingle();
@@ -16469,6 +16553,17 @@ async function loadProfile() {
 
         isCurrentUserAdmin =
             data?.is_admin === true;
+        const localLang = window.AntiShumI18n?.language || "ru";
+        const signupLang = currentUser?.user_metadata?.language;
+        // Впервые зарегистрированным даём язык, выбранный при регистрации.
+        if (data?.language === "ru" && ["uk","en"].includes(signupLang)) {
+          const {error:languageError}=await supabaseClient.from("users")
+            .update({language:signupLang}).eq("id",currentUser.id);
+          if (!languageError) data.language=signupLang;
+        }
+        window.AntiShumI18n?.setLanguage(data?.language || localLang);
+        const langSelect=document.getElementById("profileLanguageSelect");
+        if(langSelect)langSelect.value=window.AntiShumI18n?.language || "ru";
 
         /*
             Скрываем пользовательские объявления
