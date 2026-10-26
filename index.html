@@ -11103,9 +11103,12 @@ if (window.navigator.standalone === true ||
     </a>
   </div>
   <div class="release-waiting-actions">
+    <a class="release-action-btn" href="./rules.html">📖 Правила</a>
+    <button id="releaseEnablePushBtn" class="release-action-btn" type="button">🔔 Включить уведомления</button>
+    <button id="releaseSupportBtn" class="release-action-btn" type="button">❓ Поддержка</button>
     <button id="releaseAdminReturnBtn" class="release-admin-return hidden" type="button">← В админ-панель</button>
   </div>
-  <p id="releaseWaitingHelp" class="release-waiting-help">Профиль и поддержка доступны до запуска.</p>
+  <p id="releaseWaitingHelp" class="release-waiting-help">До запуска можно прочитать правила, включить уведомления и написать в поддержку.</p>
 </section>
 
 <!-- CLOSED -->
@@ -13922,6 +13925,13 @@ appScreen.classList.add("hidden");
     // После официального включения заставки обычным пользователям
     // доступны только ожидание и правила; профиль/архив/поддержка скрыты.
     if (shouldShowReleaseWaiting()) {
+        // На заставке доступны личная поддержка и приветствие новичка.
+        await ensurePersonalWelcome();
+        await checkUnreadAnnouncements();
+        startAnnouncementsRealtime();
+        startSiteRealtime();
+        await checkSupportNotifications();
+        await startSupportRealtime();
         showReleaseWaitingView();
         appInitializedUserId = initializingUserId;
         bootScreen.classList.add("hidden");
@@ -16344,7 +16354,8 @@ function showReleaseWaitingView(preview=false) {
     document.getElementById("releaseAdminReturnBtn").classList.toggle("hidden",!preview);
     document.getElementById("releaseWaitingHelp").textContent=preview
        ? "Предпросмотр: реальные ответы не затрагиваются."
-       : "До запуска здесь доступны только правила проекта.";
+       : "До запуска можно прочитать правила, включить уведомления и написать в поддержку.";
+    // Кнопка доступна до успешного сохранения подписки.
     showOnly(releaseWaitingView);
     stopReleaseWaitingClock();
     updateReleaseWaitingClock();
@@ -16352,6 +16363,20 @@ function showReleaseWaitingView(preview=false) {
        releaseWaitingClockHandle=setInterval(updateReleaseWaitingClock,1000);
     return true;
 }
+document.getElementById("releaseEnablePushBtn").addEventListener("click", async () => {
+    await enablePushNotifications();
+    const button = document.getElementById("releaseEnablePushBtn");
+    if ("Notification" in window &&
+        Notification.permission === "granted" &&
+        enableNotificationsBtn.classList.contains("hidden")) {
+        button.classList.add("hidden");
+        showNotice("Уведомления включены. До встречи 1 ноября в 20:00!");
+    }
+});
+document.getElementById("releaseSupportBtn").addEventListener("click", async () => {
+    if (!currentUser || !shouldShowReleaseWaiting()) return;
+    supportBtn.click();
+});
 document.getElementById("releaseAdminReturnBtn").addEventListener("click",()=>{
     releaseWaitingPreview=false;
     showOnly(adminView);

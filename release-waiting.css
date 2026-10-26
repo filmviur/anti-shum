@@ -115,3 +115,25 @@
 #releaseWaitingView:not(.hidden){animation:release-scene-enter .75s cubic-bezier(.22,.74,.27,1) both}
 @keyframes release-scene-enter{from{opacity:0;filter:brightness(.7);transform:translateY(9px)}to{opacity:1;filter:brightness(1);transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){#releaseWaitingView:not(.hidden){animation:none!important}}
+
+
+/* Предрелизные действия: правила, push и действующая поддержка. */
+.release-waiting-actions{
+  display:flex;flex-wrap:wrap;justify-content:center;align-items:center;
+  gap:9px;width:min(100%,540px);padding:0 8px;
+}
+.release-action-btn{
+  display:inline-flex;justify-content:center;align-items:center;
+  text-decoration:none;text-align:center;
+  min-height:42px;padding:9px 15px;
+  border:1px solid rgba(208,169,113,.55);border-radius:24px;
+  background:#322319;color:#e8cc9e;
+  font:14px/1.3 Georgia,serif;
+  cursor:pointer;
+}
+.release-action-btn:hover{background:#4b3120;color:#fff0cf}
+.release-action-btn:focus-visible{outline:2px solid #fff0d1;outline-offset:3px}
+@media(max-width:420px){
+ .release-waiting-actions{gap:7px}
+ .release-action-btn{font-size:12.5px;padding:8px 11px;min-height:39px}
+}
