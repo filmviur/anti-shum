@@ -1,0 +1,17 @@
+{
+  "name": "Anti-Shum",
+  "short_name": "Anti-Shum",
+  "description": "20 minutes without information noise",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#15110d",
+  "theme_color": "#15110d",
+  "icons": [
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

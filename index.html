@@ -19490,7 +19490,7 @@ async function saveAdminAppealDecision(decision) {
     }
 
     if (!currentUser || !selectedAdminAppealId) {
-        alert("Сначала выбери объяснительную.");
+        localizedAlert("Сначала выбери объяснительную.");
         return;
     }
 
@@ -19500,21 +19500,16 @@ async function saveAdminAppealDecision(decision) {
     const response = responseField.value.trim();
 
     if (!response) {
-        alert("Сначала напиши причину своего решения.");
+        localizedAlert("Сначала напиши причину своего решения.");
         responseField.focus();
         return;
     }
 
-    const decisionText =
-        decision === "approved"
-            ? "одобрить"
-            : "отклонить";
+    const confirmationText=decision==="approved"
+        ?"Ты действительно хочешь одобрить эту объяснительную?"
+        :"Ты действительно хочешь отклонить эту объяснительную?";
 
-    if (!confirm(
-        "Ты действительно хочешь " +
-        decisionText +
-        " эту объяснительную?"
-    )) {
+    if (!localizedConfirm(confirmationText)) {
         return;
     }
 
@@ -19555,7 +19550,7 @@ async function saveAdminAppealDecision(decision) {
 
         selectedAdminAppealId = null;
 
-        alert(
+        localizedAlert(
             decision === "approved"
                 ? "Объяснительная одобрена. Доступ восстановлен."
                 : "Объяснительная отклонена. Решение сохранено."
@@ -19570,7 +19565,7 @@ async function saveAdminAppealDecision(decision) {
             error
         );
 
-        alert(
+        localizedAlert(
             "Не удалось сохранить решение: " +
             (error.message || "Неизвестная ошибка")
         );
@@ -23878,5 +23873,9 @@ render();
 })();
 </script>
 
+<script>
+function localizedAlert(message){window.alert(window.AntiShumI18n?.t(message)||message)}
+function localizedConfirm(message){return window.confirm(window.AntiShumI18n?.t(message)||message)}
+</script>
 </body>
 </html>

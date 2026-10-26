@@ -978,11 +978,12 @@ opacity:.65;pointer-events:none}
 #book .november-tree-note{font:italic clamp(14px,1.7vw,19px)/1.3 "Cormorant Garamond",serif;color:#694a31;max-width:90%}
 
 /* Localized artwork: preserve Russian original assets. */
+
 .book-3d-back .localized-back-content{display:none}
 html[data-ash-language="uk"] .cover,html[data-ash-language="uk"] .cover-front,html[data-ash-language="uk"] .book-3d-front{background-image:url("./diary-front-uk.png")!important}
 html[data-ash-language="en"] .cover,html[data-ash-language="en"] .cover-front,html[data-ash-language="en"] .book-3d-front{background-image:url("./diary-front-en.png")!important}
 html[data-ash-language="uk"] .book-spine,html[data-ash-language="uk"] .book-3d-spine{background-image:url("./diary-spine-uk.png")!important;background-size:230% 100%!important;background-position:center!important}
-html[data-ash-language="en"] .book-spine,html[data-ash-language="en"] .book-3d-spine{background-image:url("./diary-spine-en.png")!important;background-size:100% 100%!important;background-position:center!important}
+html[data-ash-language="en"] .book-spine,html[data-ash-language="en"] .book-3d-spine{background-image:url("./diary-spine-en.png")!important;background-size:190% 100%!important;background-position:center!important}
 html[data-ash-language="uk"] .cover.back-visible,html[data-ash-language="en"] .cover.back-visible,html[data-ash-language="uk"] .cover-back,html[data-ash-language="en"] .cover-back,html[data-ash-language="uk"] .book-3d-back,html[data-ash-language="en"] .book-3d-back{background-image:url("./diary-back-blank.png")!important}
 html[data-ash-language="uk"] .cover-back,html[data-ash-language="en"] .cover-back,
 html[data-ash-language="uk"] .book-3d-back .localized-back-content,html[data-ash-language="en"] .book-3d-back .localized-back-content{
@@ -999,6 +1000,24 @@ html[data-ash-language="uk"] .localized-back-content .back-heading,html[data-ash
 html[data-ash-language="uk"] .cover-back .back-sign,html[data-ash-language="en"] .cover-back .back-sign,
 html[data-ash-language="uk"] .localized-back-content .back-sign,html[data-ash-language="en"] .localized-back-content .back-sign{
  font:600 clamp(8px,1.05vw,15px)/1.1 "Cormorant Garamond",Georgia,serif!important}
+/* Keep translated copy inside the clear central leather panel. */
+html[data-ash-language="uk"] .cover-back,
+html[data-ash-language="en"] .cover-back,
+html[data-ash-language="uk"] .book-3d-back .localized-back-content,
+html[data-ash-language="en"] .book-3d-back .localized-back-content{
+ top:30%!important;bottom:25%!important;left:21%!important;right:21%!important;
+ width:auto!important;height:auto!important;padding:0!important;gap:2%!important;
+ justify-content:space-between!important;overflow:hidden!important;
+}
+html[data-ash-language="uk"] .cover-back p,html[data-ash-language="en"] .cover-back p,
+html[data-ash-language="uk"] .localized-back-content p,html[data-ash-language="en"] .localized-back-content p{
+ font:italic clamp(7px,.84vw,10px)/1.12 "Cormorant Garamond",Georgia,serif!important
+}
+html[data-ash-language="uk"] .cover-back .back-heading,html[data-ash-language="en"] .cover-back .back-heading,
+html[data-ash-language="uk"] .localized-back-content .back-heading,html[data-ash-language="en"] .localized-back-content .back-heading{
+ font:600 clamp(8px,1vw,12px)/1.05 "Cormorant Garamond",Georgia,serif!important
+}
+
 </style>
 <script src="./release-config.js"></script>
 <script src="./site-i18n.js"></script>
@@ -1320,9 +1339,8 @@ function setCoverYaw(value,animated=true){
  closedBook3d.classList.toggle("dragging",!animated);
  closedBook3d.style.setProperty("--cover-yaw",value+"deg");
  const facingBack=Math.cos(value*Math.PI/180)<0;
- backCoverBtn.textContent=facingBack?"Лицевая обложка":"Задняя обложка";
- closedBook3d.setAttribute("aria-label",(facingBack?"Задняя":"Лицевая")+
-  " сторона книги. Проведи пальцем для вращения или нажми, чтобы открыть");
+ backCoverBtn.textContent=bt(facingBack?"Лицевая обложка":"Задняя обложка");
+ closedBook3d.setAttribute("aria-label",bt(facingBack?"Задняя сторона книги. Проведи пальцем для вращения или нажми, чтобы открыть":"Лицевая сторона книги. Проведи пальцем для вращения или нажми, чтобы открыть"));
 }
 function updateSoundButton(){
  soundBtn.textContent=bt(soundEnabled?"🔊 Звук включён":"🔇 Без звука");
@@ -1538,7 +1556,7 @@ book.addEventListener("pointercancel",()=>{swipeGesture=null;});
 
 function canExport(){return Boolean(startDate)&&(isBookAdmin||kyivDay(Date.now())>=key(nextYear()));}
 function printBook(){
- if(!canExport()){alert("Готовая книга станет доступна только после 365 дней. Пока можно листать предварительную версию.");return;}
+ if(!canExport()){alert(window.AntiShumI18n?.t("Готовая книга станет доступна только после 365 дней. Пока можно листать предварительную версию.")||"Готовая книга станет доступна только после 365 дней. Пока можно листать предварительную версию.");return;}
  const frame=document.createElement("iframe");
  frame.style.cssText="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none";
  document.body.append(frame);
@@ -1563,7 +1581,7 @@ function printBook(){
   addArtwork(page,asset);
   if(isBack && bookLang()!=="ru"){
     const textLayer=doc.createElement("div");
-    textLayer.style.cssText="position:absolute;inset:0;padding:28% 19% 21%;z-index:2;display:flex;flex-direction:column;justify-content:space-evenly;align-items:center;text-align:center;color:#f0d3a0;font:italic 11pt/1.17 Georgia,serif;";
+    textLayer.style.cssText="position:absolute;top:30%;bottom:25%;left:21%;right:21%;padding:0;z-index:2;display:flex;flex-direction:column;justify-content:space-between;align-items:center;text-align:center;color:#f0d3a0;font:italic 9pt/1.12 Georgia,serif;overflow:hidden;";
     backCoverLines.forEach((line,i)=>{
       const paragraph=doc.createElement("div");
       paragraph.textContent=bt(line);

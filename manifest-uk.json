@@ -1,0 +1,17 @@
+{
+  "name": "Анти-Шум",
+  "short_name": "Анти-Шум",
+  "description": "20 хвилин без інформаційного шуму",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#15110d",
+  "theme_color": "#15110d",
+  "icons": [
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

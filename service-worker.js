@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "anti-shum-offline-v9-textarea-translations";
+const CACHE_NAME = "anti-shum-offline-v10-i18n-audit";
 
 // Кэшируем лишь публичную офлайн-страницу и безопасные словари интерфейса, не личные данные.
 self.addEventListener("install", event => {
@@ -48,6 +48,26 @@ self.addEventListener("fetch", event => {
         })
     );
 });
+
+// Persist the selected interface language for background daily notifications.
+const SETTINGS_CACHE="anti-shum-local-preferences";
+const LANGUAGE_REQUEST=new Request(new URL("./__language__",self.registration.scope));
+self.addEventListener("message", event=>{
+    if(event.data?.type!=="anti-shum-language")return;
+    const lang=event.data.language;
+    if(!["ru","uk","en"].includes(lang))return;
+    event.waitUntil(caches.open(SETTINGS_CACHE)
+        .then(cache=>cache.put(LANGUAGE_REQUEST,new Response(lang)))
+        .catch(error=>console.warn("Language preference cache:",error)));
+});
+async function storedNotificationLanguage(){
+    try{
+        const cache=await caches.open(SETTINGS_CACHE);
+        const response=await cache.match(LANGUAGE_REQUEST);
+        const lang=response?await response.text():"ru";
+        return ["ru","uk","en"].includes(lang)?lang:"ru";
+    }catch{return "ru"}
+}
 
 self.addEventListener("push", event => {
     const defaults = {
@@ -143,22 +163,27 @@ self.addEventListener("push", event => {
                     ? `anti-shum-support-${data.id || "latest"}`
                     : `anti-shum-admin-${data.section || "general"}`;
 
-    event.waitUntil(
-        self.registration.showNotification(
-            data.title,
-            {
-                body: data.body,
-                icon: "./icon-512.png",
-                badge: "./icon-512.png",
-                tag: notificationTag,
-                renotify: true,
-                data: {
-                    type: data.type,
-                    url: targetUrl.href
-                }
+    event.waitUntil((async()=>{
+        const lang=await storedNotificationLanguage();
+        const standardBody="Время побыть с собой наедине)\nТвой вопрос уже ждёт тебя!)";
+        if(data.type==="daily" && data.body===standardBody){
+            if(lang==="uk"){
+                data.body="Час побути наодинці із собою)\nТвоє питання вже чекає на тебе!)";
+                if(data.title==="✨ Анти-Шум")data.title="✨ Анти-Шум";
+            }else if(lang==="en"){
+                data.body="Time for a quiet moment to yourself)\nYour question is waiting for you!)";
+                if(data.title==="✨ Анти-Шум")data.title="✨ Anti-Shum";
             }
-        )
-    );
+        }
+        await self.registration.showNotification(data.title,{
+            body:data.body,
+            icon:"./icon-512.png",
+            badge:"./icon-512.png",
+            tag:notificationTag,
+            renotify:true,
+            data:{type:data.type,url:targetUrl.href}
+        });
+    })());
 });
 
 self.addEventListener("notificationclick", event => {
