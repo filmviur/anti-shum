@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#17120e"><title>Конфиденциальность — Анти-Шум</title>
+<meta name="theme-color" content="#15110d"><title>Конфиденциальность — Анти-Шум</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 3%,#3b2c20,#15100c 65%);
 color:#e6d7bd;font:15px/1.75 Georgia,serif}a{color:#e9c78e}header{padding:19px;display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:1px solid #675035}
@@ -10,7 +10,26 @@ h1,h2{font-family:Georgia,serif;color:#e5c78f;line-height:1.27}h1{font-size:clam
 h2{font-size:21px;margin:29px 0 8px}p{margin:9px 0}ul{padding-left:21px}li{margin:9px 0}
 .note{border-left:2px solid #bc9b67;padding:12px 14px;background:rgba(201,168,106,.06);color:#decab0}
 small{color:#ae9e88}footer{text-align:center;margin-top:30px}
-</style></head><body>
+</style><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<style id="anti-shum-viewport-fix">
+@media screen {
+ :root{color-scheme:dark;background-color:#15110d}
+ html{min-height:100%;background-color:#15110d;overscroll-behavior-x:none}
+ body{
+   min-height:100vh;min-height:100dvh;background-color:#15110d;
+   padding-top:env(safe-area-inset-top,0px);
+   padding-bottom:env(safe-area-inset-bottom,0px);
+ }
+ @media (display-mode:standalone){html,body{overscroll-behavior-y:none}}
+ html.ash-ios-standalone,html.ash-ios-standalone body{overscroll-behavior-y:none}
+}
+</style>
+<script>
+if(window.navigator.standalone===true)document.documentElement.classList.add("ash-ios-standalone");
+</script>
+</head><body>
 <header><a href="./index.html">✦ АНТИ-ШУМ</a><a href="./rules.html">Правила</a></header>
 <main><article><h1>Конфиденциальность и твои данные</h1>
 <p class="note">«Анти-Шум» — пространство для личных мыслей. Здесь важно понимать, что остаётся личным, а что другие участники могут прочитать.</p>
