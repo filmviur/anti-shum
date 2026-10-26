@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "anti-shum-offline-v5-language";
+const CACHE_NAME = "anti-shum-offline-v6-i18n-attrs";
 
 // Кэшируем лишь публичную офлайн-страницу и безопасные словари интерфейса, не личные данные.
 self.addEventListener("install", event => {
