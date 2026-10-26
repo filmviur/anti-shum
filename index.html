@@ -9110,6 +9110,7 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 <link rel="stylesheet" href="./account-management.css">
 <script src="./release-config.js"></script>
 <script src="./site-i18n.js"></script>
+<script defer src="./author-translations.js"></script>
 <script src="./december-growth.js"></script>
 
 <style id="anti-shum-viewport-fix">
@@ -9186,6 +9187,17 @@ if (window.navigator.standalone === true ||
 }
 .ash-auth-language select:focus-visible{outline:2px solid #e4c18d;outline-offset:2px}
 @media(max-width:360px){.ash-auth-language{gap:7px;font-size:13px}.ash-auth-language select{max-width:164px}}
+</style>
+<style id="ash-author-translation-style">
+.ash-auto-translate{
+ margin:9px 0 10px;min-height:40px;padding:9px 15px;
+ border:1px solid rgba(204,169,104,.55);border-radius:7px;
+ background:linear-gradient(145deg,#503a25,#2e241b);color:#f2d8a8;
+ font:14px/1.35 Georgia,serif;cursor:pointer;
+}
+.ash-auto-translate:hover{background:#60452b}
+.ash-auto-translate:disabled{opacity:.65;cursor:wait}
+.ash-auto-translate-status{display:block;color:#c5ae8c;font:13px/1.45 Georgia,serif;min-height:18px}
 </style>
 </head>
 
