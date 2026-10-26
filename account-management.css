@@ -1,0 +1,30 @@
+/* Профиль и доступ: мягкое оформление, независимое от дневника. */
+.ash-account-link-row{display:grid;gap:8px;margin:13px 0 8px;text-align:center}
+.ash-account-link{border:0;background:transparent;color:#d6b37b;font:14px/1.4 Georgia,serif;cursor:pointer;min-height:35px;text-decoration:underline;text-underline-offset:3px}
+.ash-account-link:hover{color:#f4d5a0}
+.ash-account-danger{margin-top:12px;border:1px solid rgba(197,114,94,.65)!important;color:#e2b5a8!important;background:rgba(101,42,35,.15)!important}
+.ash-account-danger:hover{background:rgba(101,42,35,.29)!important}
+.ash-account-overlay{position:fixed;inset:0;z-index:10180;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(10,8,7,.91);overflow-y:auto;overscroll-behavior:contain}
+.ash-account-overlay.hidden{display:none!important}
+.ash-account-panel{box-sizing:border-box;width:min(480px,100%);max-height:calc(100dvh - 32px);overflow-y:auto;padding:27px clamp(17px,5vw,31px);border:1px solid rgba(201,168,106,.46);border-radius:11px;background:linear-gradient(155deg,#35281d,#19130e 78%);box-shadow:0 15px 56px rgba(0,0,0,.55);color:#e9d9ba;text-align:left}
+.ash-account-panel h2{font:600 clamp(27px,5vw,35px)/1.1 'Cormorant Garamond',Georgia,serif;text-align:center;color:#eace99;margin:6px 0 17px}
+.ash-account-panel p,.ash-account-panel li{font:15px/1.58 Georgia,serif;color:#d6c2a4}
+.ash-account-panel ul{padding-left:20px}
+.ash-account-panel small{font:13px/1.4 Georgia,serif;color:#ae987a}
+.ash-account-panel label{display:block;margin:15px 0 7px;color:#e0c9a4;font:14px Georgia,serif}
+.ash-account-panel input{width:100%;box-sizing:border-box;min-height:44px;padding:11px 13px;border:1px solid #806348;border-radius:5px;background:#16120f;color:#fff0d7;font-size:16px}
+.ash-account-panel input:focus-visible{outline:2px solid #d4ad70;outline-offset:2px}
+.ash-account-actions{display:flex;flex-wrap:wrap;gap:10px;margin:23px 0 0}
+.ash-account-actions button{flex:1;min-width:115px;padding:12px;border-radius:5px;cursor:pointer;font:14px/1.35 Georgia,serif;min-height:44px}
+.ash-account-secondary{color:#d7c5ab;background:transparent;border:1px solid rgba(201,168,106,.42)}
+.ash-account-primary{background:#685035;border:1px solid #be9960;color:#fff0d2}
+.ash-account-confirm{background:#76352d;border:1px solid #b66556;color:#fff0e8}
+.ash-account-actions button:disabled{opacity:.5;cursor:not-allowed}
+.ash-account-status{min-height:21px;font:13px/1.5 Georgia,serif;color:#e7c99b;margin-top:13px}
+.ash-account-alert{padding:13px;border:1px solid rgba(182,101,79,.55);background:rgba(101,48,38,.16);border-radius:7px}
+.ash-account-note{padding:12px;border-left:2px solid #b38b53;background:rgba(179,139,83,.08)}
+.ash-restore-screen{position:fixed;z-index:10140;inset:0;display:flex;justify-content:center;align-items:center;padding:17px;overflow:auto;background:radial-gradient(circle at 50% 15%,#34271e,#100d0a 70%)}
+.ash-restore-screen.hidden{display:none!important}
+.ash-restore-screen .ash-account-panel{text-align:center}
+.ash-restore-screen .ash-account-actions{justify-content:center}
+@media (prefers-reduced-motion:reduce){.ash-account-overlay *,.ash-restore-screen *{animation:none!important;transition:none!important}}
