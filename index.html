@@ -23850,7 +23850,7 @@ function render(){
  stage.max=String(max);
  stage.value=String(Math.min(max,Number(stage.value)));
  const n=Number(stage.value);
- label.textContent=n+" из "+max;
+ label.textContent=n+(window.AntiShumI18n?.language==="en"?" of ":window.AntiShumI18n?.language==="uk"?" із ":" из ")+max;
  panel.querySelector(".capsule-winter-points")?.remove();
  panel.classList.toggle("capsule-december",december);
  if(december){
@@ -23873,6 +23873,7 @@ function render(){
 }
 month.addEventListener("change",()=>{stage.value="0";render()});
 stage.addEventListener("input",render);
+document.addEventListener("anti-shum-language-changed",render);
 render();
 })();
 </script>
