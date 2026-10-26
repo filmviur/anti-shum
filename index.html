@@ -13323,6 +13323,9 @@ async function restoreSession() {
 
         if (currentUser) {
 
+            // Password recovery links use an authenticated temporary session,
+            // but must not open the regular diary before the password is set.
+            if (window.ashPasswordRecoveryActive) return;
             await initializeUser();
 
             return;
@@ -13362,7 +13365,8 @@ async function initializeUser() {
 
     const userId = currentUser?.id;
 
-    if (!userId || appInitializedUserId === userId) {
+    if (!userId || appInitializedUserId === userId ||
+        window.ashPasswordRecoveryActive) {
         return;
     }
 
