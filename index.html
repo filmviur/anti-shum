@@ -9105,6 +9105,7 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 }
 </style>
 <link rel="stylesheet" href="./release-waiting.css">
+<link rel="stylesheet" href="./account-management.css">
 <script src="./december-growth.js"></script>
 </head>
 
@@ -9211,6 +9212,10 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
         </form>
 
         <div id="authMessage" class="auth-message"></div>
+<div id="authRecoveryActions" class="ash-account-link-row">
+ <button id="authRecoveryHelpBtn" class="ash-account-link" type="button">Забыл пароль? Восстановить доступ</button>
+ <button id="authRestoreProfileBtn" class="ash-account-link" type="button">Восстановить удалённый профиль</button>
+</div>
 
 <!-- Поддержка доступна без регистрации -->
 
@@ -9645,6 +9650,85 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
    <div class="ash-welcome-help">Знакомство можно открыть повторно в профиле.</div>
  </section>
 </div>
+
+
+<!-- Доступ: забытый пароль и возвращение в существующий аккаунт. -->
+<div id="authHelpDialog" class="ash-account-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="authHelpTitle">
+ <div class="ash-account-panel">
+  <h2 id="authHelpTitle">Восстановление доступа</h2>
+  <p><strong>Забыл пароль?</strong> Мы отправим письмо со ссылкой для выбора нового. Имя, ответы, фотографии и книга останутся прежними.</p>
+  <p class="ash-account-note"><strong>Удалил профиль?</strong> Войди с прежними данными, и в течение 30 дней сможешь восстановить свою историю. Если пароль забыт, сначала сбрось его здесь.</p>
+  <label for="forgotPasswordEmail">Электронная почта аккаунта</label>
+  <input id="forgotPasswordEmail" type="email" autocomplete="email" placeholder="example@mail.com">
+  <div id="authRecoveryStatus" class="ash-account-status" role="status" aria-live="polite"></div>
+  <div class="ash-account-actions">
+   <button class="ash-account-secondary" type="button" id="closeAuthHelpDialog">Назад ко входу</button>
+   <button class="ash-account-primary" type="button" id="sendResetEmailBtn">Отправить письмо</button>
+  </div>
+ </div>
+</div>
+<!-- После перехода по подтверждённой ссылке Supabase. -->
+<div id="passwordRecoveryDialog" class="ash-account-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="passwordRecoveryTitle">
+ <div class="ash-account-panel">
+  <h2 id="passwordRecoveryTitle">Новый пароль</h2>
+  <p>Доступ к этому аккаунту подтверждён по ссылке из письма. Придумай новый пароль. Все сохранённые данные останутся с тобой.</p>
+  <label for="recoveryNewPassword">Новый пароль</label>
+  <input id="recoveryNewPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Не менее 8 символов">
+  <label for="recoveryRepeatPassword">Повтори пароль</label>
+  <input id="recoveryRepeatPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Повтори новый пароль">
+  <div id="passwordRecoveryStatus" class="ash-account-status" role="status" aria-live="polite"></div>
+  <div class="ash-account-actions">
+   <button type="button" id="cancelRecoveredPasswordBtn" class="ash-account-secondary">Отмена</button>
+   <button type="button" id="saveRecoveredPasswordBtn" class="ash-account-primary">Сохранить пароль</button>
+  </div>
+ </div>
+</div>
+<!-- Первое предупреждение перед удалением. -->
+<div id="accountDeleteWarning1" class="ash-account-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="accountDeleteTitle1">
+ <div class="ash-account-panel">
+  <h2 id="accountDeleteTitle1">Удалить профиль?</h2>
+  <p>Это не просто выход из приложения. Если продолжить, участие остановится, а профиль и ответы больше не будут доступны другим людям.</p>
+  <ul>
+   <li>Начнётся <strong>30-дневный период восстановления</strong>.</li>
+   <li>Твои ответы, фотографии и личная книга сохранятся только на этот период.</li>
+   <li>Вернуться можно через прежний email и пароль.</li>
+  </ul>
+  <p class="ash-account-note">Если нужно лишь сменить пароль или сделать паузу — удалять профиль необязательно.</p>
+  <div class="ash-account-actions">
+   <button id="cancelAccountDelete1" class="ash-account-secondary" type="button">Оставить профиль</button>
+   <button id="continueAccountDelete1" class="ash-account-confirm" type="button">Продолжить</button>
+  </div>
+ </div>
+</div>
+<!-- Второе, независимое подтверждение с явным вводом. -->
+<div id="accountDeleteWarning2" class="ash-account-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="accountDeleteTitle2">
+ <div class="ash-account-panel">
+  <h2 id="accountDeleteTitle2">Последнее предупреждение</h2>
+  <p class="ash-account-alert">Через 30 дней аккаунт и его личные данные будут окончательно удалены без возможности восстановления. После этого можно зарегистрироваться заново — с чистого листа.</p>
+  <label for="accountDeleteTypedConfirmation">Чтобы подтвердить, напиши <strong>УДАЛИТЬ</strong></label>
+  <input id="accountDeleteTypedConfirmation" type="text" spellcheck="false" autocomplete="off" placeholder="УДАЛИТЬ">
+  <div id="accountDeleteStatus" class="ash-account-status" role="status" aria-live="polite"></div>
+  <div class="ash-account-actions">
+   <button type="button" id="cancelAccountDelete2" class="ash-account-secondary">Отмена</button>
+   <button type="button" id="confirmAccountDelete2" class="ash-account-confirm" disabled>Удалить профиль</button>
+  </div>
+ </div>
+</div>
+<!-- Показ только после подтверждённого входа в ожидающий удаления аккаунт. -->
+<section id="accountRestoreView" class="ash-restore-screen hidden" aria-labelledby="accountRestoreTitle">
+ <div class="ash-account-panel">
+  <div style="font-size:42px" aria-hidden="true">🌿</div>
+  <h2 id="accountRestoreTitle">Твой профиль сохранён</h2>
+  <p id="accountRestoreMessage">Ты можешь восстановить профиль и продолжить участие.</p>
+  <p id="accountRestoreDeadline" class="ash-account-note"></p>
+  <div id="accountRestoreStatus" class="ash-account-status" role="status" aria-live="polite"></div>
+  <div class="ash-account-actions">
+   <button id="accountRestoreLogout" class="ash-account-secondary" type="button">Выйти</button>
+   <button id="accountRestoreAccept" class="ash-account-primary" type="button">Восстановить профиль</button>
+  </div>
+  <p><small>Нужна помощь? Выйди и воспользуйся поддержкой на экране входа.</small></p>
+ </div>
+</section>
 
 <!-- MAIN APP -->
 
@@ -11239,7 +11323,8 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
             >
                 Изменить пароль
             </button>
-
+            <button id="openDeleteProfileBtn" class="secondary-btn ash-account-danger hidden"
+                    type="button">Удалить профиль</button>
         </div>
 
         <div class="modal-actions">
@@ -11631,6 +11716,7 @@ input:focus,textarea:focus,select:focus{transition-duration:240ms}
 </div>
 
 
+<script src="./account-management.js"></script>
 <script>
 "use strict";
 
@@ -12859,6 +12945,7 @@ function setAuthMode(mode) {
         !register
     );
 
+    document.getElementById("authRecoveryActions")?.classList.toggle("hidden", register);
     authSubmitBtn.textContent =
         register
             ? "Зарегистрироваться"
@@ -13096,6 +13183,13 @@ supabaseClient.auth.onAuthStateChange(
 
         const newUserId = currentUser?.id || null;
 
+        if (event === "PASSWORD_RECOVERY") {
+            window.ashShowPasswordRecovery();
+            return;
+        }
+        if (window.ashPasswordRecoveryActive && event !== "SIGNED_OUT") {
+            return;
+        }
 
         /* =========================
            СМЕНА ПОЛЬЗОВАТЕЛЯ
@@ -13299,6 +13393,10 @@ async function runUserInitialization(initializingUserId) {
         return;
     }
 
+    // Accounts awaiting deletion are restored before normal profile loading.
+    if (await window.ashAccountCheckOnLogin()) {
+        return;
+    }
 
     /* =========================
        ПРОВЕРКА БЛОКИРОВКИ
@@ -18188,6 +18286,9 @@ editProfileBtn.addEventListener(
         deleteAvatarMenuBtn.classList.toggle(
             "hidden",
             !currentAvatarUrl
+        );
+        document.getElementById("openDeleteProfileBtn").classList.toggle(
+            "hidden", !currentUser || isCurrentUserAdmin
         );
 
         editProfileModal.classList.remove(
