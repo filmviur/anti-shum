@@ -256,7 +256,7 @@ function smallButton(label,className,handler){
  const b=node("button","btn "+(className||""),label);b.type="button";
  if(handler)b.addEventListener("click",handler);return b;
 }
-function timeLabel(value){try{return new Date(value).toLocaleString("ru-RU",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}catch{return ""}}
+function timeLabel(value){try{return new Date(value).toLocaleString((window.AntiShumI18n?.language==="uk"?"uk-UA":window.AntiShumI18n?.language==="en"?"en-US":"ru-RU"),{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}catch{return ""}}
 function changeSection(kind){
  if(!sections[kind])return;
  activeSection=kind;
