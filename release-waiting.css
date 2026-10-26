@@ -137,3 +137,28 @@
  .release-waiting-actions{gap:7px}
  .release-action-btn{font-size:12.5px;padding:8px 11px;min-height:39px}
 }
+
+/* Интерактивные кнопки внутри иллюстрации, рядом с её кнопкой «Правила проекта». */
+.release-inline-actions{
+  position:absolute;z-index:6;
+  left:8%;right:8%;top:94.4%;height:4.25%;
+  display:flex;justify-content:center;gap:3%;
+}
+.release-illustrated-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  gap:4%;min-width:0;flex:1;
+  padding:0 3%;
+  border:1px solid rgba(215,172,117,.58);
+  border-radius:999px;
+  color:#eacb9b;
+  background:linear-gradient(180deg,rgba(100,66,43,.91),rgba(49,31,23,.94));
+  box-shadow:inset 0 1px 0 rgba(255,215,158,.12),0 2px 9px rgba(16,8,4,.25);
+  font:500 2.55cqw/1.05 Georgia,serif;
+  white-space:nowrap;cursor:pointer;
+}
+.release-illustrated-btn svg{width:8%;min-width:14px;max-width:24px;height:auto;flex:none}
+.release-illustrated-btn:hover{background:linear-gradient(180deg,rgba(121,82,51,.96),rgba(63,40,26,.96))}
+.release-illustrated-btn:focus-visible{outline:2px solid #fff0d1;outline-offset:2px}
+.release-illustrated-btn.hidden+.release-illustrated-btn{flex:0 1 53%}
+#releaseWaitingView:not(.hidden) .release-waiting-actions:has(.release-admin-return.hidden){display:none}
+#releaseWaitingView .release-waiting-help{display:none}

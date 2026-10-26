@@ -4,6 +4,7 @@
 "use strict";
 const SUPPORTED=["ru","uk","en"],KEY="antiShumLanguage";
 const strings={
+"Уведомления":["Сповіщення","Notifications"],
 "📖 Правила":["📖 Правила","📖 Rules"],
 "🔔 Включить уведомления":["🔔 Увімкнути сповіщення","🔔 Enable notifications"],
 "❓ Поддержка":["❓ Підтримка","❓ Support"],

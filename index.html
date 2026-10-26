@@ -11101,11 +11101,18 @@ if (window.navigator.standalone === true ||
     <a class="release-rules-hotspot" href="./rules.html" aria-label="Читать правила проекта">
       <span class="release-visually-hidden">Правила проекта</span>
     </a>
+    <div class="release-inline-actions">
+      <button id="releaseEnablePushBtn" class="release-illustrated-btn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+        <span>Уведомления</span>
+      </button>
+      <button id="releaseSupportBtn" class="release-illustrated-btn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 0 1 4.7 1.2c0 1.7-2.3 2.2-2.3 3.8"/><path d="M12 17.5h.01"/></svg>
+        <span>Поддержка</span>
+      </button>
+    </div>
   </div>
   <div class="release-waiting-actions">
-    <a class="release-action-btn" href="./rules.html">📖 Правила</a>
-    <button id="releaseEnablePushBtn" class="release-action-btn" type="button">🔔 Включить уведомления</button>
-    <button id="releaseSupportBtn" class="release-action-btn" type="button">❓ Поддержка</button>
     <button id="releaseAdminReturnBtn" class="release-admin-return hidden" type="button">← В админ-панель</button>
   </div>
   <p id="releaseWaitingHelp" class="release-waiting-help">До запуска можно прочитать правила, включить уведомления и написать в поддержку.</p>
