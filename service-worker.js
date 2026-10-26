@@ -1,11 +1,11 @@
 
-const CACHE_NAME = "anti-shum-offline-v4-safe-area";
+const CACHE_NAME = "anti-shum-offline-v5-language";
 
-// Кэшируем только безопасную страницу отсутствия связи, не личные данные.
+// Кэшируем лишь публичную офлайн-страницу и безопасные словари интерфейса, не личные данные.
 self.addEventListener("install", event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(["./offline.html", "./offline-lighthouse.webp"]))
+            .then(cache => cache.addAll(["./offline.html", "./offline-lighthouse.webp", "./site-i18n.js", "./release-config.js"]))
             .then(() => self.skipWaiting())
     );
 });
@@ -23,6 +23,19 @@ self.addEventListener("activate", event => {
 // При новой навигации без сети показываем офлайн-экран.
 // Ответы, сессии и сообщения не кэшируем.
 self.addEventListener("fetch", event => {
+    const requestedAsset=new URL(event.request.url);
+    const scopeAsset=new URL(self.registration.scope);
+    const publicAsset=requestedAsset.origin===scopeAsset.origin &&
+      requestedAsset.pathname.startsWith(scopeAsset.pathname) &&
+      (requestedAsset.pathname.endsWith("/site-i18n.js") ||
+       requestedAsset.pathname.endsWith("/release-config.js"));
+    if(publicAsset){
+      event.respondWith(fetch(event.request).catch(async()=>{
+        const cache=await caches.open(CACHE_NAME);
+        return await cache.match(event.request,{ignoreSearch:true}) || Response.error();
+      }));
+      return;
+    }
     if (event.request.mode !== "navigate") return;
     const requested = new URL(event.request.url);
     const scope = new URL(self.registration.scope);
