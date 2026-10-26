@@ -13932,9 +13932,8 @@ appScreen.classList.add("hidden");
     // После официального включения заставки обычным пользователям
     // доступны только ожидание и правила; профиль/архив/поддержка скрыты.
     if (shouldShowReleaseWaiting()) {
-        // На заставке доступны личная поддержка и приветствие новичка.
-        await ensurePersonalWelcome();
-        await checkUnreadAnnouncements();
+        // До релиза открыты только правила, push и поддержка.
+        // Персональное приветствие появится вместе с первым вопросом.
         startAnnouncementsRealtime();
         startSiteRealtime();
         await checkSupportNotifications();
@@ -16339,14 +16338,35 @@ function updateReleaseWaitingClock() {
       values[2]+" минут, "+values[3]+" секунд");
     if(seconds===0 && !releaseWaitingPreview) {
        stopReleaseWaitingClock();
-       // Нельзя показывать неподготовленные вопросы, если официальный
-       // календарь ещё не включён в отдельной настройке.
+       // При открытии проекта сначала создаём и проверяем личное
+       // приветствие, затем показываем официальный вопрос № 1.
        if(PROJECT_START_DATE === RELEASE_WAITING_TARGET.slice(0,10)) {
-           loadTodayQuestionAndState().catch(console.error);
+           openAntiShumAfterRelease().catch(error => {
+               console.error("Release transition:", error);
+               loadTodayQuestionAndState().catch(console.error);
+           });
        } else {
            document.getElementById("releaseWaitingHelp").textContent =
              "Время ожидания подошло к концу. Открытие дневника готовится.";
        }
+    }
+}
+let releaseOpenPromise = null;
+async function openAntiShumAfterRelease() {
+    if (releaseOpenPromise) return releaseOpenPromise;
+    releaseOpenPromise = (async () => {
+        if (!currentUser || Date.now() < Date.parse(RELEASE_WAITING_TARGET)) return;
+        if (!isCurrentUserAdmin) {
+            await ensurePersonalWelcome();
+            await checkUnreadAnnouncements();
+            startAnnouncementsRealtime();
+        }
+        await loadTodayQuestionAndState();
+    })();
+    try {
+        return await releaseOpenPromise;
+    } finally {
+        releaseOpenPromise = null;
     }
 }
 function showReleaseWaitingView(preview=false) {
