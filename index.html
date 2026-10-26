@@ -13007,7 +13007,7 @@ if (profileLanguageSelect) {
     if(currentUser?.id){
        profileLanguageSelect.disabled=true;
        const {error}=await supabaseClient.from("users")
-         .update({language}).eq("id",currentUser.id);
+         .update({language,language_preference_set:true}).eq("id",currentUser.id);
        profileLanguageSelect.disabled=false;
        if(error)showNotice("Не удалось сохранить язык: "+error.message);
     }
@@ -16538,7 +16538,7 @@ async function loadProfile() {
         } = await supabaseClient
             .from("users")
             .select(
-                "id, display_name, avatar_url, is_admin, language"
+                "id, display_name, avatar_url, is_admin, language, language_preference_set"
             )
             .eq("id", currentUser.id)
             .maybeSingle();
@@ -16556,9 +16556,9 @@ async function loadProfile() {
         const localLang = window.AntiShumI18n?.language || "ru";
         const signupLang = currentUser?.user_metadata?.language;
         // Впервые зарегистрированным даём язык, выбранный при регистрации.
-        if (data?.language === "ru" && ["uk","en"].includes(signupLang)) {
+        if (!data?.language_preference_set && data?.language === "ru" && ["uk","en"].includes(signupLang)) {
           const {error:languageError}=await supabaseClient.from("users")
-            .update({language:signupLang}).eq("id",currentUser.id);
+            .update({language:signupLang,language_preference_set:true}).eq("id",currentUser.id);
           if (!languageError) data.language=signupLang;
         }
         window.AntiShumI18n?.setLanguage(data?.language || localLang);
