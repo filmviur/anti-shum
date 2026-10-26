@@ -10959,6 +10959,13 @@ if (window.navigator.standalone === true ||
         rows="5"
     ></textarea>
 
+    <div class="ash-announcement-translations">
+        <p>Переводы объявления (необязательно). Если перевод отсутствует, участник увидит русский оригинал.</p>
+        <label for="adminAnnouncementUk">Українська</label>
+        <textarea id="adminAnnouncementUk" class="admin-announcement-textarea" rows="3" maxlength="2000"></textarea>
+        <label for="adminAnnouncementEn">English</label>
+        <textarea id="adminAnnouncementEn" class="admin-announcement-textarea" rows="3" maxlength="2000"></textarea>
+    </div>
     <div class="admin-announcement-actions">
 
         <button
@@ -12234,7 +12241,11 @@ adminPublishAnnouncementBtn.addEventListener(
                     .from("announcements")
                     .insert({
                         title: "Объявление",
+                        title_uk: "Оголошення",
+                        title_en: "Announcement",
                         body: body,
+                        body_uk:document.getElementById("adminAnnouncementUk").value.trim()||null,
+                        body_en:document.getElementById("adminAnnouncementEn").value.trim()||null,
                         created_by: currentUser.id
                     });
 
@@ -12243,6 +12254,8 @@ adminPublishAnnouncementBtn.addEventListener(
             }
 
             adminAnnouncementText.value = "";
+            document.getElementById("adminAnnouncementUk").value = "";
+            document.getElementById("adminAnnouncementEn").value = "";
 
             adminAnnouncementStatus.textContent =
                 "Объявление успешно опубликовано.";
@@ -21804,11 +21817,11 @@ async function openAnnouncementsModal() {
     try {
         const [globalResult, personalResult] = await Promise.all([
             supabaseClient.from("announcements")
-                .select("id, title, body, created_at")
+                .select("id, title, body, title_uk, title_en, body_uk, body_en, created_at")
                 .eq("origin", "admin")
                 .order("created_at", { ascending: false }),
             supabaseClient.from("personal_announcements")
-                .select("id, title, body, created_at, read_at")
+                .select("id, title, body, title_uk, title_en, body_uk, body_en, created_at, read_at")
                 .eq("user_id", userId).order("created_at", { ascending: false })
         ]);
         if (globalResult.error) throw globalResult.error;
@@ -21841,12 +21854,12 @@ async function openAnnouncementsModal() {
             if (announcement.title) {
                 const heading = document.createElement("div");
                 heading.className = "user-announcement-title";
-                heading.textContent = announcement.title;
+                heading.textContent = window.AntiShumI18n?.translateRecord(announcement,"title") || announcement.title;
                 card.appendChild(heading);
             }
             const body = document.createElement("div");
             body.className = "user-announcement-body";
-            body.textContent = announcement.body;
+            body.textContent = window.AntiShumI18n?.translateRecord(announcement,"body") || announcement.body;
             card.appendChild(body);
             userAnnouncementsList.appendChild(card);
         });
